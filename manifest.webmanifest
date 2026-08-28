@@ -1,0 +1,27 @@
+{
+  "name": "Leggi di più — diario di lettura",
+  "short_name": "Leggi di più",
+  "description": "Segna titolo e pagine lette, rispondi alle domande sul contesto e guarda i tuoi progressi. Basta un nome utente.",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F5F3EC",
+  "theme_color": "#202B22",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
