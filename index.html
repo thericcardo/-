@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ultra White — Il bianco che accende | Concept fan-site</title>
+<meta name="description" content="Concept fan-site dedicato a Monster Energy Ultra White: profilo aromatico, valori nutrizionali, caffeina a confronto e tutta la famiglia Ultra. Progetto non ufficiale.">
+<meta name="theme-color" content="#f2f3f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a0b0d" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Ultra White — Il bianco che accende">
+<meta property="og:description" content="Concept fan-site dedicato a Monster Energy Ultra White. Progetto non ufficiale, a scopo dimostrativo.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23f2f3f5'/><g fill='%238fa8bf'><path d='M28 22c7 16 10 32 6 52-4-20-10-36-18-50z'/><path d='M50 18c7 18 10 36 6 58-4-22-10-40-18-56z'/><path d='M72 22c7 16 10 32 6 52-4-20-10-36-18-50z'/></g></svg>">
+
+<noscript><style>
+  #preloader{display:none!important}
+  .reveal{opacity:1!important;transform:none!important}
+  .taste__fill,.bar-row .fill{width:var(--v)!important}
+  .sip__step::after{width:100%!important}
+  .hero__title .line>span{transform:none!important}
+</style></noscript>
+</head>
+<body>
+
+<!-- ============ PRELOADER ============ -->
+<div id="preloader" role="status" aria-live="polite" aria-label="Caricamento">
+  <svg class="pre-claw" viewBox="0 0 120 90" aria-hidden="true">
+    <path d="M14 6c9 20 13 40 8 66-5-26-13-46-22-62z"/>
+    <path d="M52 0c10 24 14 48 9 78-5-30-14-54-24-72z"/>
+    <path d="M92 6c9 20 13 40 8 66-5-26-13-46-22-62z"/>
+  </svg>
+  <p class="pre-label">Ultra&nbsp;White</p>
+</div>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <div class="nav__inner">
+    <a class="brand" href="#top" aria-label="Ultra White, torna in cima">
+      <svg viewBox="0 0 120 90" aria-hidden="true">
+        <path d="M14 6c9 20 13 40 8 66-5-26-13-46-22-62z"/>
+        <path d="M52 0c10 24 14 48 9 78-5-30-14-54-24-72z"/>
+        <path d="M92 6c9 20 13 40 8 66-5-26-13-46-22-62z"/>
+      </svg>
+      Ultra White <span>concept</span>
+    </a>
+
+    <nav class="nav__links" id="navLinks" aria-label="Navigazione principale">
+      <a href="#prodotto">Prodotto</a>
+      <a href="#gusto">Gusto</a>
+      <a href="#energia">Energia</a>
+      <a href="#nutrizione">Nutrizione</a>
+      <a href="#famiglia">Famiglia Ultra</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+
+    <div class="nav__tools">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Cambia tema chiaro/scuro">
+        <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+      </button>
+      <button class="icon-btn nav__toggle" id="navToggle" type="button" aria-label="Apri il menu" aria-expanded="false" aria-controls="navLinks">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="progress" id="progress"></div>
+</header>
+
+<main id="top">
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero__bg" aria-hidden="true"></div>
+  <div class="hero__grid-lines" aria-hidden="true"></div>
+  <div class="hero__spot" id="spot" aria-hidden="true"></div>
+
+  <div class="hero__inner">
+    <div>
+      <p class="eyebrow">Zero zuccheri · 150 mg caffeina</p>
+
+      <h1 class="hero__title">
+        <span class="line"><span>Ultra</span></span>
+        <span class="line"><span class="text-chrome">White</span></span>
+        <span class="line"><span class="thin">Energia</span></span>
+      </h1>
+
+      <p class="hero__sub">
+        Agrumi bianchi, bollicine nette, finale asciutto. La lattina che ha
+        riscritto il concetto di energy drink: leggera come un&nbsp;sorso
+        d&rsquo;aria fredda, seria come una notte di lavoro.
+      </p>
+
+      <div class="hero__cta">
+        <button class="btn" type="button" data-scroll="#prodotto">
+          Scopri il prodotto
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+        </button>
+        <button class="btn btn--ghost" type="button" data-scroll="#nutrizione">Valori nutrizionali</button>
+      </div>
+
+      <div class="hero__meta">
+        <div><strong>0 g</strong><span>Zuccheri</span></div>
+        <div><strong>10</strong><span>Calorie</span></div>
+        <div><strong>150 mg</strong><span>Caffeina</span></div>
+        <div><strong>473 ml</strong><span>Formato</span></div>
+      </div>
+    </div>
+
+    <div class="can-stage" id="canStage">
+      <div class="can-halo" aria-hidden="true"></div>
+      <div class="can-ring" aria-hidden="true"></div>
+
+      <!-- Lattina disegnata in SVG (illustrazione originale, non un asset di marca) -->
+      <svg class="can" id="can" viewBox="0 0 260 570" role="img" aria-label="Illustrazione di una lattina bianca da 473 ml con tre graffi argento">
+        <defs>
+          <linearGradient id="cyl" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stop-color="#c9d0d7"/>
+            <stop offset="8%"   stop-color="#ffffff"/>
+            <stop offset="26%"  stop-color="#ffffff"/>
+            <stop offset="46%"  stop-color="#eef1f4"/>
+            <stop offset="66%"  stop-color="#ffffff"/>
+            <stop offset="86%"  stop-color="#dde2e7"/>
+            <stop offset="100%" stop-color="#aeb7c0"/>
+          </linearGradient>
+          <linearGradient id="metal" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stop-color="#8d979f"/>
+            <stop offset="18%"  stop-color="#eef1f3"/>
+            <stop offset="38%"  stop-color="#b3bcc4"/>
+            <stop offset="58%"  stop-color="#f7f9fa"/>
+            <stop offset="78%"  stop-color="#9aa4ac"/>
+            <stop offset="100%" stop-color="#d6dce1"/>
+          </linearGradient>
+          <linearGradient id="claw" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#b9c6d2"/>
+            <stop offset="45%"  stop-color="#7d8f9f"/>
+            <stop offset="100%" stop-color="#aebbc7"/>
+          </linearGradient>
+          <clipPath id="bodyClip">
+            <path d="M34 140C34 100 62 86 62 64L198 64C198 86 226 100 226 140L226 450C226 490 198 504 198 526L62 526C62 504 34 490 34 450Z"/>
+          </clipPath>
+        </defs>
+
+        <!-- ombra a terra -->
+        <ellipse cx="130" cy="545" rx="84" ry="12" fill="rgba(10,12,15,.18)"/>
+
+        <!-- corpo -->
+        <path d="M34 140C34 100 62 86 62 64L198 64C198 86 226 100 226 140L226 450C226 490 198 504 198 526L62 526C62 504 34 490 34 450Z" fill="url(#cyl)"/>
+
+        <g clip-path="url(#bodyClip)">
+          <!-- riflesso speculare -->
+          <rect x="52" y="60" width="16" height="480" fill="#fff" opacity=".85"/>
+          <rect x="188" y="60" width="10" height="480" fill="#98a3ad" opacity=".28"/>
+
+          <!-- graffi -->
+          <g transform="translate(76 150) scale(1.05)" fill="url(#claw)">
+            <path d="M10 0c9 24 12 48 6 80-4-30-11-54-19-74z" transform="rotate(-7 10 0)"/>
+            <path d="M46 -8c10 27 13 54 7 90-5-34-12-60-21-83z"/>
+            <path d="M82 0c9 24 12 48 6 80-4-30-11-54-19-74z" transform="rotate(7 82 0)"/>
+          </g>
+
+          <!-- lettering etichetta -->
+          <text x="130" y="292" text-anchor="middle" font-family="Archivo Black, Impact, sans-serif"
+                font-size="22" letter-spacing="6" fill="#20262c">MONSTER</text>
+          <text x="130" y="352" text-anchor="middle" font-family="Archivo Black, Impact, sans-serif"
+                font-size="54" letter-spacing="1" fill="#12171c">ULTRA</text>
+          <text x="130" y="392" text-anchor="middle" font-family="Archivo Black, Impact, sans-serif"
+                font-size="30" letter-spacing="10" fill="none" stroke="#5d6b78" stroke-width="1.2">WHITE</text>
+
+          <line x1="66" y1="410" x2="194" y2="410" stroke="#c2cbd3" stroke-width="1.5"/>
+          <text x="130" y="432" text-anchor="middle" font-family="Inter, sans-serif"
+                font-size="11" letter-spacing="3" fill="#7b868f">ZERO SUGAR · 473 ML</text>
+
+          <!-- gocce di condensa -->
+          <g fill="#ffffff" opacity=".7">
+            <ellipse cx="78" cy="230" rx="3" ry="4"/>
+            <ellipse cx="96" cy="470" rx="2.4" ry="3.4"/>
+            <ellipse cx="170" cy="200" rx="2.6" ry="3.6"/>
+            <ellipse cx="186" cy="330" rx="3.2" ry="4.4"/>
+            <ellipse cx="150" cy="490" rx="2.2" ry="3"/>
+          </g>
+        </g>
+
+        <!-- coperchio -->
+        <ellipse cx="130" cy="64" rx="68" ry="12" fill="url(#metal)"/>
+        <ellipse cx="130" cy="62" rx="59" ry="9" fill="#c4ccd3"/>
+        <ellipse cx="130" cy="62" rx="52" ry="7" fill="#dfe5ea"/>
+        <path d="M112 60h30a5 5 0 0 1 0 8h-30a5 5 0 0 1 0-8z" fill="#aab4bd"/>
+        <ellipse cx="126" cy="64" rx="6" ry="3.4" fill="#8f99a2"/>
+
+        <!-- base -->
+        <path d="M62 520c0 8 30 14 68 14s68-6 68-14v6c0 8-30 14-68 14s-68-6-68-14z" fill="#b6bfc7"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="scroll-hint" aria-hidden="true"><i></i>Scorri</div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee__track">
+    <span><b>ZERO ZUCCHERI</b><i></i>10 CALORIE<i></i><b>150 MG CAFFEINA</b><i></i>AGRUMI BIANCHI<i></i><b>ULTRA WHITE</b><i></i>FINALE ASCIUTTO<i></i></span>
+    <span><b>ZERO ZUCCHERI</b><i></i>10 CALORIE<i></i><b>150 MG CAFFEINA</b><i></i>AGRUMI BIANCHI<i></i><b>ULTRA WHITE</b><i></i>FINALE ASCIUTTO<i></i></span>
+  </div>
+</div>
+
+<!-- ============ PRODOTTO / STATS ============ -->
+<section class="section" id="prodotto">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Il prodotto</p>
+      <h2 class="section-title">Leggera<br>di proposito</h2>
+      <p class="lede">
+        Ultra White nasce da un&rsquo;idea semplice e radicale: togliere lo zucchero
+        senza togliere il carattere. Il risultato è un profilo agrumato chiaro,
+        una carbonatazione fine e un finale pulito che non lascia patina.
+      </p>
+    </div>
+
+    <div class="stats reveal" style="--d:100ms; margin-top:3rem">
+      <div class="stat">
+        <div class="stat__num" data-count="0">0<small>g</small></div>
+        <div class="stat__label">Zuccheri</div>
+        <p class="stat__note">Dolcificato con eritritolo e sucralosio: dolcezza senza carico glicemico.</p>
+      </div>
+      <div class="stat">
+        <div class="stat__num" data-count="10">0<small>kcal</small></div>
+        <div class="stat__label">Per lattina</div>
+        <p class="stat__note">Dieci calorie in 473 ml. Meno di una mela morsicata due volte.</p>
+      </div>
+      <div class="stat">
+        <div class="stat__num" data-count="150">0<small>mg</small></div>
+        <div class="stat__label">Caffeina</div>
+        <p class="stat__note">Quanto due espressi lunghi, distribuiti su un sorso lungo.</p>
+      </div>
+      <div class="stat">
+        <div class="stat__num" data-count="4">0<small>vit. B</small></div>
+        <div class="stat__label">Complesso B</div>
+        <p class="stat__note">B2, B3, B6 e B12 per il normale metabolismo energetico.</p>
+      </div>
+    </div>
+
+    <div class="split" style="margin-top:clamp(3rem,7vw,5rem)">
+      <div class="card reveal">
+        <div class="card__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg></div>
+        <h3>Carbonatazione fine</h3>
+        <p>Bollicina piccola e persistente: pulisce il palato invece di aggredirlo, e mantiene la bevanda viva fino all&rsquo;ultimo sorso.</p>
+      </div>
+      <div class="card reveal" style="--d:80ms">
+        <div class="card__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5z"/></svg></div>
+        <h3>Colore trasparente</h3>
+        <p>Nessun colorante: il liquido è limpido. Una scelta estetica che è anche una dichiarazione di formula.</p>
+      </div>
+      <div class="card reveal" style="--d:160ms">
+        <div class="card__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h4l2.5-7 3 14L16 12h4"/></svg></div>
+        <h3>Rilascio costante</h3>
+        <p>Caffeina, taurina e vitamine del gruppo B lavorano insieme su un sorso lungo, non su un colpo secco.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GUSTO ============ -->
+<section class="section" id="gusto" style="background:var(--paper-2)">
+  <div class="wrap split">
+    <div class="reveal">
+      <p class="eyebrow">Profilo aromatico</p>
+      <h2 class="section-title">Agrumi<br>bianchi</h2>
+      <p class="lede">
+        Non è limone, non è pompelmo, non è cedro: è la zona esatta in mezzo.
+        Apertura frizzante, cuore leggermente floreale, chiusura secca e minerale.
+        Il tipo di gusto che si dimentica di essere &laquo;a zero zuccheri&raquo;.
+      </p>
+      <blockquote class="quote">
+        &laquo;Il bianco non è assenza di colore. È tutti i colori insieme,
+        messi in fila.&raquo;
+      </blockquote>
+    </div>
+
+    <div class="taste reveal">
+      <div class="taste__row">
+        <div class="taste__head"><b>Agrumato</b><span>9 / 10</span></div>
+        <div class="taste__bar"><div class="taste__fill" style="--v:90%"></div></div>
+      </div>
+      <div class="taste__row">
+        <div class="taste__head"><b>Dolcezza percepita</b><span>4 / 10</span></div>
+        <div class="taste__bar"><div class="taste__fill" style="--v:40%; --d:100ms"></div></div>
+      </div>
+      <div class="taste__row">
+        <div class="taste__head"><b>Acidità</b><span>6 / 10</span></div>
+        <div class="taste__bar"><div class="taste__fill" style="--v:60%; --d:200ms"></div></div>
+      </div>
+      <div class="taste__row">
+        <div class="taste__head"><b>Effervescenza</b><span>8 / 10</span></div>
+        <div class="taste__bar"><div class="taste__fill" style="--v:80%; --d:300ms"></div></div>
+      </div>
+      <div class="taste__row">
+        <div class="taste__head"><b>Corpo</b><span>3 / 10</span></div>
+        <div class="taste__bar"><div class="taste__fill" style="--v:30%; --d:400ms"></div></div>
+      </div>
+      <div class="taste__row">
+        <div class="taste__head"><b>Persistenza del finale</b><span>5 / 10</span></div>
+        <div class="taste__bar"><div class="taste__fill" style="--v:50%; --d:500ms"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="sip reveal">
+      <div class="sip__step">
+        <span class="sip__t">0—2 s</span>
+        <h4>Attacco</h4>
+        <p>Freddo e frizzante. Scorza di agrume e un&rsquo;idea di lime verde.</p>
+      </div>
+      <div class="sip__step" style="--d:150ms">
+        <span class="sip__t">2—6 s</span>
+        <h4>Cuore</h4>
+        <p>La bollicina si apre: note floreali bianche, dolcezza contenuta.</p>
+      </div>
+      <div class="sip__step" style="--d:300ms">
+        <span class="sip__t">6—12 s</span>
+        <h4>Finale</h4>
+        <p>Chiusura asciutta e minerale, senza scia zuccherina sul palato.</p>
+      </div>
+      <div class="sip__step" style="--d:450ms">
+        <span class="sip__t">15—45 min</span>
+        <h4>Effetto</h4>
+        <p>La caffeina entra a regime: lucidità stabile, senza picco improvviso.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ENERGIA (banda scura) ============ -->
+<section class="section dark-band" id="energia">
+  <div class="wrap">
+    <div class="reveal" style="max-width:60ch">
+      <p class="eyebrow">La caffeina, in scala</p>
+      <h2 class="section-title">150 mg,<br>senza mistero</h2>
+      <p class="lede">
+        Una lattina da 473 ml contiene circa 150&nbsp;mg di caffeina: più di una tazzina,
+        meno di quanto immagini. Ecco il confronto con quello che bevi già.
+      </p>
+    </div>
+
+    <div class="bars reveal" role="img" aria-label="Confronto della caffeina: espresso 63 mg, tè nero 47 mg, lattina di cola 34 mg, caffè filtro 95 mg, Ultra White 150 mg, energy shot 200 mg">
+      <div class="bar-row">
+        <span class="name">Lattina di cola (330 ml)</span>
+        <span class="track"><span class="fill" style="--v:17%"></span></span>
+        <span class="val">34 mg</span>
+      </div>
+      <div class="bar-row">
+        <span class="name">Tè nero (240 ml)</span>
+        <span class="track"><span class="fill" style="--v:23.5%; --d:80ms"></span></span>
+        <span class="val">47 mg</span>
+      </div>
+      <div class="bar-row">
+        <span class="name">Espresso (30 ml)</span>
+        <span class="track"><span class="fill" style="--v:31.5%; --d:160ms"></span></span>
+        <span class="val">63 mg</span>
+      </div>
+      <div class="bar-row">
+        <span class="name">Caffè filtro (240 ml)</span>
+        <span class="track"><span class="fill" style="--v:47.5%; --d:240ms"></span></span>
+        <span class="val">95 mg</span>
+      </div>
+      <div class="bar-row is-hero">
+        <span class="name">Ultra White (473 ml)</span>
+        <span class="track"><span class="fill" style="--v:75%; --d:320ms"></span></span>
+        <span class="val">150 mg</span>
+      </div>
+      <div class="bar-row">
+        <span class="name">Energy shot (60 ml)</span>
+        <span class="track"><span class="fill" style="--v:100%; --d:400ms"></span></span>
+        <span class="val">200 mg</span>
+      </div>
+    </div>
+
+    <p class="disclaimer">
+      Valori medi indicativi, utili per un ordine di grandezza. L&rsquo;EFSA considera
+      generalmente sicure assunzioni fino a 400&nbsp;mg di caffeina al giorno per un adulto sano
+      e fino a 200&nbsp;mg in singola dose. Non adatto a bambini, in gravidanza o allattamento.
+    </p>
+    <span class="warn"><i></i>Contiene caffeina. Consumo consapevole.</span>
+  </div>
+</section>
+
+<!-- ============ NUTRIZIONE ============ -->
+<section class="section" id="nutrizione">
+  <div class="wrap split">
+    <div class="reveal">
+      <p class="eyebrow">Etichetta</p>
+      <h2 class="section-title">Cosa c&rsquo;è<br>dentro</h2>
+      <p class="lede">
+        Nessun ingrediente nascosto dietro il marketing. Qui trovi la tabella
+        e, sotto, la spiegazione di ogni voce che di solito nessuno legge.
+      </p>
+
+      <div class="acc" style="margin-top:2.2rem">
+        <div class="acc__item">
+          <button class="acc__btn" type="button" aria-expanded="false">Eritritolo <i aria-hidden="true"></i></button>
+          <div class="acc__panel"><div><p>Poliolo presente in natura in frutta e alimenti fermentati. Dolcifica circa il 70% dello zucchero ma apporta pochissime calorie e non incide sulla glicemia. È anche ciò che dà quella sensazione lievemente fresca in bocca.</p></div></div>
+        </div>
+        <div class="acc__item">
+          <button class="acc__btn" type="button" aria-expanded="false">Taurina <i aria-hidden="true"></i></button>
+          <div class="acc__panel"><div><p>Amminoacido che il corpo produce da sé e che si trova in pesce e carne. Negli energy drink è presente in quantità nell&rsquo;ordine dei grammi per lattina, storicamente associato alla formula &laquo;energetica&raquo; classica.</p></div></div>
+        </div>
+        <div class="acc__item">
+          <button class="acc__btn" type="button" aria-expanded="false">Vitamine del gruppo B <i aria-hidden="true"></i></button>
+          <div class="acc__panel"><div><p>B2 (riboflavina), B3 (niacina), B6 e B12 contribuiscono al normale metabolismo energetico e alla riduzione di stanchezza e affaticamento. Sono idrosolubili: l&rsquo;eccesso viene semplicemente eliminato.</p></div></div>
+        </div>
+        <div class="acc__item">
+          <button class="acc__btn" type="button" aria-expanded="false">L-carnitina e inositolo <i aria-hidden="true"></i></button>
+          <div class="acc__panel"><div><p>Due componenti della miscela energetica classica. La L-carnitina interviene nel trasporto degli acidi grassi nei mitocondri; l&rsquo;inositolo è una molecola simile a uno zucchero coinvolta nella segnalazione cellulare.</p></div></div>
+        </div>
+        <div class="acc__item">
+          <button class="acc__btn" type="button" aria-expanded="false">Perché il liquido è trasparente? <i aria-hidden="true"></i></button>
+          <div class="acc__panel"><div><p>Perché non ci sono coloranti né succhi concentrati: solo acqua carbonata, dolcificanti, aromi e la miscela energetica. È la stessa ragione per cui il finale risulta più pulito rispetto alle versioni tradizionali.</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal" style="--d:120ms">
+      <div class="nutri">
+        <div class="nutri__head">
+          <b>Valori nutrizionali</b>
+          <span>per lattina · 473 ml</span>
+        </div>
+        <table>
+          <tbody>
+            <tr class="hi"><td>Energia</td><td>10 kcal / 42 kJ</td></tr>
+            <tr><td>Grassi</td><td>0 g</td></tr>
+            <tr><td>&nbsp;&nbsp;&nbsp;di cui saturi</td><td>0 g</td></tr>
+            <tr><td>Carboidrati</td><td>2 g</td></tr>
+            <tr class="hi"><td>&nbsp;&nbsp;&nbsp;di cui zuccheri</td><td>0 g</td></tr>
+            <tr><td>&nbsp;&nbsp;&nbsp;polioli (eritritolo)</td><td>2 g</td></tr>
+            <tr><td>Proteine</td><td>0 g</td></tr>
+            <tr><td>Sale</td><td>0,45 g</td></tr>
+            <tr><td>Niacina (B3)</td><td>20 mg</td></tr>
+            <tr><td>Vitamina B6</td><td>2 mg</td></tr>
+            <tr><td>Riboflavina (B2)</td><td>1,7 mg</td></tr>
+            <tr><td>Vitamina B12</td><td>6 µg</td></tr>
+            <tr class="hi"><td>Caffeina</td><td>150 mg</td></tr>
+          </tbody>
+        </table>
+        <p class="nutri__foot">
+          Valori indicativi a scopo dimostrativo, riferiti al formato da 473 ml (16 fl oz).
+          Le formulazioni cambiano da mercato a mercato: fa sempre fede l&rsquo;etichetta sulla lattina.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAMIGLIA ULTRA ============ -->
+<section class="section" id="famiglia" style="background:var(--paper-2)">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">La famiglia</p>
+      <h2 class="section-title">Ultra è<br>un colore</h2>
+      <p class="lede">
+        White è la capostipite: è arrivata prima, e da lì è nata una palette intera.
+        Tocca un gusto per ridipingere la pagina.
+      </p>
+
+      <div class="flavors" role="group" aria-label="Selettore gusti Ultra">
+        <button class="flavor" type="button" aria-pressed="true" style="--c:#8fa8bf"
+          data-accent="#8fa8bf" data-deep="#56728e"
+          data-name="Ultra White" data-desc="L'originale. Agrumi bianchi, corpo leggerissimo, finale asciutto: la definizione stessa di energy drink trasparente."
+          data-notes="Agrumi bianchi" data-year="2013" data-mood="Lucido"><i></i>White</button>
+
+        <button class="flavor" type="button" aria-pressed="false" style="--c:#2e7fe8"
+          data-accent="#2e7fe8" data-deep="#1a56a8"
+          data-name="Ultra Zero" data-desc="La versione più vicina al Monster classico, ma senza zucchero: profilo più dolce e rotondo, con la stessa spina dorsale energetica."
+          data-notes="Classico dolce" data-year="2016" data-mood="Familiare"><i></i>Zero</button>
+
+        <button class="flavor" type="button" aria-pressed="false" style="--c:#35c06b"
+          data-accent="#35c06b" data-deep="#1f8348"
+          data-name="Ultra Paradise" data-desc="Kiwi, lime e una punta di cocco. Tropicale ma non stucchevole: il gusto più 'estivo' della famiglia."
+          data-notes="Kiwi &amp; lime" data-year="2018" data-mood="Solare"><i></i>Paradise</button>
+
+        <button class="flavor" type="button" aria-pressed="false" style="--c:#ff8a5b"
+          data-accent="#ff8a5b" data-deep="#c25a2e"
+          data-name="Ultra Peachy Keen" data-desc="Pesca bianca matura su base frizzante. Il gusto più morbido, quello che convince chi dice di non amare gli energy drink."
+          data-notes="Pesca bianca" data-year="2021" data-mood="Morbido"><i></i>Peachy Keen</button>
+
+        <button class="flavor" type="button" aria-pressed="false" style="--c:#ff5c8a"
+          data-accent="#ff5c8a" data-deep="#c22e59"
+          data-name="Ultra Rosá" data-desc="Frutti rossi e un'acidità elegante da pompelmo rosa. Colore nella lattina, non nel bicchiere."
+          data-notes="Frutti rossi" data-year="2018" data-mood="Vivace"><i></i>Rosá</button>
+
+        <button class="flavor" type="button" aria-pressed="false" style="--c:#e7b23c"
+          data-accent="#e7b23c" data-deep="#a97c14"
+          data-name="Ultra Gold" data-desc="Ananas maturo e agrume dorato. Più corposa della White, con una dolcezza che resta comunque sotto controllo."
+          data-notes="Ananas" data-year="2020" data-mood="Ricco"><i></i>Gold</button>
+
+        <button class="flavor" type="button" aria-pressed="false" style="--c:#7c4dff"
+          data-accent="#7c4dff" data-deep="#4a24c4"
+          data-name="Ultra Fiesta" data-desc="Mango e frutti tropicali scuri. Il profilo più esuberante della gamma, con un finale comunque pulito."
+          data-notes="Mango" data-year="2019" data-mood="Esuberante"><i></i>Fiesta</button>
+
+        <button class="flavor" type="button" aria-pressed="false" style="--c:#ff3b5c"
+          data-accent="#ff3b5c" data-deep="#c01432"
+          data-name="Ultra Watermelon" data-desc="Anguria fresca, quasi acquosa nel senso migliore. Dissetante più che dolce, perfetta dopo lo sport."
+          data-notes="Anguria" data-year="2022" data-mood="Dissetante"><i></i>Watermelon</button>
+      </div>
+    </div>
+
+    <div class="flavor-panel reveal" id="flavorPanel">
+      <div class="flavor-panel__swatch" aria-hidden="true">
+        <svg viewBox="0 0 120 90">
+          <path d="M14 6c9 20 13 40 8 66-5-26-13-46-22-62z"/>
+          <path d="M52 0c10 24 14 48 9 78-5-30-14-54-24-72z"/>
+          <path d="M92 6c9 20 13 40 8 66-5-26-13-46-22-62z"/>
+        </svg>
+      </div>
+      <div>
+        <h3 id="fName">Ultra White</h3>
+        <p id="fDesc">L&rsquo;originale. Agrumi bianchi, corpo leggerissimo, finale asciutto: la definizione stessa di energy drink trasparente.</p>
+        <dl>
+          <div><dt>Note dominanti</dt><dd id="fNotes">Agrumi bianchi</dd></div>
+          <div><dt>Debutto</dt><dd id="fYear">2013</dd></div>
+          <div><dt>Carattere</dt><dd id="fMood">Lucido</dd></div>
+          <div><dt>Zuccheri</dt><dd>0 g</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MOMENTI ============ -->
+<section class="section" id="momenti">
+  <div class="wrap">
+    <div class="reveal" style="max-width:56ch">
+      <p class="eyebrow">Quando</p>
+      <h2 class="section-title">Quattro modi<br>di aprirla</h2>
+      <p class="lede">Non serve un motivo epico. Servono i momenti giusti.</p>
+    </div>
+
+    <div class="moments">
+      <article class="moment reveal">
+        <span class="moment__n">01</span>
+        <span class="time">06:40</span>
+        <h3>Prima del turno</h3>
+        <p>Fredda di frigo, prima che il resto del mondo si accorga che sei sveglio.</p>
+      </article>
+      <article class="moment reveal" style="--d:80ms">
+        <span class="moment__n">02</span>
+        <span class="time">14:20</span>
+        <h3>Il muro del pomeriggio</h3>
+        <p>Quando il caffè numero tre non ha più niente da dire e mancano quattro ore.</p>
+      </article>
+      <article class="moment reveal" style="--d:160ms">
+        <span class="moment__n">03</span>
+        <span class="time">18:05</span>
+        <h3>Palestra, secondo tempo</h3>
+        <p>Zero zuccheri significa nessun peso sullo stomaco a metà sessione.</p>
+      </article>
+      <article class="moment reveal" style="--d:240ms">
+        <span class="moment__n">04</span>
+        <span class="time">23:50</span>
+        <h3>Deploy notturno</h3>
+        <p>Tu, il terminale e una lattina che non ti abbandona al primo bug.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="section" id="faq" style="background:var(--paper-2)">
+  <div class="wrap split">
+    <div class="reveal">
+      <p class="eyebrow">Domande</p>
+      <h2 class="section-title">Le cose<br>che chiedono<br>tutti</h2>
+      <p class="lede">Risposte brevi, senza giri di parole.</p>
+    </div>
+
+    <div class="acc reveal" style="--d:100ms">
+      <div class="acc__item">
+        <button class="acc__btn" type="button" aria-expanded="false">Che differenza c&rsquo;è tra Ultra White e Ultra Zero? <i aria-hidden="true"></i></button>
+        <div class="acc__panel"><div><p>Entrambe sono senza zucchero. Ultra White ha un profilo agrumato chiaro e un corpo molto leggero; Ultra Zero punta invece a ricreare il gusto del Monster classico, quindi risulta più dolce e rotonda.</p></div></div>
+      </div>
+      <div class="acc__item">
+        <button class="acc__btn" type="button" aria-expanded="false">È adatta a chi segue una dieta chetogenica? <i aria-hidden="true"></i></button>
+        <div class="acc__panel"><div><p>Con 2 g di carboidrati da eritritolo e zero zuccheri, l&rsquo;impatto sulla glicemia è minimo. Detto questo, non è un consiglio medico: se segui un regime specifico o hai patologie, parlane con un professionista.</p></div></div>
+      </div>
+      <div class="acc__item">
+        <button class="acc__btn" type="button" aria-expanded="false">Quante se ne possono bere al giorno? <i aria-hidden="true"></i></button>
+        <div class="acc__panel"><div><p>L&rsquo;EFSA indica come generalmente sicura una soglia di 400 mg di caffeina al giorno per un adulto sano: circa due lattine e mezzo, contando però anche caffè, tè e cioccolato. Meglio restare abbondantemente sotto.</p></div></div>
+      </div>
+      <div class="acc__item">
+        <button class="acc__btn" type="button" aria-expanded="false">Va bene prima dell&rsquo;allenamento? <i aria-hidden="true"></i></button>
+        <div class="acc__panel"><div><p>Molti la usano come pre-workout leggero, 30-45 minuti prima. L&rsquo;assenza di zuccheri evita il calo che segue il picco glicemico. Ricorda che non idrata: l&rsquo;acqua resta obbligatoria.</p></div></div>
+      </div>
+      <div class="acc__item">
+        <button class="acc__btn" type="button" aria-expanded="false">Perché non ha colore? <i aria-hidden="true"></i></button>
+        <div class="acc__panel"><div><p>Perché non contiene coloranti né succhi. È una scelta di formula che si vede: liquido limpido, gusto pulito, nessuna macchia se la rovesci sulla tastiera.</p></div></div>
+      </div>
+      <div class="acc__item">
+        <button class="acc__btn" type="button" aria-expanded="false">Questo sito è ufficiale? <i aria-hidden="true"></i></button>
+        <div class="acc__panel"><div><p>No. È un progetto dimostrativo e non ufficiale, creato per esercizio di design e sviluppo front-end. Non è affiliato, sponsorizzato o approvato da Monster Beverage Corporation. Tutti i marchi citati appartengono ai rispettivi proprietari.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="section">
+  <div class="wrap">
+    <div class="cta-band reveal">
+      <p class="eyebrow" style="justify-content:center">Resta sul pezzo</p>
+      <h2>Il bianco<br>non stanca mai</h2>
+      <p class="lede" style="margin:1.2rem auto 0; text-align:center">
+        Lascia un&rsquo;email fittizia per vedere come si comporta il form: resta tutto nel browser,
+        non parte nessuna richiesta.
+      </p>
+      <form class="form" id="form" novalidate>
+        <label for="email" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Email</label>
+        <input id="email" type="email" placeholder="nome@esempio.it" autocomplete="off" required>
+        <button class="btn" type="submit">Iscrivimi</button>
+      </form>
+      <p class="form__note">Demo front-end: nessun dato viene raccolto, salvato o inviato.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__grid">
+      <div>
+        <a class="brand" href="#top">
+          <svg viewBox="0 0 120 90" aria-hidden="true">
+            <path d="M14 6c9 20 13 40 8 66-5-26-13-46-22-62z"/>
+            <path d="M52 0c10 24 14 48 9 78-5-30-14-54-24-72z"/>
+            <path d="M92 6c9 20 13 40 8 66-5-26-13-46-22-62z"/>
+          </svg>
+          Ultra White <span>concept</span>
+        </a>
+        <p class="disclaimer">
+          Progetto <strong>non ufficiale</strong> a scopo dimostrativo e didattico.
+          Non affiliato né approvato da Monster Beverage Corporation.
+          &laquo;Monster&raquo;, &laquo;Monster Energy&raquo; e &laquo;Ultra&raquo; sono marchi dei rispettivi
+          titolari e vengono citati unicamente a fini descrittivi.
+          Illustrazioni, testi e valori riportati sono realizzati per questo concept
+          e non sostituiscono l&rsquo;etichetta del prodotto.
+        </p>
+      </div>
+      <div>
+        <h4>Sezioni</h4>
+        <ul>
+          <li><a href="#prodotto">Prodotto</a></li>
+          <li><a href="#gusto">Profilo aromatico</a></li>
+          <li><a href="#energia">Caffeina</a></li>
+          <li><a href="#nutrizione">Nutrizione</a></li>
+          <li><a href="#famiglia">Famiglia Ultra</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Consumo consapevole</h4>
+        <ul>
+          <li><span>Non adatto ai minori</span></li>
+          <li><span>Sconsigliato in gravidanza</span></li>
+          <li><span>Max 400 mg caffeina / giorno</span></li>
+          <li><span>Non sostituisce l&rsquo;acqua</span></li>
+          <li><span>Lattina in alluminio: riciclala</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__legal">
+      <span>&copy; <span id="year">2026</span> — Concept fan-made. Nessun diritto rivendicato sui marchi citati.</span>
+      <span>Costruito senza framework: HTML, CSS e JavaScript.</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>
