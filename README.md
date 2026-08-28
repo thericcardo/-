@@ -50,6 +50,24 @@ branch e la cartella `/ (root)`. Da HTTPS si attiva anche il service worker, qui
 l'app funziona offline e si può installare sul telefono con «Aggiungi a schermata
 Home».
 
+## Versione a file unico
+
+```
+node build.mjs
+```
+
+Rigenera dagli stessi sorgenti due file dentro `dist/`:
+
+- `leggi-di-piu.html` — la stessa app in un solo file, con CSS, JavaScript e
+  icona già dentro: si apre con un doppio clic, si manda per email, sta su una
+  chiavetta;
+- `artifact.html` — lo stesso contenuto senza `<html>`/`<head>`/`<body>`, per gli
+  host che avvolgono loro la pagina.
+
+Sono file generati: si modificano i sorgenti e si rilancia il comando, mai il
+contrario. Il build si ferma con un errore se non ritrova quello che deve
+sostituire, così non produce silenziosamente una versione monca.
+
 ## Struttura
 
 ```
@@ -60,7 +78,8 @@ js/app.js               interfaccia, statistiche, import/export
 sw.js                   cache offline
 manifest.webmanifest    installazione come app
 icon.svg                icona
+build.mjs               genera la versione a file unico in dist/
 ```
 
-Nessuna dipendenza, nessun passaggio di compilazione: si modifica un file e si
+Nessuna dipendenza e nessuna compilazione per lavorarci: si modifica un file e si
 ricarica la pagina.
