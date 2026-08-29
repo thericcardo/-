@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Panigale V4 — Anatomia della Velocità</title>
+<meta name="description" content="Un tributo open source alla Ducati Panigale V4 S: modello 3D procedurale, animazioni scroll-driven e motore audio sintetizzato. Progetto indipendente, non affiliato a Ducati.">
+<meta name="theme-color" content="#08090A">
+<meta property="og:title" content="Panigale V4 — Anatomia della Velocità">
+<meta property="og:description" content="Tributo open source alla Ducati Panigale V4 S. WebGL, GSAP, Web Audio. Zero asset esterni.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Saira:wght@200;300;400;500;600;800&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2308090A'/%3E%3Cpath d='M6 22 L16 8 L20 14 L26 10 L22 24 Z' fill='%23DA291C'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════ PRELOADER ══════════════════════════════════════════ -->
+<div id="loader" role="status" aria-live="polite">
+  <div class="loader-inner">
+    <div class="loader-mark">
+      <span class="loader-mark-l1">DUCATI</span>
+      <span class="loader-mark-l2">PANIGALE&nbsp;V4</span>
+    </div>
+    <div class="loader-track"><div id="loader-bar"></div></div>
+    <div class="loader-meta">
+      <span id="loader-msg">Accensione impianto</span>
+      <span id="loader-pct">0%</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ WEBGL LAYER ══════════════════════════════════════════ -->
+<canvas id="scene-canvas" aria-hidden="true"></canvas>
+<div id="scene-fallback" hidden>
+  <p>WebGL non è disponibile su questo dispositivo.<br>La pagina resta leggibile, ma la scena 3D è disattivata.</p>
+</div>
+<div id="grain" aria-hidden="true"></div>
+<div id="vignette" aria-hidden="true"></div>
+
+<!-- ══════════════════════════════════════════ CURSOR ══════════════════════════════════════════ -->
+<div id="cursor" aria-hidden="true"></div>
+<div id="cursor-dot" aria-hidden="true"></div>
+
+<!-- ══════════════════════════════════════════ CHROME ══════════════════════════════════════════ -->
+<div id="progress-rail" aria-hidden="true"><div id="progress-fill"></div></div>
+
+<header id="nav">
+  <a class="nav-brand" href="#top" data-goto="0" data-magnetic>
+    <span class="nav-brand-mark"></span>
+    <span class="nav-brand-text">PANIGALE&nbsp;V4</span>
+  </a>
+  <nav class="nav-links" aria-label="Capitoli">
+    <button class="nav-link" data-goto="1" data-magnetic>Cuore</button>
+    <button class="nav-link" data-goto="2" data-magnetic>Aero</button>
+    <button class="nav-link" data-goto="3" data-magnetic>Anatomia</button>
+    <button class="nav-link" data-goto="4" data-magnetic>Elettronica</button>
+    <button class="nav-link" data-goto="5" data-magnetic>Livrea</button>
+  </nav>
+  <div class="nav-actions">
+    <button id="sound-toggle" data-magnetic aria-pressed="false" aria-label="Attiva il suono del motore">
+      <span class="sound-bars"><i></i><i></i><i></i><i></i></span>
+      <span class="sound-label">Motore</span>
+    </button>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════ HUD ══════════════════════════════════════════ -->
+<aside id="hud" aria-hidden="true">
+  <svg class="hud-gauge" viewBox="0 0 120 120">
+    <circle class="hud-gauge-track" cx="60" cy="60" r="52"></circle>
+    <circle id="hud-rpm-arc" class="hud-gauge-arc" cx="60" cy="60" r="52"></circle>
+    <circle class="hud-gauge-limit" cx="60" cy="60" r="52"></circle>
+  </svg>
+  <div class="hud-readout">
+    <div class="hud-rpm"><span id="hud-rpm-value">1250</span><em>rpm</em></div>
+    <div class="hud-row">
+      <div class="hud-cell"><span id="hud-gear">N</span><em>marcia</em></div>
+      <div class="hud-cell"><span id="hud-speed">0</span><em>km/h</em></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════════ CONTENT ══════════════════════════════════════════ -->
+<main id="smooth-wrapper">
+<div id="smooth-content">
+
+  <!-- ─────────── 0 · HERO ─────────── -->
+  <section id="top" data-chapter="0" class="chapter chapter--hero">
+    <div class="chapter-inner">
+      <p class="eyebrow" data-reveal>Ducati Panigale V4 S · 2022–2024</p>
+      <h1 class="hero-title" data-split>Anatomia della Velocità</h1>
+      <div class="hero-strip">
+        <div class="hero-stat" data-reveal data-reveal-delay="0.1">
+          <b data-counter data-counter-to="1103" data-counter-suffix=" cc">0</b>
+          <span>Desmosedici Stradale</span>
+        </div>
+        <div class="hero-stat" data-reveal data-reveal-delay="0.2">
+          <b data-counter data-counter-to="215.5" data-counter-decimals="1" data-counter-suffix=" CV">0</b>
+          <span>a 13.000 giri/min</span>
+        </div>
+        <div class="hero-stat" data-reveal data-reveal-delay="0.3">
+          <b data-counter data-counter-to="195" data-counter-suffix=" kg">0</b>
+          <span>in ordine di marcia</span>
+        </div>
+      </div>
+      <p class="hero-lede" data-reveal data-reveal-delay="0.4">
+        Un V4 a 90° derivato dalla MotoGP, un telaio che usa il motore come elemento
+        portante e un pacchetto aerodinamico nato in galleria del vento.
+        Scorri per smontarla, pezzo per pezzo.
+      </p>
+    </div>
+    <div class="scroll-cue" aria-hidden="true">
+      <span>Scorri</span>
+      <i></i>
+    </div>
+  </section>
+
+  <!-- ─────────── 1 · IL CUORE ─────────── -->
+  <section data-chapter="1" class="chapter chapter--right">
+    <div class="chapter-inner">
+      <p class="eyebrow" data-reveal>Capitolo 01 — Il Cuore</p>
+      <h2 data-split>Desmosedici Stradale</h2>
+      <p class="lede" data-reveal>
+        1103 cm³, quattro cilindri a V di 90°, distribuzione desmodromica.
+        L’albero motore controrotante annulla parte dell’effetto giroscopico delle ruote:
+        la moto cambia direzione come se pesasse molto meno di quanto dice la bilancia.
+      </p>
+      <dl class="figure-grid">
+        <div data-reveal><dt>Alesaggio × corsa</dt><dd>81 × 53,5 mm</dd></div>
+        <div data-reveal data-reveal-delay="0.06"><dt>Rapporto di compressione</dt><dd>14,0 : 1</dd></div>
+        <div data-reveal data-reveal-delay="0.12"><dt>Coppia massima</dt><dd>123,6 Nm a 9.500 giri</dd></div>
+        <div data-reveal data-reveal-delay="0.18"><dt>Ordine di scoppio</dt><dd>Twin Pulse — 0°, 90°, 290°, 380°</dd></div>
+      </dl>
+      <blockquote class="pull" data-reveal>
+        <span>“Twin Pulse”:</span> i quattro cilindri sparano a coppie ravvicinate.
+        È il motivo per cui un V4 può suonare come un bicilindrico arrabbiato.
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- ─────────── 2 · AERODINAMICA ─────────── -->
+  <section data-chapter="2" class="chapter chapter--left">
+    <div class="chapter-inner">
+      <p class="eyebrow" data-reveal>Capitolo 02 — Aerodinamica</p>
+      <h2 data-split>Alette biplano</h2>
+      <p class="lede" data-reveal>
+        Le appendici aerodinamiche derivate dalla Desmosedici GP generano carico verticale
+        sull’avantreno. Meno impennata in uscita di curva, più stabilità in frenata,
+        meno intervento dell’elettronica: la moto si autoregola prima ancora che il software se ne accorga.
+      </p>
+      <div class="aero-readout">
+        <div class="aero-cell" data-reveal>
+          <b data-counter data-counter-to="2" data-counter-suffix="×2">0</b>
+          <span>profili per lato, configurazione biplano</span>
+        </div>
+        <div class="aero-cell" data-reveal data-reveal-delay="0.1">
+          <b data-counter data-counter-to="90" data-counter-suffix="°">0</b>
+          <span>angolo fra le bancate, come sulla Desmosedici GP</span>
+        </div>
+      </div>
+      <ul class="ticks">
+        <li data-reveal>Carico crescente con il quadrato della velocità</li>
+        <li data-reveal data-reveal-delay="0.06">Riduce l’intervento del controllo d’impennata</li>
+        <li data-reveal data-reveal-delay="0.12">Stabilizza l’avantreno nelle staccate violente</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ─────────── 3 · ANATOMIA ─────────── -->
+  <section data-chapter="3" class="chapter chapter--center">
+    <div class="chapter-inner">
+      <p class="eyebrow" data-reveal>Capitolo 03 — Anatomia</p>
+      <h2 data-split>Vista esplosa</h2>
+      <p class="lede" data-reveal>
+        Il Front Frame in alluminio pesa poco più di 4 kg e si avvita direttamente
+        sulle teste del motore. Non c’è un telaio che abbraccia il propulsore:
+        è il propulsore a essere il telaio.
+      </p>
+      <button id="explode-toggle" class="btn" data-magnetic>
+        <span class="btn-label">Esplodi / ricomponi</span>
+        <span class="btn-glyph" aria-hidden="true"></span>
+      </button>
+      <ol class="parts-legend">
+        <li data-reveal><em>01</em> Front Frame in alluminio</li>
+        <li data-reveal data-reveal-delay="0.05"><em>02</em> Forcella Öhlins NIX30 da 43 mm</li>
+        <li data-reveal data-reveal-delay="0.10"><em>03</em> Forcellone monobraccio, lato sinistro</li>
+        <li data-reveal data-reveal-delay="0.15"><em>04</em> Scarico 4-2-1 con silenziatore sottomotore</li>
+        <li data-reveal data-reveal-delay="0.20"><em>05</em> Cerchi forgiati a tre razze</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ─────────── 4 · ELETTRONICA ─────────── -->
+  <section data-chapter="4" class="chapter chapter--right">
+    <div class="chapter-inner">
+      <p class="eyebrow" data-reveal>Capitolo 04 — Elettronica</p>
+      <h2 data-split>Sei assi di controllo</h2>
+      <p class="lede" data-reveal>
+        Una piattaforma inerziale a 6 assi misura assetto, imbardata e accelerazioni
+        centinaia di volte al secondo. Tutto il resto — trazione, impennata, ABS in curva,
+        freno motore — è una conseguenza di quel dato.
+      </p>
+      <div class="specs">
+        <div class="spec" data-reveal>
+          <div class="spec-head"><span>Ducati Traction Control EVO 3</span><em>8 livelli</em></div>
+          <div class="spec-track"><div class="spec-bar" data-value="88"></div></div>
+        </div>
+        <div class="spec" data-reveal data-reveal-delay="0.06">
+          <div class="spec-head"><span>Ducati Wheelie Control EVO</span><em>8 livelli</em></div>
+          <div class="spec-track"><div class="spec-bar" data-value="80"></div></div>
+        </div>
+        <div class="spec" data-reveal data-reveal-delay="0.12">
+          <div class="spec-head"><span>Ducati Slide Control</span><em>2 livelli</em></div>
+          <div class="spec-track"><div class="spec-bar" data-value="55"></div></div>
+        </div>
+        <div class="spec" data-reveal data-reveal-delay="0.18">
+          <div class="spec-head"><span>Cornering ABS EVO — Bosch</span><em>3 livelli</em></div>
+          <div class="spec-track"><div class="spec-bar" data-value="72"></div></div>
+        </div>
+        <div class="spec" data-reveal data-reveal-delay="0.24">
+          <div class="spec-head"><span>Ducati Quick Shift EVO 2</span><em>su/giù</em></div>
+          <div class="spec-track"><div class="spec-bar" data-value="94"></div></div>
+        </div>
+      </div>
+      <p class="note" data-reveal>Scorrendo, il contagiri qui accanto percorre le sei marce.</p>
+    </div>
+  </section>
+
+  <!-- ─────────── 5 · LIVREA ─────────── -->
+  <section data-chapter="5" class="chapter chapter--center">
+    <div class="chapter-inner">
+      <p class="eyebrow" data-reveal>Capitolo 05 — Livrea</p>
+      <h2 data-split>Rosso, e le sue alternative</h2>
+      <p class="lede" data-reveal>
+        Il rosso Ducati è una scelta industriale prima che estetica: satura, ad alto contrasto,
+        leggibile a 300 km/h da bordo pista. Ma la vernice è l’unica cosa negoziabile.
+      </p>
+      <div class="paints" role="group" aria-label="Colore della carrozzeria">
+        <button data-paint data-paint-color="#DA291C" data-magnetic class="is-active"><i style="--sw:#DA291C"></i><span>Rosso Ducati</span></button>
+        <button data-paint data-paint-color="#111417" data-magnetic><i style="--sw:#111417"></i><span>Nero Opaco</span></button>
+        <button data-paint data-paint-color="#D9DDE1" data-magnetic><i style="--sw:#D9DDE1"></i><span>Bianco Ghiaccio</span></button>
+        <button data-paint data-paint-color="#1B4A8A" data-magnetic><i style="--sw:#1B4A8A"></i><span>Blu Corse</span></button>
+        <button data-paint data-paint-color="#C9A227" data-magnetic><i style="--sw:#C9A227"></i><span>Oro Öhlins</span></button>
+      </div>
+      <p class="note" data-reveal>Nessun logo o grafica ufficiale è riprodotto: questo è un progetto indipendente.</p>
+    </div>
+  </section>
+
+  <!-- ─────────── 6 · OUTRO ─────────── -->
+  <section data-chapter="6" class="chapter chapter--outro">
+    <div class="chapter-inner">
+      <p class="eyebrow" data-reveal>Capitolo 06 — Il progetto</p>
+      <h2 data-split>Tutto questo è codice</h2>
+      <p class="lede" data-reveal>
+        Nessun modello 3D scaricato, nessuna texture, nessun file audio. La moto è generata
+        con geometria procedurale, l’ambiente è un HDRI costruito a runtime e il suono del
+        motore è sintetizzato campione per campione partendo dall’ordine di scoppio reale.
+      </p>
+      <div class="credits">
+        <div class="credit" data-reveal><em>Geometria</em><span>three.js 0.160 · ~200k triangoli procedurali</span></div>
+        <div class="credit" data-reveal data-reveal-delay="0.06"><em>Animazione</em><span>GSAP 3.12 + ScrollTrigger, smooth scroll custom</span></div>
+        <div class="credit" data-reveal data-reveal-delay="0.12"><em>Audio</em><span>Web Audio API · AudioWorklet, 0 campioni</span></div>
+        <div class="credit" data-reveal data-reveal-delay="0.18"><em>Licenza</em><span>MIT</span></div>
+      </div>
+      <div class="marquee-wrap" aria-hidden="true">
+        <div data-marquee data-marquee-speed="38" data-marquee-dir="1" class="marquee">
+          <span>DESMOSEDICI STRADALE</span><span>·</span><span>1103 CC</span><span>·</span><span>V4 A 90°</span><span>·</span><span>TWIN PULSE</span><span>·</span><span>FRONT FRAME</span><span>·</span>
+        </div>
+        <div data-marquee data-marquee-speed="26" data-marquee-dir="-1" class="marquee marquee--ghost">
+          <span>OPEN SOURCE</span><span>·</span><span>WEBGL</span><span>·</span><span>ZERO ASSET</span><span>·</span><span>MIT</span><span>·</span><span>PROCEDURALE</span><span>·</span>
+        </div>
+      </div>
+      <footer class="site-footer">
+        <p>
+          Progetto indipendente a scopo didattico e dimostrativo.
+          <strong>Non affiliato, sponsorizzato o approvato da Ducati Motor Holding S.p.A.</strong>
+          “Ducati” e “Panigale” sono marchi dei rispettivi titolari, citati a solo scopo descrittivo.
+          Nessun marchio figurativo è riprodotto.
+        </p>
+        <p class="site-footer-links">
+          <a href="https://github.com/thericcardo/-" data-magnetic>Codice sorgente</a>
+          <span>·</span>
+          <a href="LICENSE" data-magnetic>MIT</a>
+        </p>
+      </footer>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<!-- ══════════════════════════════════════════ SCRIPTS ══════════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script src="js/materials.js"></script>
+<script src="js/bike-model.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/engine-audio.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>

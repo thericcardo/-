@@ -1,0 +1,99 @@
+{
+  "model": "Ducati Panigale V4 S",
+  "modelYearRange": "2022-2024",
+  "purpose": "Vincoli dimensionali e tecnici usati per generare il modello 3D procedurale e i testi del sito.",
+  "verificationStatus": {
+    "state": "non-verificato-in-sessione",
+    "detail": "Le cifre sono state compilate dalla conoscenza del modello, NON ri-verificate su fonti primarie in questa sessione: l'agente incaricato della verifica è stato interrotto dal limite di sessione. Il campo `confidence` riflette quanto la cifra sia consolidata e stabile fra le fonti pubbliche, non una verifica appena eseguita. Prima di citare questi numeri altrove, controllarli sulla scheda tecnica Ducati del model year corrispondente.",
+    "recommendedSources": [
+      "Scheda tecnica ufficiale Ducati del model year",
+      "Ducati Media House (comunicati di presentazione)",
+      "Test indipendenti (Cycle World, MCN, Motociclismo) per i dati non dichiarati dal costruttore"
+    ]
+  },
+
+  "specs": {
+    "engine": {
+      "name":            { "value": "Desmosedici Stradale", "confidence": "high" },
+      "configuration":   { "value": "V4 a 90°, controrotante, ruotato di 42° all'indietro", "confidence": "high" },
+      "displacement":    { "value": 1103, "unit": "cc", "confidence": "high" },
+      "bore":            { "value": 81, "unit": "mm", "confidence": "high" },
+      "stroke":          { "value": 53.5, "unit": "mm", "confidence": "high" },
+      "compressionRatio":{ "value": "14.0:1", "confidence": "high" },
+      "valvetrain":      { "value": "Desmodromica, 4 valvole per cilindro, doppio albero a camme in testa", "confidence": "high" },
+      "firingOrder":     { "value": "Twin Pulse — scoppi a 0°, 90°, 290°, 380° del ciclo di 720°", "confidence": "high",
+                           "note": "L'ordine di scoppio ravvicinato a coppie è ciò che dà al V4 il timbro da bicilindrico. È il modello implementato in js/engine-audio.js." },
+      "power_hp":        { "value": 215.5, "unit": "CV", "confidence": "medium",
+                           "note": "Valore per i model year 2022+. I 2018–2021 sono accreditati di 214 CV. Le omologazioni possono variare per mercato." },
+      "power_rpm":       { "value": 13000, "unit": "rpm", "confidence": "high" },
+      "torque_nm":       { "value": 123.6, "unit": "Nm", "confidence": "medium" },
+      "torque_rpm":      { "value": 9500, "unit": "rpm", "confidence": "medium" },
+      "redline_rpm":     { "value": 14500, "unit": "rpm", "confidence": "low",
+                           "note": "Il limitatore effettivo dipende da marcia e mappatura. Usato solo come fondo scala per la sintesi audio e per il contagiri." }
+    },
+
+    "chassis": {
+      "frame":           { "value": "Front Frame in alluminio; il motore è elemento stressato", "confidence": "high" },
+      "swingarm":        { "value": "Monobraccio in alluminio, braccio sul lato sinistro", "confidence": "high" },
+      "wheelbase_mm":    { "value": 1469, "unit": "mm", "confidence": "high" },
+      "rake_deg":        { "value": 24.5, "unit": "°", "confidence": "high" },
+      "trail_mm":        { "value": 100, "unit": "mm", "confidence": "high" },
+      "seatHeight_mm":   { "value": 835, "unit": "mm", "confidence": "high" },
+      "frontSuspension": { "value": "Forcella Öhlins NIX30 rovesciata da 43 mm, regolazione elettronica (S)", "confidence": "high" },
+      "rearSuspension":  { "value": "Monoammortizzatore Öhlins TTX36 a gestione elettronica (S)", "confidence": "high" },
+      "frontBrakes":     { "value": "Doppio disco da 330 mm, pinze Brembo Stylema monoblocco a 4 pistoncini", "confidence": "high" },
+      "rearBrake":       { "value": "Disco da 245 mm, pinza a 2 pistoncini", "confidence": "medium" },
+      "frontTyre":       { "value": "120/70 ZR17", "confidence": "high" },
+      "rearTyre":        { "value": "200/60 ZR17", "confidence": "medium",
+                           "note": "Le fonti si dividono fra 200/60 e 200/55 a seconda di model year e primo equipaggiamento. Il modello 3D usa 200/55 (Ø 652 mm); con 200/60 il diametro salirebbe a ~672 mm." },
+      "wheels":          { "value": "Cerchi forgiati in alluminio a 3 razze (S)", "confidence": "high" }
+    },
+
+    "weight": {
+      "dryWeight_kg":    { "value": 175, "unit": "kg", "confidence": "medium" },
+      "kerbWeight_kg":   { "value": 195, "unit": "kg", "confidence": "medium",
+                           "note": "Ducati dichiara sia il peso a secco sia quello in ordine di marcia; le riviste ne riportano indifferentemente uno o l'altro, ed è la causa più comune di numeri discordanti su questa moto." },
+      "fuelCapacity_l":  { "value": 16, "unit": "l", "confidence": "medium" }
+    },
+
+    "electronics": {
+      "imu":              { "value": "Piattaforma inerziale a 6 assi Bosch", "confidence": "high" },
+      "tractionControl":  { "value": "Ducati Traction Control EVO 3, 8 livelli", "confidence": "high" },
+      "wheelieControl":   { "value": "Ducati Wheelie Control EVO, 8 livelli", "confidence": "high" },
+      "slideControl":     { "value": "Ducati Slide Control, 2 livelli", "confidence": "medium" },
+      "abs":              { "value": "Cornering ABS EVO Bosch, 3 livelli", "confidence": "high" },
+      "engineBrakeControl":{ "value": "Engine Brake Control EVO, 3 livelli", "confidence": "medium" },
+      "quickshifter":     { "value": "Ducati Quick Shift EVO 2, su e giù", "confidence": "high" },
+      "ridingModes":      { "value": "Race, Sport, Street", "confidence": "high" },
+      "dashboard":        { "value": "TFT a colori da 5 pollici", "confidence": "high" }
+    },
+
+    "aero": {
+      "winglets":  { "value": "Appendici aerodinamiche biplano derivate dalla Desmosedici GP, due profili per lato", "confidence": "high" },
+      "downforce": { "value": null, "confidence": "unverified",
+                     "note": "DELIBERATAMENTE NON PUBBLICATO SUL SITO. Circolano cifre diverse (spesso riferite alla V4 R o a velocità non dichiarate) e non è stato possibile risalire a un dato ufficiale attribuibile con certezza alla V4 S. Meglio nessun numero che un numero sbagliato." }
+    },
+
+    "performance": {
+      "topSpeed_kmh":  { "value": null, "confidence": "unverified", "note": "Non dichiarata dal costruttore. I test indipendenti riportano valori molto dipendenti da circuito e rapportatura." },
+      "zeroTo100_s":   { "value": null, "confidence": "unverified", "note": "Non dichiarata dal costruttore." }
+    }
+  },
+
+  "designNotes": [
+    "Firma luminosa anteriore a V formata da due barre LED che convergono verso il basso, con proiettori sottostanti.",
+    "Alette biplano su entrambi i lati della carena anteriore, chiuse all'estremità da una paratia verticale.",
+    "Grandi estrattori d'aria calda sulle fiancate, dietro le alette.",
+    "Coda corta, alta e appuntita, con luce posteriore sottile sotto la punta.",
+    "Scarico 4-2-1 con silenziatore sotto il motore e doppio terminale che esce basso sul lato destro, sotto la coda.",
+    "Cerchi forgiati a tre razze a Y.",
+    "Forcella rovesciata con steli superiori dorati (anodizzazione Öhlins) e foderi inferiori neri.",
+    "Forcellone monobraccio con il braccio sul lato sinistro: il fianco destro della ruota posteriore resta completamente scoperto.",
+    "Catena e corona sul lato sinistro."
+  ],
+
+  "generationNotes": [
+    "Il modello 3D in js/bike-model.js deriva le proporzioni da interasse, raggi degli pneumatici, inclinazione del cannotto e avancorsa elencati qui. Cambiare una di queste costanti riposiziona automaticamente ruote, forcella e forcellone.",
+    "La terza generazione (2025) introduce modifiche sostanziali, fra cui l'abbandono del forcellone monobraccio: questo file NON la descrive."
+  ]
+}

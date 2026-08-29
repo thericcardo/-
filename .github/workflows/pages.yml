@@ -1,0 +1,41 @@
+name: Deploy su GitHub Pages
+
+# Il sito è statico e senza build step: si pubblica il repository così com'è.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Controllo sintassi dei moduli JS
+        run: |
+          for f in js/*.js; do
+            node --check "$f" || exit 1
+            echo "ok  $f"
+          done
+          node -e "JSON.parse(require('fs').readFileSync('data/specs.json','utf8'))"
+          echo "ok  data/specs.json"
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
