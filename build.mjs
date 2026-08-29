@@ -39,8 +39,10 @@ const body = bodyMatch[1]
   .replace(/src="icon\.svg"/g, `src="${iconDataUri}"`)
   .trim();
 
-// ---- script: i due file nell'ordine in cui li carica index.html
-let js = read("js/storage.js") + "\n\n" + read("js/app.js");
+// ---- script: gli stessi file, nello stesso ordine in cui li carica index.html
+const scripts = Array.from(html.matchAll(/<script src="([^"]+)"><\/script>/g), (m) => m[1]);
+if (!scripts.length) throw new Error("Build: nessuno <script src> in index.html.");
+let js = scripts.map(read).join("\n\n");
 // In un file unico non c'è nessun sw.js accanto alla pagina.
 js = replaceOnce(js, "    registerServiceWorker();", "    // file unico: nessun service worker da registrare", "la chiamata a registerServiceWorker");
 js = js.replace(/<\/script/gi, "<\\/script");

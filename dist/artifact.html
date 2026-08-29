@@ -589,7 +589,7 @@ textarea { resize: vertical; min-height: 2.8rem; }
 .qa dt:not(:first-child) { margin-top: .8rem; }
 .qa dd { margin: .15rem 0 0; white-space: pre-wrap; word-break: break-word; }
 
-.entry-actions { display: flex; gap: .3rem; margin-top: .7rem; }
+.entry-actions { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .7rem; }
 
 .empty {
   text-align: center;
@@ -661,6 +661,50 @@ textarea { resize: vertical; min-height: 2.8rem; }
   font-size: .78rem;
   color: var(--muted);
 }
+
+/* ------------------------------------------------------------- Claude --- */
+
+.book-actions { display: flex; gap: .3rem; flex-wrap: wrap; justify-content: flex-end; }
+
+#ai-key { flex: 1 1 14rem; max-width: none; min-width: 12rem; }
+
+/* Il commento di Claude dentro una lettura: citato, non confuso con i tuoi appunti. */
+.ai-note {
+  margin: .8rem 0 0;
+  padding: .7rem .9rem;
+  background: var(--surface-alt);
+  border-left: 3px solid var(--yellow);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.ai-note-label {
+  display: block;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: .2rem;
+}
+.ai-note p { white-space: pre-wrap; word-break: break-word; }
+
+.ai-dialog {
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: min(40rem, calc(100dvh - 3rem));
+  overflow-y: auto;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  box-shadow: var(--shadow);
+}
+.ai-dialog::backdrop { background: rgba(20, 27, 22, .55); }
+
+.ai-head { display: flex; align-items: center; justify-content: space-between; gap: .8rem; }
+.ai-body { margin: .9rem 0; display: flex; flex-direction: column; gap: .6rem; }
+.ai-answer { white-space: pre-wrap; word-break: break-word; }
+.ai-loading { color: var(--muted); }
+.ai-prompt { font-size: .9rem; line-height: 1.45; }
 
 /* -------------------------------------------------------------- toast --- */
 
@@ -798,7 +842,11 @@ textarea { resize: vertical; min-height: 2.8rem; }
           <div id="domande-box"></div>
 
           <div id="custom-box" class="custom-box"></div>
-          <button type="button" id="btn-add-domanda" class="btn ghost small">+ Aggiungi una tua domanda</button>
+          <div class="row wrap">
+            <button type="button" id="btn-add-domanda" class="btn ghost small">+ Aggiungi una tua domanda</button>
+            <button type="button" id="btn-ai-domande" class="btn small">Domande su misura</button>
+          </div>
+          <p class="hint">«Domande su misura» chiede a Claude tre domande pensate per questo libro e per le pagine che hai appena letto.</p>
         </fieldset>
 
         <p class="error" id="form-error" role="alert" hidden></p>
@@ -854,6 +902,19 @@ textarea { resize: vertical; min-height: 2.8rem; }
       </div>
 
       <div class="card">
+        <h3>Claude</h3>
+        <p class="hint">Con una chiave API di Anthropic, Claude ti propone domande su misura, commenta quello che scrivi e ti ricorda dove eri rimasto. Senza chiave l'app prepara comunque la domanda da copiare e incollare in Claude.</p>
+        <label class="field" for="ai-key"><span>Chiave API</span></label>
+        <div class="row wrap">
+          <input id="ai-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…">
+          <button type="button" id="btn-ai-key" class="btn">Salva chiave</button>
+          <button type="button" id="btn-ai-key-remove" class="btn danger">Rimuovi</button>
+        </div>
+        <p class="hint" id="ai-key-state"></p>
+        <p class="hint">La chiave resta in questo browser e non entra mai nell'export delle letture. Chiunque usi questo dispositivo può però leggerla: non metterla su un computer condiviso. Ogni richiesta a Claude viene conteggiata sul tuo account Anthropic.</p>
+      </div>
+
+      <div class="card">
         <h3>I tuoi dati</h3>
         <p class="hint">Tutto è salvato soltanto in questo browser, su questo dispositivo. Esporta ogni tanto per non perdere nulla.</p>
         <div class="row wrap">
@@ -869,6 +930,16 @@ textarea { resize: vertical; min-height: 2.8rem; }
 
   <footer class="footer">Leggi di più · i tuoi dati non escono da questo dispositivo</footer>
 </div>
+
+<dialog id="ai-dialog" class="ai-dialog" aria-labelledby="ai-title">
+  <div class="ai-head">
+    <h3 id="ai-title">Claude</h3>
+    <button type="button" class="btn ghost small icon" id="ai-close" aria-label="Chiudi">×</button>
+  </div>
+  <p class="hint" id="ai-note"></p>
+  <div id="ai-body" class="ai-body"></div>
+  <div class="row wrap" id="ai-actions"></div>
+</dialog>
 
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
@@ -1129,6 +1200,239 @@ const Store = (() => {
     deleteEntry,
     exportCurrent,
     importIntoCurrent
+  };
+})();
+
+
+/**
+ * Leggi di più — il compagno di lettura.
+ *
+ * Parla con l'API di Claude direttamente dal browser, con la chiave che l'utente
+ * incolla nelle impostazioni. Niente SDK e niente build: l'app deve restare un
+ * sito statico che si apre anche con un doppio clic, e l'SDK ufficiale
+ * richiederebbe npm e un bundler.
+ *
+ * La chiave sta in una voce di localStorage tutta sua, separata dai diari: non
+ * finisce mai dentro l'export delle letture.
+ *
+ * Ogni funzione che chiede qualcosa a Claude restituisce { ok: true, text } o
+ * { ok: false, reason }. Chi chiama deve gestire il caso senza risposta: senza
+ * chiave, o dove la rete verso l'API è bloccata, l'app ripiega sul prompt da
+ * copiare e incollare in Claude.
+ */
+const AI = (() => {
+  "use strict";
+
+  const KEY_STORAGE = "leggidipiu.apikey";
+  const ENDPOINT = "https://api.anthropic.com/v1/messages";
+  const MODEL = "claude-opus-5";
+
+  const SYSTEM = [
+    "Sei il compagno di lettura dentro «Leggi di più», il diario di lettura di chi ti scrive.",
+    "Rispondi in italiano e dai del tu. Frasi brevi e concrete: chi ti legge ha appena chiuso il libro e ha poco tempo.",
+    "",
+    "Regole:",
+    "- Non anticipare mai niente che venga dopo le pagine indicate. Niente spoiler, nemmeno accennati o allusivi.",
+    "- Entra nel merito del libro solo se lo conosci davvero. Se non lo conosci, o non sei sicuro, dillo in mezza riga e lavora su quello che ha scritto chi legge.",
+    "- Niente markdown, niente titoli, niente elenchi puntati se non te li chiedono: il testo viene mostrato così com'è.",
+    "- Niente complimenti di cortesia. Se una risposta è vaga, dillo e chiedi la cosa precisa che manca."
+  ].join("\n");
+
+  /* ------------------------------------------------------------- chiave API */
+
+  function getKey() {
+    try {
+      return (localStorage.getItem(KEY_STORAGE) || "").trim();
+    } catch (err) {
+      return "";
+    }
+  }
+
+  function setKey(value) {
+    const clean = String(value || "").trim();
+    try {
+      if (clean) localStorage.setItem(KEY_STORAGE, clean);
+      else localStorage.removeItem(KEY_STORAGE);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  const hasKey = () => getKey().length > 0;
+
+  /* ------------------------------------------------------------- richiesta */
+
+  /**
+   * Una domanda sola, senza cronologia: ogni funzione qui sotto è autonoma.
+   * `effort: "low"` perché sono richieste corte e l'utente aspetta davanti allo
+   * schermo.
+   */
+  async function ask(prompt, { maxTokens = 4000 } = {}) {
+    const key = getKey();
+    if (!key) return { ok: false, reason: "no-key" };
+
+    let response;
+    try {
+      response = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": key,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: maxTokens,
+          output_config: { effort: "low" },
+          system: SYSTEM,
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+    } catch (err) {
+      // Rete assente, oppure una policy che blocca le chiamate verso l'esterno.
+      return { ok: false, reason: "network", detail: String(err && err.message ? err.message : err) };
+    }
+
+    if (!response.ok) {
+      let detail = "";
+      try {
+        const body = await response.json();
+        detail = body && body.error && body.error.message ? body.error.message : "";
+      } catch (err) { /* corpo non leggibile: resta il codice HTTP */ }
+      const reason = response.status === 401 || response.status === 403 ? "auth"
+        : response.status === 429 ? "rate-limit"
+        : "http";
+      return { ok: false, reason, status: response.status, detail };
+    }
+
+    let data;
+    try {
+      data = await response.json();
+    } catch (err) {
+      return { ok: false, reason: "http", detail: "Risposta illeggibile." };
+    }
+
+    if (data.stop_reason === "refusal") return { ok: false, reason: "refusal" };
+
+    const text = (data.content || [])
+      .filter((block) => block && block.type === "text")
+      .map((block) => block.text)
+      .join("\n")
+      .trim();
+
+    if (!text) return { ok: false, reason: "empty" };
+    return { ok: true, text };
+  }
+
+  /** Messaggi in italiano per ogni modo in cui una richiesta può fallire. */
+  function explain(result) {
+    switch (result.reason) {
+      case "no-key": return "Non hai ancora inserito una chiave API di Claude.";
+      case "auth": return "La chiave API non è stata accettata. Controllala nel profilo.";
+      case "rate-limit": return "Troppe richieste di fila. Riprova fra un minuto.";
+      case "refusal": return "Claude ha preferito non rispondere a questa richiesta.";
+      case "empty": return "Claude ha risposto senza testo. Riprova.";
+      case "network": return "Non riesco a raggiungere l'API di Claude da questa pagina: può essere la rete, oppure una pagina che non ha il permesso di chiamare servizi esterni.";
+      case "http": return `L'API ha risposto con un errore${result.status ? " " + result.status : ""}${result.detail ? ": " + result.detail : "."}`;
+      default: return "Richiesta non riuscita.";
+    }
+  }
+
+  /* -------------------------------------------------------------- prompt */
+
+  function describeReading(entry) {
+    const hasRange = entry.pageFrom !== null && entry.pageFrom !== undefined
+      && entry.pageTo !== null && entry.pageTo !== undefined;
+    return hasRange
+      ? `dalla pagina ${entry.pageFrom} alla ${entry.pageTo}`
+      : `${entry.pages} pagine`;
+  }
+
+  function bookLabel(title, author) {
+    return author ? `«${title}» di ${author}` : `«${title}»`;
+  }
+
+  function formatQA(qa) {
+    return qa
+      .filter((item) => String(item.a || "").trim())
+      .map((item) => `D: ${item.q}\nR: ${item.a.trim()}`)
+      .join("\n\n");
+  }
+
+  /** Tre domande cucite su questo libro e su queste pagine. */
+  function questionsPrompt({ title, author, entry, previous }) {
+    const lines = [
+      `Sto leggendo ${bookLabel(title, author)}. In questa sessione ho letto ${describeReading(entry)}.`
+    ];
+    if (previous && previous.length) {
+      lines.push("", "Dai miei appunti sulle letture precedenti di questo libro:", previous.join("\n"));
+    }
+    lines.push(
+      "",
+      "Scrivimi 3 domande che mi aiutino a fissare quello che ho appena letto e a capirne il contesto.",
+      "Devono essere specifiche per questo libro: non domande che andrebbero bene per qualsiasi lettura.",
+      "Una domanda per riga, senza numerarle e senza aggiungere altro testo."
+    );
+    return lines.join("\n");
+  }
+
+  /** Un commento breve su quello che ha scritto chi legge. */
+  function feedbackPrompt({ title, author, entry, qa }) {
+    const answers = formatQA(qa);
+    const lines = [
+      `Sto leggendo ${bookLabel(title, author)}. Oggi ho letto ${describeReading(entry)}.`,
+      "",
+      answers ? "Ecco che cosa ho scritto nel diario:" : "Non ho scritto niente nel diario per questa lettura.",
+      answers
+    ].filter(Boolean);
+    lines.push(
+      "",
+      "In non più di 120 parole: dimmi che cosa ho colto, che cosa nei miei appunti resta vago o impreciso,",
+      "e chiudi con una domanda che mi faccia tornare sul testo.",
+      "Se ho segnalato un dubbio, sciogliilo in una frase senza andare oltre le pagine che ho letto."
+    );
+    return lines.join("\n");
+  }
+
+  /** Il riassunto di dove eravamo rimasti, prima di riprendere il libro. */
+  function recapPrompt({ title, author, sessions }) {
+    const lines = [
+      `Sto per riprendere ${bookLabel(title, author)}.`,
+      "",
+      "Questi sono i miei appunti sulle letture precedenti, dalla più vecchia alla più recente:",
+      sessions.join("\n\n"),
+      "",
+      "In non più di 100 parole, e basandoti solo sui miei appunti, ricordami dove sono arrivato",
+      "e che cosa mi conviene tenere d'occhio quando riprendo. Se i miei appunti non bastano a capirlo, dillo."
+    ];
+    return lines.join("\n");
+  }
+
+  /** Da una risposta a righe libere alle domande vere e proprie. */
+  function parseQuestions(text, limit = 3) {
+    return String(text || "")
+      .split("\n")
+      .map((line) => line.replace(/^\s*(?:\d+[.)]|[-*•])\s*/, "").trim())
+      .filter((line) => line.length > 3)
+      .slice(0, limit);
+  }
+
+  return {
+    MODEL,
+    getKey,
+    setKey,
+    hasKey,
+    ask,
+    explain,
+    parseQuestions,
+    formatQA,
+    prompts: {
+      questions: questionsPrompt,
+      feedback: feedbackPrompt,
+      recap: recapPrompt
+    }
   };
 })();
 
@@ -1774,8 +2078,18 @@ const Store = (() => {
             ]))
           )
         : h("p", { class: "muted small", text: "Nessuna domanda compilata." }),
+      entry.aiComment && entry.aiComment.text
+        ? h("blockquote", { class: "ai-note" },
+            h("span", { class: "ai-note-label", text: "Claude" }),
+            h("p", { text: entry.aiComment.text })
+          )
+        : null,
       h("div", { class: "entry-actions" },
         h("button", { type: "button", class: "btn ghost small", onClick: () => startEdit(entry.id), text: "Modifica" }),
+        h("button", {
+          type: "button", class: "btn ghost small", onClick: () => aiFeedback(entry),
+          text: entry.aiComment ? "Chiedi di nuovo" : "Commento di Claude"
+        }),
         h("button", { type: "button", class: "btn ghost small danger", onClick: () => removeEntry(entry), text: "Elimina" })
       )
     );
@@ -1813,6 +2127,7 @@ const Store = (() => {
 
     renderChart(stats);
     renderBooks(stats.books);
+    renderKeyState();
     $("#goal-input").value = String(user.dailyGoal);
   }
 
@@ -1859,7 +2174,10 @@ const Store = (() => {
             h("strong", { text: b.title }),
             h("span", { class: "muted small", text: [b.author, `${plural(b.pages, "pagina", "pagine")} in ${plural(b.sessions, "lettura", "letture")}`, b.lastDate ? `ultima: ${formatDay(b.lastDate).toLowerCase()}` : ""].filter(Boolean).join(" · ") })
           ),
-          h("button", { type: "button", class: "btn small", onClick: () => resume(b), text: "Riprendi" })
+          h("div", { class: "book-actions" },
+            h("button", { type: "button", class: "btn ghost small", onClick: () => aiRecap(b), text: "Dove eravamo rimasti" }),
+            h("button", { type: "button", class: "btn small", onClick: () => resume(b), text: "Riprendi" })
+          )
         )
       );
     }
@@ -1874,6 +2192,252 @@ const Store = (() => {
     switchView("nuova");
     $("#f-a").focus();
     toast(`Riprendi «${book.title}».`);
+  }
+
+  /* ------------------------------------------------------------- Claude */
+
+  /** Le domande e risposte di una lettura, nell'ordine in cui appaiono nel form. */
+  function entryQA(entry) {
+    const fixed = QUESTIONS
+      .filter((q) => String(entry.answers?.[q.id] || "").trim())
+      .map((q) => ({ q: q.label, a: entry.answers[q.id] }));
+    const custom = (entry.customQA || [])
+      .filter((qa) => String(qa.a || "").trim())
+      .map((qa) => ({ q: qa.q || "Domanda", a: qa.a }));
+    return fixed.concat(custom);
+  }
+
+  /** Una lettura passata riassunta per Claude: pagine, giorno e appunti. */
+  function sessionSummary(entry) {
+    const range = entry.pageFrom !== null && entry.pageFrom !== undefined
+      && entry.pageTo !== null && entry.pageTo !== undefined
+      ? `pagine ${entry.pageFrom}–${entry.pageTo}`
+      : `${entry.pages} pagine`;
+    const qa = AI.formatQA(entryQA(entry));
+    return `(${range}, ${formatDay(entry.date).toLowerCase()})\n${qa || "nessun appunto"}`;
+  }
+
+  /** Le letture precedenti dello stesso libro, dalla più vecchia alla più recente. */
+  function previousSessions(title, excludeId) {
+    const key = String(title || "").trim().toLowerCase();
+    if (!key) return [];
+    return Store.entries()
+      .filter((e) => String(e.title || "").trim().toLowerCase() === key && e.id !== excludeId)
+      .reverse()
+      .map(sessionSummary);
+  }
+
+  /* --- finestra di dialogo: risposta di Claude, oppure prompt da copiare --- */
+
+  const dialog = () => $("#ai-dialog");
+
+  function openDialog(title, note) {
+    const box = dialog();
+    $("#ai-title").textContent = title;
+    $("#ai-note").textContent = note || "";
+    $("#ai-note").hidden = !note;
+    clear($("#ai-body"));
+    clear($("#ai-actions"));
+    if (!box.open) box.showModal();
+  }
+
+  function dialogLoading(message) {
+    clear($("#ai-body"));
+    $("#ai-body").append(h("p", { class: "ai-loading", text: message }));
+  }
+
+  function dialogAnswer(text) {
+    clear($("#ai-body"));
+    $("#ai-body").append(h("p", { class: "ai-answer", text: text }));
+    clear($("#ai-actions"));
+    $("#ai-actions").append(h("button", { type: "button", class: "btn", onClick: closeDialog, text: "Chiudi" }));
+  }
+
+  /**
+   * Nessuna chiave, o API irraggiungibile: l'app prepara comunque la domanda.
+   * Con `onPaste` compare anche il campo per riportare dentro la risposta.
+   */
+  function dialogManual(prompt, note, onPaste) {
+    $("#ai-note").textContent = note;
+    $("#ai-note").hidden = false;
+
+    const promptBox = h("textarea", { class: "ai-prompt", rows: "8", readonly: true, "aria-label": "Domanda da copiare" });
+    promptBox.value = prompt;
+
+    clear($("#ai-body"));
+    $("#ai-body").append(promptBox);
+
+    clear($("#ai-actions"));
+    $("#ai-actions").append(
+      h("button", { type: "button", class: "btn primary", onClick: () => copyText(promptBox), text: "Copia la domanda" }),
+      h("a", { class: "btn", href: "https://claude.ai/new", target: "_blank", rel: "noopener noreferrer", text: "Apri Claude" }),
+      h("button", { type: "button", class: "btn ghost", onClick: closeDialog, text: "Chiudi" })
+    );
+
+    if (!onPaste) return;
+    const answerBox = h("textarea", { class: "ai-prompt", rows: "5", placeholder: "Incolla qui la risposta di Claude", "aria-label": "Risposta di Claude" });
+    $("#ai-body").append(
+      h("p", { class: "hint", text: "Poi torna qui e incolla la risposta:" }),
+      answerBox,
+      h("button", {
+        type: "button", class: "btn small", text: "Usa questa risposta",
+        onClick: () => {
+          const value = answerBox.value.trim();
+          if (!value) { toast("Incolla prima la risposta di Claude."); return; }
+          onPaste(value);
+          closeDialog();
+        }
+      })
+    );
+  }
+
+  function closeDialog() {
+    if (dialog().open) dialog().close();
+  }
+
+  /**
+   * Copia negli appunti. Prima la via sincrona, che funziona anche dentro una
+   * finestra di dialogo e in un iframe; l'API asincrona resta come riserva, ma
+   * con un tempo massimo, perché in alcuni contesti non risponde mai.
+   */
+  async function copyText(field) {
+    field.focus();
+    field.select();
+
+    try {
+      if (document.execCommand("copy")) {
+        toast("Copiato.");
+        return;
+      }
+    } catch (err) { /* deprecata e non sempre disponibile: si prosegue */ }
+
+    try {
+      await Promise.race([
+        navigator.clipboard.writeText(field.value),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 1500))
+      ]);
+      toast("Copiato.");
+    } catch (err) {
+      toast("Copia non permessa qui: il testo è già selezionato, usa Ctrl+C (⌘+C sul Mac).");
+    }
+  }
+
+  /**
+   * Il giro completo di una richiesta: chiave presente → chiama l'API;
+   * altrimenti, o se la chiamata fallisce, mostra il prompt da copiare.
+   */
+  async function askClaude({ title, note, prompt, onText, onPaste }) {
+    openDialog(title, note);
+    if (!AI.hasKey()) {
+      dialogManual(prompt, "Non hai una chiave API di Claude: copia la domanda qui sotto e incollala in Claude.", onPaste);
+      return;
+    }
+    dialogLoading("Sto chiedendo a Claude…");
+    const result = await AI.ask(prompt);
+    if (result.ok) {
+      if (onText) onText(result.text);
+      else dialogAnswer(result.text);
+      return;
+    }
+    dialogManual(prompt, `${AI.explain(result)} Intanto puoi copiare la domanda e incollarla in Claude.`, onPaste);
+  }
+
+  /* --- le tre richieste --- */
+
+  function aiSuggestQuestions() {
+    const title = $("#f-titolo").value.trim();
+    if (!title) {
+      toast("Scrivi prima il titolo del libro.");
+      $("#f-titolo").focus();
+      return;
+    }
+    const pages = readNumber("#f-pagine", { min: 1 });
+    const entry = {
+      pages: Number.isFinite(pages) && pages ? pages : null,
+      pageFrom: readNumber("#f-da"),
+      pageTo: readNumber("#f-a")
+    };
+    if (!entry.pages && (entry.pageFrom === null || entry.pageTo === null)) {
+      toast("Scrivi prima quante pagine hai letto.");
+      $("#f-pagine").focus();
+      return;
+    }
+
+    const prompt = AI.prompts.questions({
+      title,
+      author: $("#f-autore").value.trim(),
+      entry,
+      previous: previousSessions(title, editingId).slice(-2)
+    });
+
+    const useQuestions = (text) => {
+      const questions = AI.parseQuestions(text);
+      if (!questions.length) {
+        toast("Non ho trovato domande nella risposta.");
+        return;
+      }
+      for (const question of questions) addCustomRow(question, "");
+      closeDialog();
+      switchView("nuova");
+      toast(`Aggiunte ${plural(questions.length, "domanda", "domande")}. Ora rispondi con parole tue.`);
+    };
+
+    askClaude({
+      title: "Domande su misura",
+      note: `Per «${title}».`,
+      prompt,
+      onText: useQuestions,
+      onPaste: useQuestions
+    });
+  }
+
+  function aiFeedback(entry) {
+    const qa = entryQA(entry);
+    if (!qa.length) {
+      toast("Rispondi prima ad almeno una domanda: Claude commenta quello che hai scritto.");
+      return;
+    }
+    const prompt = AI.prompts.feedback({ title: entry.title, author: entry.author, entry, qa });
+    const save = (text) => {
+      Store.updateEntry(entry.id, { aiComment: { text, at: new Date().toISOString() } });
+      renderAll();
+      dialogAnswer(text);
+    };
+    askClaude({
+      title: "Commento di Claude",
+      note: `Su «${entry.title}», ${formatDay(entry.date).toLowerCase()}.`,
+      prompt,
+      onText: save,
+      onPaste: save
+    });
+  }
+
+  function aiRecap(book) {
+    const sessions = previousSessions(book.title, null);
+    if (!sessions.length) {
+      toast("Nessun appunto su questo libro, per ora.");
+      return;
+    }
+    askClaude({
+      title: "Dove eravamo rimasti",
+      note: `Su «${book.title}», da ${plural(sessions.length, "lettura", "letture")}.`,
+      prompt: AI.prompts.recap({ title: book.title, author: book.author, sessions })
+    });
+  }
+
+  /* --- impostazioni della chiave --- */
+
+  function renderKeyState() {
+    const field = $("#ai-key");
+    const state = $("#ai-key-state");
+    if (AI.hasKey()) {
+      field.value = "";
+      field.placeholder = "chiave salvata — incollane una nuova per sostituirla";
+      state.textContent = `Chiave salvata. Claude risponde dentro l'app con il modello ${AI.MODEL}.`;
+    } else {
+      field.placeholder = "sk-ant-…";
+      state.textContent = "Nessuna chiave: l'app prepara la domanda da copiare in Claude.";
+    }
   }
 
   /* --------------------------------------------------------- import/export */
@@ -1959,6 +2523,23 @@ const Store = (() => {
       } else {
         toast("Scegli un numero di pagine tra 1 e 500.");
       }
+    });
+
+    $("#btn-ai-domande").addEventListener("click", aiSuggestQuestions);
+    $("#ai-close").addEventListener("click", closeDialog);
+
+    $("#btn-ai-key").addEventListener("click", () => {
+      const value = $("#ai-key").value.trim();
+      if (!value) { toast("Incolla prima la chiave."); return; }
+      if (!AI.setKey(value)) { toast("Non riesco a salvare la chiave in questo browser."); return; }
+      renderKeyState();
+      toast("Chiave salvata. Ora Claude risponde dentro l'app.");
+    });
+    $("#btn-ai-key-remove").addEventListener("click", () => {
+      if (!AI.hasKey()) { toast("Nessuna chiave da rimuovere."); return; }
+      AI.setKey("");
+      renderKeyState();
+      toast("Chiave rimossa.");
     });
 
     $("#btn-export").addEventListener("click", doExport);

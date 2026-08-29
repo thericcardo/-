@@ -586,7 +586,7 @@ textarea { resize: vertical; min-height: 2.8rem; }
 .qa dt:not(:first-child) { margin-top: .8rem; }
 .qa dd { margin: .15rem 0 0; white-space: pre-wrap; word-break: break-word; }
 
-.entry-actions { display: flex; gap: .3rem; margin-top: .7rem; }
+.entry-actions { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .7rem; }
 
 .empty {
   text-align: center;
@@ -658,6 +658,50 @@ textarea { resize: vertical; min-height: 2.8rem; }
   font-size: .78rem;
   color: var(--muted);
 }
+
+/* ------------------------------------------------------------- Claude --- */
+
+.book-actions { display: flex; gap: .3rem; flex-wrap: wrap; justify-content: flex-end; }
+
+#ai-key { flex: 1 1 14rem; max-width: none; min-width: 12rem; }
+
+/* Il commento di Claude dentro una lettura: citato, non confuso con i tuoi appunti. */
+.ai-note {
+  margin: .8rem 0 0;
+  padding: .7rem .9rem;
+  background: var(--surface-alt);
+  border-left: 3px solid var(--yellow);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.ai-note-label {
+  display: block;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: .2rem;
+}
+.ai-note p { white-space: pre-wrap; word-break: break-word; }
+
+.ai-dialog {
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: min(40rem, calc(100dvh - 3rem));
+  overflow-y: auto;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  box-shadow: var(--shadow);
+}
+.ai-dialog::backdrop { background: rgba(20, 27, 22, .55); }
+
+.ai-head { display: flex; align-items: center; justify-content: space-between; gap: .8rem; }
+.ai-body { margin: .9rem 0; display: flex; flex-direction: column; gap: .6rem; }
+.ai-answer { white-space: pre-wrap; word-break: break-word; }
+.ai-loading { color: var(--muted); }
+.ai-prompt { font-size: .9rem; line-height: 1.45; }
 
 /* -------------------------------------------------------------- toast --- */
 

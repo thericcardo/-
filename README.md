@@ -30,6 +30,36 @@ e servono a fissare quello che hai letto invece di dimenticarlo alla pagina dopo
 
 Puoi aggiungerne di tue con **+ Aggiungi una tua domanda**.
 
+## Claude come compagno di lettura
+
+Tre punti dell'app chiedono aiuto a Claude:
+
+- **Domande su misura** (nel form) — tre domande pensate per quel libro e per le
+  pagine appena lette, che finiscono nel form pronte da compilare;
+- **Commento di Claude** (su ogni lettura del diario) — legge quello che hai
+  scritto, dice che cosa resta vago e chiude con una domanda che ti riporta al
+  testo; il commento resta salvato insieme alla lettura;
+- **Dove eravamo rimasti** (sui libri, nel profilo) — riassume i tuoi appunti
+  precedenti prima che tu riprenda il libro.
+
+A Claude viene chiesto di non anticipare mai nulla oltre le pagine indicate: il
+diario non deve diventare una fonte di spoiler.
+
+**Con una chiave API** (da `console.anthropic.com`, incollata in *Profilo →
+Claude*) le risposte arrivano dentro l'app. La chiave resta in questo browser,
+in una voce di `localStorage` separata dai diari, e non entra mai nell'export;
+chi usa il dispositivo però può leggerla, quindi non va messa su un computer
+condiviso. Ogni richiesta è conteggiata sul tuo account Anthropic.
+
+**Senza chiave** — o dove la pagina non può chiamare servizi esterni — l'app
+prepara comunque la domanda completa da copiare e incollare in Claude, e per le
+domande su misura ti offre un campo dove riportare dentro la risposta. Questa
+strada funziona ovunque e non costa niente.
+
+Le chiamate usano `fetch` verso l'API di Anthropic invece dell'SDK ufficiale,
+perché l'SDK richiederebbe npm e un bundler e l'app deve restare un sito statico
+apribile con un doppio clic.
+
 ## Dove finiscono i dati
 
 Tutto resta nel `localStorage` del browser, su quel dispositivo: nessuna
@@ -74,6 +104,7 @@ sostituire, così non produce silenziosamente una versione monca.
 index.html              markup delle tre schermate
 css/styles.css          stile (verde #202B22 + giallo #FFD85F, chiaro e scuro)
 js/storage.js           profili e letture su localStorage
+js/ai.js                chiamate a Claude e costruzione dei prompt
 js/app.js               interfaccia, statistiche, import/export
 sw.js                   cache offline
 manifest.webmanifest    installazione come app

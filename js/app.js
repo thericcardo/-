@@ -639,8 +639,18 @@
             ]))
           )
         : h("p", { class: "muted small", text: "Nessuna domanda compilata." }),
+      entry.aiComment && entry.aiComment.text
+        ? h("blockquote", { class: "ai-note" },
+            h("span", { class: "ai-note-label", text: "Claude" }),
+            h("p", { text: entry.aiComment.text })
+          )
+        : null,
       h("div", { class: "entry-actions" },
         h("button", { type: "button", class: "btn ghost small", onClick: () => startEdit(entry.id), text: "Modifica" }),
+        h("button", {
+          type: "button", class: "btn ghost small", onClick: () => aiFeedback(entry),
+          text: entry.aiComment ? "Chiedi di nuovo" : "Commento di Claude"
+        }),
         h("button", { type: "button", class: "btn ghost small danger", onClick: () => removeEntry(entry), text: "Elimina" })
       )
     );
@@ -678,6 +688,7 @@
 
     renderChart(stats);
     renderBooks(stats.books);
+    renderKeyState();
     $("#goal-input").value = String(user.dailyGoal);
   }
 
@@ -724,7 +735,10 @@
             h("strong", { text: b.title }),
             h("span", { class: "muted small", text: [b.author, `${plural(b.pages, "pagina", "pagine")} in ${plural(b.sessions, "lettura", "letture")}`, b.lastDate ? `ultima: ${formatDay(b.lastDate).toLowerCase()}` : ""].filter(Boolean).join(" · ") })
           ),
-          h("button", { type: "button", class: "btn small", onClick: () => resume(b), text: "Riprendi" })
+          h("div", { class: "book-actions" },
+            h("button", { type: "button", class: "btn ghost small", onClick: () => aiRecap(b), text: "Dove eravamo rimasti" }),
+            h("button", { type: "button", class: "btn small", onClick: () => resume(b), text: "Riprendi" })
+          )
         )
       );
     }
@@ -739,6 +753,252 @@
     switchView("nuova");
     $("#f-a").focus();
     toast(`Riprendi «${book.title}».`);
+  }
+
+  /* ------------------------------------------------------------- Claude */
+
+  /** Le domande e risposte di una lettura, nell'ordine in cui appaiono nel form. */
+  function entryQA(entry) {
+    const fixed = QUESTIONS
+      .filter((q) => String(entry.answers?.[q.id] || "").trim())
+      .map((q) => ({ q: q.label, a: entry.answers[q.id] }));
+    const custom = (entry.customQA || [])
+      .filter((qa) => String(qa.a || "").trim())
+      .map((qa) => ({ q: qa.q || "Domanda", a: qa.a }));
+    return fixed.concat(custom);
+  }
+
+  /** Una lettura passata riassunta per Claude: pagine, giorno e appunti. */
+  function sessionSummary(entry) {
+    const range = entry.pageFrom !== null && entry.pageFrom !== undefined
+      && entry.pageTo !== null && entry.pageTo !== undefined
+      ? `pagine ${entry.pageFrom}–${entry.pageTo}`
+      : `${entry.pages} pagine`;
+    const qa = AI.formatQA(entryQA(entry));
+    return `(${range}, ${formatDay(entry.date).toLowerCase()})\n${qa || "nessun appunto"}`;
+  }
+
+  /** Le letture precedenti dello stesso libro, dalla più vecchia alla più recente. */
+  function previousSessions(title, excludeId) {
+    const key = String(title || "").trim().toLowerCase();
+    if (!key) return [];
+    return Store.entries()
+      .filter((e) => String(e.title || "").trim().toLowerCase() === key && e.id !== excludeId)
+      .reverse()
+      .map(sessionSummary);
+  }
+
+  /* --- finestra di dialogo: risposta di Claude, oppure prompt da copiare --- */
+
+  const dialog = () => $("#ai-dialog");
+
+  function openDialog(title, note) {
+    const box = dialog();
+    $("#ai-title").textContent = title;
+    $("#ai-note").textContent = note || "";
+    $("#ai-note").hidden = !note;
+    clear($("#ai-body"));
+    clear($("#ai-actions"));
+    if (!box.open) box.showModal();
+  }
+
+  function dialogLoading(message) {
+    clear($("#ai-body"));
+    $("#ai-body").append(h("p", { class: "ai-loading", text: message }));
+  }
+
+  function dialogAnswer(text) {
+    clear($("#ai-body"));
+    $("#ai-body").append(h("p", { class: "ai-answer", text: text }));
+    clear($("#ai-actions"));
+    $("#ai-actions").append(h("button", { type: "button", class: "btn", onClick: closeDialog, text: "Chiudi" }));
+  }
+
+  /**
+   * Nessuna chiave, o API irraggiungibile: l'app prepara comunque la domanda.
+   * Con `onPaste` compare anche il campo per riportare dentro la risposta.
+   */
+  function dialogManual(prompt, note, onPaste) {
+    $("#ai-note").textContent = note;
+    $("#ai-note").hidden = false;
+
+    const promptBox = h("textarea", { class: "ai-prompt", rows: "8", readonly: true, "aria-label": "Domanda da copiare" });
+    promptBox.value = prompt;
+
+    clear($("#ai-body"));
+    $("#ai-body").append(promptBox);
+
+    clear($("#ai-actions"));
+    $("#ai-actions").append(
+      h("button", { type: "button", class: "btn primary", onClick: () => copyText(promptBox), text: "Copia la domanda" }),
+      h("a", { class: "btn", href: "https://claude.ai/new", target: "_blank", rel: "noopener noreferrer", text: "Apri Claude" }),
+      h("button", { type: "button", class: "btn ghost", onClick: closeDialog, text: "Chiudi" })
+    );
+
+    if (!onPaste) return;
+    const answerBox = h("textarea", { class: "ai-prompt", rows: "5", placeholder: "Incolla qui la risposta di Claude", "aria-label": "Risposta di Claude" });
+    $("#ai-body").append(
+      h("p", { class: "hint", text: "Poi torna qui e incolla la risposta:" }),
+      answerBox,
+      h("button", {
+        type: "button", class: "btn small", text: "Usa questa risposta",
+        onClick: () => {
+          const value = answerBox.value.trim();
+          if (!value) { toast("Incolla prima la risposta di Claude."); return; }
+          onPaste(value);
+          closeDialog();
+        }
+      })
+    );
+  }
+
+  function closeDialog() {
+    if (dialog().open) dialog().close();
+  }
+
+  /**
+   * Copia negli appunti. Prima la via sincrona, che funziona anche dentro una
+   * finestra di dialogo e in un iframe; l'API asincrona resta come riserva, ma
+   * con un tempo massimo, perché in alcuni contesti non risponde mai.
+   */
+  async function copyText(field) {
+    field.focus();
+    field.select();
+
+    try {
+      if (document.execCommand("copy")) {
+        toast("Copiato.");
+        return;
+      }
+    } catch (err) { /* deprecata e non sempre disponibile: si prosegue */ }
+
+    try {
+      await Promise.race([
+        navigator.clipboard.writeText(field.value),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 1500))
+      ]);
+      toast("Copiato.");
+    } catch (err) {
+      toast("Copia non permessa qui: il testo è già selezionato, usa Ctrl+C (⌘+C sul Mac).");
+    }
+  }
+
+  /**
+   * Il giro completo di una richiesta: chiave presente → chiama l'API;
+   * altrimenti, o se la chiamata fallisce, mostra il prompt da copiare.
+   */
+  async function askClaude({ title, note, prompt, onText, onPaste }) {
+    openDialog(title, note);
+    if (!AI.hasKey()) {
+      dialogManual(prompt, "Non hai una chiave API di Claude: copia la domanda qui sotto e incollala in Claude.", onPaste);
+      return;
+    }
+    dialogLoading("Sto chiedendo a Claude…");
+    const result = await AI.ask(prompt);
+    if (result.ok) {
+      if (onText) onText(result.text);
+      else dialogAnswer(result.text);
+      return;
+    }
+    dialogManual(prompt, `${AI.explain(result)} Intanto puoi copiare la domanda e incollarla in Claude.`, onPaste);
+  }
+
+  /* --- le tre richieste --- */
+
+  function aiSuggestQuestions() {
+    const title = $("#f-titolo").value.trim();
+    if (!title) {
+      toast("Scrivi prima il titolo del libro.");
+      $("#f-titolo").focus();
+      return;
+    }
+    const pages = readNumber("#f-pagine", { min: 1 });
+    const entry = {
+      pages: Number.isFinite(pages) && pages ? pages : null,
+      pageFrom: readNumber("#f-da"),
+      pageTo: readNumber("#f-a")
+    };
+    if (!entry.pages && (entry.pageFrom === null || entry.pageTo === null)) {
+      toast("Scrivi prima quante pagine hai letto.");
+      $("#f-pagine").focus();
+      return;
+    }
+
+    const prompt = AI.prompts.questions({
+      title,
+      author: $("#f-autore").value.trim(),
+      entry,
+      previous: previousSessions(title, editingId).slice(-2)
+    });
+
+    const useQuestions = (text) => {
+      const questions = AI.parseQuestions(text);
+      if (!questions.length) {
+        toast("Non ho trovato domande nella risposta.");
+        return;
+      }
+      for (const question of questions) addCustomRow(question, "");
+      closeDialog();
+      switchView("nuova");
+      toast(`Aggiunte ${plural(questions.length, "domanda", "domande")}. Ora rispondi con parole tue.`);
+    };
+
+    askClaude({
+      title: "Domande su misura",
+      note: `Per «${title}».`,
+      prompt,
+      onText: useQuestions,
+      onPaste: useQuestions
+    });
+  }
+
+  function aiFeedback(entry) {
+    const qa = entryQA(entry);
+    if (!qa.length) {
+      toast("Rispondi prima ad almeno una domanda: Claude commenta quello che hai scritto.");
+      return;
+    }
+    const prompt = AI.prompts.feedback({ title: entry.title, author: entry.author, entry, qa });
+    const save = (text) => {
+      Store.updateEntry(entry.id, { aiComment: { text, at: new Date().toISOString() } });
+      renderAll();
+      dialogAnswer(text);
+    };
+    askClaude({
+      title: "Commento di Claude",
+      note: `Su «${entry.title}», ${formatDay(entry.date).toLowerCase()}.`,
+      prompt,
+      onText: save,
+      onPaste: save
+    });
+  }
+
+  function aiRecap(book) {
+    const sessions = previousSessions(book.title, null);
+    if (!sessions.length) {
+      toast("Nessun appunto su questo libro, per ora.");
+      return;
+    }
+    askClaude({
+      title: "Dove eravamo rimasti",
+      note: `Su «${book.title}», da ${plural(sessions.length, "lettura", "letture")}.`,
+      prompt: AI.prompts.recap({ title: book.title, author: book.author, sessions })
+    });
+  }
+
+  /* --- impostazioni della chiave --- */
+
+  function renderKeyState() {
+    const field = $("#ai-key");
+    const state = $("#ai-key-state");
+    if (AI.hasKey()) {
+      field.value = "";
+      field.placeholder = "chiave salvata — incollane una nuova per sostituirla";
+      state.textContent = `Chiave salvata. Claude risponde dentro l'app con il modello ${AI.MODEL}.`;
+    } else {
+      field.placeholder = "sk-ant-…";
+      state.textContent = "Nessuna chiave: l'app prepara la domanda da copiare in Claude.";
+    }
   }
 
   /* --------------------------------------------------------- import/export */
@@ -824,6 +1084,23 @@
       } else {
         toast("Scegli un numero di pagine tra 1 e 500.");
       }
+    });
+
+    $("#btn-ai-domande").addEventListener("click", aiSuggestQuestions);
+    $("#ai-close").addEventListener("click", closeDialog);
+
+    $("#btn-ai-key").addEventListener("click", () => {
+      const value = $("#ai-key").value.trim();
+      if (!value) { toast("Incolla prima la chiave."); return; }
+      if (!AI.setKey(value)) { toast("Non riesco a salvare la chiave in questo browser."); return; }
+      renderKeyState();
+      toast("Chiave salvata. Ora Claude risponde dentro l'app.");
+    });
+    $("#btn-ai-key-remove").addEventListener("click", () => {
+      if (!AI.hasKey()) { toast("Nessuna chiave da rimuovere."); return; }
+      AI.setKey("");
+      renderKeyState();
+      toast("Chiave rimossa.");
     });
 
     $("#btn-export").addEventListener("click", doExport);
