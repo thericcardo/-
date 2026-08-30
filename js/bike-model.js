@@ -189,6 +189,40 @@
     return track(new THREE.BoxGeometry(w, h, d, sx || 1, sy || 1, sz || 1));
   }
 
+
+  /* Pannello di carena come superficie rigata fra due bordi.
+
+     Un loft chiuso produce sempre una fusoliera: la sezione gira tutt'attorno
+     e il fianco non ha un bordo. E una sezione a Bézier unica resta comunque
+     bombata. Una carena vera è fatta di lamiere quasi piane che si incontrano
+     su una PIEGA: è la piega a dare la luce, non la pancia.
+
+     Qui ogni stazione dichiara tre punti in (y, z) — bordo alto, piega, bordo
+     basso — e si costruiscono due superfici distinte, alto→piega e
+     piega→basso. Poiché sono due mesh separate che finiscono esattamente
+     sulla stessa curva, le normali non vengono mediate attraverso la piega:
+     lo spigolo resta vivo senza bisogno di trucchi sulle normali.
+
+     `bulge` aggiunge una convessità appena percettibile, perché una lamiera
+     perfettamente piana legge come cartone. */
+  function panelSurface(stations, side, keyA, keyB, bulge, segs) {
+    var out = [];
+    for (var i = 0; i < stations.length; i++) {
+      var st = stations[i];
+      var a = st[keyA], b = st[keyB];
+      var pts = [];
+      for (var k = 0; k <= segs; k++) {
+        var v = k / segs;
+        var y = a[0] + (b[0] - a[0]) * v;
+        var z = a[1] + (b[1] - a[1]) * v;
+        z += bulge * Math.sin(Math.PI * v);
+        pts.push([y, side * z]);
+      }
+      out.push({ x: st.x, pts: pts });
+    }
+    return out;
+  }
+
   /* ═══════════════════════════ RUOTE ═══════════════════════════ */
 
   /* Sezione di uno pneumatico sportivo: corona molto arrotondata (serve a
@@ -437,6 +471,20 @@
       var ft = mesh(foot, mats.forkLeg, 'fork_foot');
       ft.position.set(axleLX, axleLY + 0.012, s2 * TUBE_Z);
       slider.add(ft);
+    }
+
+    /* Tubi freno: dal ripartitore sotto la piastra giù lungo gli steli fino
+       alle pinze. Sono sottili e quasi sempre in ombra, ma l'occhio li cerca:
+       una moto senza tubi freno legge come un modello, non come una moto. */
+    for (var bl = -1; bl <= 1; bl += 2) {
+      var hosePts = [
+        [axleLX - 0.010, 0.600, 0],
+        [axleLX - 0.004, 0.545, bl * TUBE_Z * 0.55],
+        [axleLX + 0.006, 0.470, bl * (TUBE_Z + 0.016)],
+        [axleLX + 0.004, 0.390, bl * (TUBE_Z + 0.026)],
+        [axleLX - 0.014, 0.330, bl * (TUBE_Z + 0.024)]
+      ];
+      slider.add(mesh(tubeFrom(hosePts, 0.0042, 22, 6), mats.hose, 'brake_hose'));
     }
 
     /* La ruota va contro-ruotata: dentro `rake` tutto è inclinato di 24,5°. */
@@ -821,43 +869,118 @@
     g.name = 'bodywork';
     var seg = quality === 'low' ? 16 : 26;
 
-    /* ── Carena principale ──
-       Un guscio aperto sotto, non un bozzolo: sotto ci passano motore,
-       collettori e ruota, esattamente come sulla moto vera.
-       Ogni stazione dichiara il bordo superiore e quello inferiore; `n` cala
-       verso il muso e la sezione diventa a diamante, tagliente.
-       Il tetto scende dopo x ≈ 0,5 per lasciare emergere il serbatoio. */
-    var OPEN = 0.82;
-    var fairingSecs = [
-      /*  x,     yTop,  yBot,  halfW,  n  */
-      /* La silhouette è un CUNEO, non una lente: il tetto crolla subito dopo
-         il cupolino perché da lì in poi comanda il serbatoio, e la carena
-         resta solo come fiancata bassa che corre verso il puntale.
-         `n` sale da 1,7 (muso a lama) a 3,2 (fianchi quasi piatti): è questo
-         a distinguere una carena da una fusoliera. */
-      [1.022, 0.812, 0.652, 0.026, 1.70],
-      [0.998, 0.856, 0.596, 0.056, 1.95],
-      [0.968, 0.892, 0.540, 0.094, 2.25],
-      [0.918, 0.914, 0.494, 0.146, 2.60],
-      [0.850, 0.918, 0.458, 0.204, 2.95],
-      [0.772, 0.888, 0.434, 0.252, 3.15],
-      [0.690, 0.868, 0.424, 0.268, 3.20],
-      [0.600, 0.828, 0.414, 0.262, 3.15],
-      [0.505, 0.792, 0.410, 0.240, 3.05],
-      [0.405, 0.762, 0.410, 0.208, 2.95],
-      [0.300, 0.740, 0.414, 0.172, 2.85],
-      [0.195, 0.726, 0.424, 0.136, 2.75]
-    ];
+    /* ── Frontale: tre pezzi distinti, non un guscio solo ──
+       Il cupolino chiude sopra, le due fiancate scendono ai lati, il puntale
+       chiude sotto. È la scomposizione della moto vera, ed è anche l'unico
+       modo di ottenere una linea di carattere netta sul fianco. */
+
     function shellFrom(rows, open, segs) {
       return rows.map(function (r) {
         var cy = (r[1] + r[2]) / 2, h = (r[1] - r[2]) / 2;
         return { x: r[0], pts: shellProfile(cy, h, r[3], r[4], segs, open) };
       });
     }
-    /* capFront chiude il muso: senza, si guarda dentro il guscio e il puntale
-       diventa una serie di facce scure. */
-    g.add(mesh(loft(shellFrom(fairingSecs, OPEN, seg), true, false, false),
-      mats.paint, 'fairing_main'));
+
+    /* Cupolino anteriore: corto, alto, affilato. `n` sotto 2 rende la sezione
+       a lama — è il muso della moto, non un cono. */
+    var noseSecs = [
+      /*  x,     yTop,  yBot,  halfW,  n  */
+      [1.062, 0.780, 0.742, 0.014, 1.50],
+      [1.044, 0.804, 0.726, 0.030, 1.55],
+      [1.020, 0.830, 0.706, 0.052, 1.65],
+      [0.992, 0.856, 0.684, 0.078, 1.80],
+      [0.956, 0.878, 0.664, 0.104, 2.00],
+      [0.916, 0.894, 0.650, 0.128, 2.20],
+      [0.868, 0.902, 0.642, 0.146, 2.35],
+      [0.816, 0.902, 0.640, 0.155, 2.45],
+      [0.762, 0.894, 0.642, 0.156, 2.55]
+    ];
+    g.add(mesh(loft(shellFrom(noseSecs, 0.68, seg), true, false, false),
+      mats.paint, 'nose_cowl'));
+
+    /* Fiancate. Tre curve: bordo alto (rientra sotto il serbatoio), piega
+       (la linea di carattere, che scende verso la coda come sulla moto vera)
+       e bordo basso (rientra verso il puntale). */
+    var panelStations = [
+      /*        x        bordo alto        piega            bordo basso   */
+      { x: 0.905, top: [0.872, 0.092], crease: [0.700, 0.158], bot: [0.586, 0.086] },
+      { x: 0.848, top: [0.880, 0.116], crease: [0.672, 0.212], bot: [0.536, 0.110] },
+      { x: 0.772, top: [0.874, 0.130], crease: [0.640, 0.254], bot: [0.492, 0.128] },
+      { x: 0.686, top: [0.848, 0.136], crease: [0.610, 0.272], bot: [0.462, 0.138] },
+      { x: 0.598, top: [0.818, 0.136], crease: [0.582, 0.272], bot: [0.446, 0.140] },
+      { x: 0.500, top: [0.788, 0.132], crease: [0.558, 0.260], bot: [0.436, 0.136] },
+      { x: 0.398, top: [0.766, 0.124], crease: [0.540, 0.238], bot: [0.430, 0.128] },
+      { x: 0.292, top: [0.752, 0.112], crease: [0.528, 0.210], bot: [0.428, 0.116] },
+      { x: 0.184, top: [0.746, 0.100], crease: [0.522, 0.178], bot: [0.432, 0.102] },
+      { x: 0.078, top: [0.748, 0.086], crease: [0.520, 0.144], bot: [0.444, 0.086] }
+    ];
+
+    /* La verniciatura segue la piega: rosso sopra, nero sotto. È così anche
+       sulla moto vera, e non per caso — la piega è dove si ferma la maschera. */
+    var vSeg = quality === 'low' ? 5 : 9;
+    for (var ps = -1; ps <= 1; ps += 2) {
+      g.add(mesh(loft(panelSurface(panelStations, ps, 'top', 'crease', 0.016, vSeg), false, false, false),
+        mats.paint, 'fairing_panel_upper'));
+      g.add(mesh(loft(panelSurface(panelStations, ps, 'crease', 'bot', 0.010, vSeg), false, false, false),
+        mats.accent, 'fairing_panel_lower'));
+    }
+
+    /* ── Fughe fra i pannelli ──
+       Una carena vera è avvitata insieme da più pezzi, e fra un pezzo e
+       l'altro c'è una fessura scura. È il dettaglio che, più di qualunque
+       altro, separa una moto da un giocattolo stampato in un pezzo solo:
+       senza fughe la superficie non ha scala. */
+    function seamAlong(stations, key, side, zPull, radius) {
+      var pts = [];
+      for (var i = 0; i < stations.length; i++) {
+        var e = stations[i][key];
+        pts.push([stations[i].x, e[0], side * (e[1] - zPull)]);
+      }
+      return tubeFrom(pts, radius, stations.length * 3, 6);
+    }
+    for (var sm = -1; sm <= 1; sm += 2) {
+      g.add(mesh(seamAlong(panelStations, 'crease', sm, 0.004, 0.0035), mats.seam, 'seam_crease'));
+      g.add(mesh(seamAlong(panelStations, 'top', sm, 0.003, 0.0030), mats.seam, 'seam_top'));
+    }
+
+    /* ── Viteria a vista ──
+       Sei fissaggi per lato lungo la piega. Sono minuscoli e per gran parte
+       del tempo invisibili, ma costano poco e danno la scala all'occhio. */
+    for (var bs = -1; bs <= 1; bs += 2) {
+      for (var bi = 1; bi < panelStations.length; bi += 2) {
+        var stn = panelStations[bi];
+        var bolt = mesh(cyl(0.0055, 0.0055, 0.004, 6), mats.chrome, 'fastener');
+        bolt.rotation.x = Math.PI / 2;
+        bolt.position.set(stn.x, stn.crease[0] + 0.026, bs * (stn.crease[1] + 0.002));
+        g.add(bolt);
+      }
+    }
+
+    /* ── Radiatore ──
+       Sulla moto vera si vede benissimo, incorniciato fra ruota anteriore e
+       carena: un pannello di alette orizzontali. Riempie il vuoto che
+       altrimenti resta fra il muso e il motore. */
+    var rad = new THREE.Group();
+    rad.name = 'radiator';
+    rad.add(mesh(box(0.022, 0.235, 0.235), mats.radiator, 'rad_core'));
+    var fins = quality === 'low' ? 7 : 14;
+    for (var fi = 0; fi < fins; fi++) {
+      var fin = mesh(box(0.030, 0.004, 0.225), mats.forgedDark, 'rad_fin');
+      fin.position.y = -0.108 + (fi / (fins - 1)) * 0.216;
+      rad.add(fin);
+    }
+    /* telaietto perimetrale */
+    for (var rf = -1; rf <= 1; rf += 2) {
+      var side1 = mesh(box(0.028, 0.245, 0.012), mats.forgedDark, 'rad_frame');
+      side1.position.z = rf * 0.117;
+      rad.add(side1);
+      var side2 = mesh(box(0.028, 0.012, 0.245), mats.forgedDark, 'rad_frame');
+      side2.position.y = rf * 0.120;
+      rad.add(side2);
+    }
+    rad.position.set(0.452, 0.596, 0);
+    rad.rotation.z = 0.30;
+    g.add(rad);
 
     /* ── Puntale ──
        Chiude il ventre sotto il motore. Nero opaco: sulla moto vera è il
@@ -878,9 +1001,9 @@
        aerodinamica della V4 e devono leggersi anche in silhouette. */
     for (var side = -1; side <= 1; side += 2) {
       for (var tier = 0; tier < 2; tier++) {
-        var span = tier === 0 ? 0.115 : 0.092;
-        var chord = tier === 0 ? 0.135 : 0.110;
-        var wingG = box(chord, 0.011, span, 6, 1, 4);
+        var span = tier === 0 ? 0.098 : 0.078;
+        var chord = tier === 0 ? 0.118 : 0.096;
+        var wingG = box(chord, 0.0085, span, 6, 1, 4);
         sculpt(wingG, function (v) {
           /* il clamp non è cosmetico: sul bordo esatto v.x/chord + 0.5 può
              valere −1e−18, e Math.pow(negativo, 0.7) restituisce NaN */
@@ -898,22 +1021,24 @@
         var wing = mesh(wingG, mats.carbon, 'winglet');
         /* Sporgono davvero oltre il fianco: se non si leggono in silhouette
            non stanno facendo il loro mestiere, né aerodinamico né visivo. */
-        wing.position.set(0.858 - tier * 0.014, 0.660 + tier * 0.092, side * (0.250 + tier * 0.006));
-        wing.rotation.x = side * (tier === 0 ? 0.10 : 0.07);
-        wing.rotation.y = side * 0.26;
-        wing.rotation.z = -0.06;
+        wing.position.set(0.842 - tier * 0.012, 0.652 + tier * 0.078, side * (0.222 + tier * 0.004));
+        wing.rotation.x = side * (tier === 0 ? 0.09 : 0.06);
+        wing.rotation.y = side * 0.30;
+        wing.rotation.z = -0.05;
         g.add(wing);
       }
 
       /* Paratia verticale che chiude le due alette all'estremità. */
-      var endG = box(0.145, 0.190, 0.014, 3, 4, 1);
+      var endG = box(0.118, 0.150, 0.009, 3, 4, 1);
       sculpt(endG, function (v) {
-        v.y *= 1 - Math.pow(Math.abs(v.x) / 0.0725, 2) * 0.35;
-        v.x -= Math.max(0, v.y) * 0.22;
+        v.y *= 1 - Math.pow(Math.abs(v.x) / 0.059, 2) * 0.40;
+        v.x -= Math.max(0, v.y) * 0.26;
       });
-      var end = mesh(endG, mats.paint, 'winglet_endplate');
-      end.position.set(0.850, 0.706, side * 0.318);
-      end.rotation.y = side * 0.26;
+      /* In carbonio, non verniciata: sulla moto vera la paratia è nera e
+         sparisce contro l'asfalto — se è rossa sembra una pinna. */
+      var end = mesh(endG, mats.carbon, 'winglet_endplate');
+      end.position.set(0.838, 0.694, side * 0.272);
+      end.rotation.y = side * 0.30;
       g.add(end);
 
       /* Estrattore d'aria calda sul fianco: un incavo scuro, il dettaglio
@@ -952,28 +1077,28 @@
       /* La firma a V: due barre luminose che scendono verso il centro.
          Viste di muso disegnano una V — è l'elemento per cui la moto si
          riconosce di notte da lontano. */
-      var drlG = box(0.150, 0.016, 0.011, 4, 1, 1);
-      sculpt(drlG, function (v) { v.y += Math.abs(v.x) * 0.10; });
+      var drlG = box(0.190, 0.019, 0.012, 5, 1, 1);
+      sculpt(drlG, function (v) { v.y += Math.abs(v.x) * 0.12; });
       var drl = mesh(drlG, mats.led, 'drl');
-      drl.position.set(0.958, 0.800, s3 * 0.070);
-      drl.rotation.y = Math.PI / 2 - s3 * 0.30;
-      drl.rotation.z = s3 * 0.40;
+      drl.position.set(0.990, 0.792, s3 * 0.062);
+      drl.rotation.y = Math.PI / 2 - s3 * 0.34;
+      drl.rotation.z = s3 * 0.46;
       headlight.add(drl);
 
       /* proiettore sotto la barra */
-      var proj = mesh(cyl(0.028, 0.028, 0.020, 18), mats.lens, 'projector');
+      var proj = mesh(cyl(0.030, 0.030, 0.022, 18), mats.lens, 'projector');
       proj.rotation.z = Math.PI / 2;
-      proj.position.set(0.952, 0.742, s3 * 0.052);
+      proj.position.set(0.986, 0.748, s3 * 0.046);
       headlight.add(proj);
 
-      var bulb = mesh(cyl(0.019, 0.019, 0.006, 14), mats.ledWarm, 'projector_led');
+      var bulb = mesh(cyl(0.021, 0.021, 0.006, 14), mats.ledWarm, 'projector_led');
       bulb.rotation.z = Math.PI / 2;
-      bulb.position.set(0.960, 0.742, s3 * 0.052);
+      bulb.position.set(0.994, 0.748, s3 * 0.046);
       headlight.add(bulb);
 
       /* presa d'aria dinamica accanto al faro: alimenta l'airbox */
-      var duct = mesh(box(0.040, 0.062, 0.048), mats.vent, 'ram_air');
-      duct.position.set(0.946, 0.858, s3 * 0.086);
+      var duct = mesh(box(0.032, 0.048, 0.036), mats.vent, 'ram_air');
+      duct.position.set(0.938, 0.856, s3 * 0.080);
       headlight.add(duct);
     }
     g.add(headlight);
@@ -1074,29 +1199,6 @@
       g.add(hanger);
     }
 
-    /* ── Fascia scura sulla fiancata bassa ──
-       Spezza la massa rossa esattamente dove lo fa la moto vera, all'attacco
-       fra fiancata e puntale. Senza, il fianco legge come un unico blocco. */
-    for (var s5 = -1; s5 <= 1; s5 += 2) {
-      var stripeSecs = [];
-      var rows = [
-        [0.790, 0.690, 0.446, 0.238],
-        [0.690, 0.672, 0.430, 0.264],
-        [0.580, 0.640, 0.418, 0.262],
-        [0.470, 0.604, 0.412, 0.240],
-        [0.360, 0.572, 0.412, 0.204],
-        [0.250, 0.548, 0.418, 0.168]
-      ];
-      for (var r5 = 0; r5 < rows.length; r5++) {
-        var rw = rows[r5];
-        var cy5 = (rw[1] + rw[2]) / 2, h5 = (rw[1] - rw[2]) / 2;
-        stripeSecs.push({ x: rw[0], pts: shellProfile(cy5, h5, rw[3] * 1.014, 3.1, 16, 0.46) });
-      }
-      var stripe = mesh(loft(stripeSecs, false, false, false), mats.accent, 'flank_stripe');
-      stripe.rotation.x = s5 > 0 ? 0 : Math.PI;
-      g.add(stripe);
-    }
-
     return g;
   }
 
@@ -1153,7 +1255,11 @@
       ledWarm: M ? M.emissiveLED(THREE, { color: 0xfff0d8, intensity: 2.6 }) : fallback(0xfff0d8, 0.3, 0.0),
       ledRed: M ? M.emissiveLED(THREE, { color: 0xff2a12, intensity: 2.4 }) : fallback(0xff2a12, 0.3, 0.0),
       dash: M ? M.dash(THREE) : fallback(0x101418, 0.2, 0.0),
-      springRed: M ? M.matte(THREE, { color: 0xb4231a }) : fallback(0xb4231a, 0.4, 0.3)
+      springRed: M ? M.matte(THREE, { color: 0xb4231a }) : fallback(0xb4231a, 0.4, 0.3),
+      /* Le fughe non riflettono nulla: sono ombra, non superficie. */
+      seam: track(new THREE.MeshStandardMaterial({ color: 0x050607, roughness: 0.95, metalness: 0.0, envMapIntensity: 0.15 })),
+      radiator: M ? M.plasticSatin(THREE, { color: 0x0b0d0f, roughness: 0.8 }) : fallback(0x0b0d0f, 0.8, 0.0),
+      hose: M ? M.plasticSatin(THREE, { color: 0x14171a, roughness: 0.5 }) : fallback(0x14171a, 0.5, 0.0)
     };
 
     emissiveMaterials.push(mats.led, mats.ledWarm, mats.ledRed, mats.dash);

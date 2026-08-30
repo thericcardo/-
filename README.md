@@ -45,7 +45,7 @@ attraverso un unico oggetto di stato:
 | File | Ruolo |
 |---|---|
 | `js/materials.js` | Libreria PBR procedurale: rumore tileable, height→normal, carbonio a twill 2×2, gomma con battistrada, dischi forati, titanio rinvenuto, TFT con subpixel |
-| `js/bike-model.js` | La moto. Loft di sezioni a superellisse, tubi su curve Catmull-Rom, scultura dei vertici |
+| `js/bike-model.js` | La moto. Frontale in tre pezzi (cupolino, fiancate, puntale), fiancate come superfici rigate che si incontrano su una piega viva, tubi su curve Catmull-Rom, scultura dei vertici |
 | `js/effects.js` | HDRI di studio procedurale (PMREM), foschia di calore, fumo, scintille, scie di velocità, pavimento riflettente, pulviscolo |
 | `js/scene.js` | Renderer, regia della camera, bloom scritto a mano, vista esplosa, degrado automatico della qualità |
 | `js/engine-audio.js` | Sintesi del V4: treno di impulsi sull'angolo di manovella, risonatori di scarico, rumore d'aspirazione |
@@ -94,7 +94,7 @@ alto), come richiedono i browser.
 - `prefers-reduced-motion` sostituisce ogni movimento con una dissolvenza e
   disattiva lo smooth scroll.
 
-Costo attuale della scena: ~44.000 triangoli, ~310 draw call.
+Costo attuale della scena: ~50.000 triangoli, ~380 draw call.
 
 ---
 
@@ -108,17 +108,23 @@ Cosa funziona bene:
   scarichi che escono a destra fuori dalla sagoma del pneumatico.
 - Materiali e ambiente: il trasparente sulla vernice, l'HDRI procedurale e il
   pavimento riflettente reggono bene il confronto ravvicinato.
+- La carrozzeria è costruita come una moto vera: pezzi separati, fughe scure
+  fra un pannello e l'altro, viteria a vista e una piega netta sul fianco che
+  divide il rosso dal nero. La piega è un bordo di mesh, non un trucco sulle
+  normali, quindi lo spigolo resta vivo da qualunque angolo.
+- I dettagli che l'occhio cerca: radiatore a vista fra ruota e carena, tubi
+  freno lungo gli steli, alette biplano in carbonio.
 - Il racconto a scroll, la regia della camera, la vista esplosa e la sincronia
   fra scroll, scena e audio sono a posto.
 
 Cosa **non** è ancora all'altezza:
 
-- **La superficie della carena.** Le proporzioni sono giuste, ma il volume
-  della carena anteriore legge ancora come una fusoliera arrotondata, non come
-  il cuneo tagliente di una Panigale. Le sezioni sono definite in una tabella
-  in cima a `buildBodywork()` (`fairingSecs`): sono il punto in cui intervenire.
-  Servirebbe una linea di carattere netta fra fiancata e cofano e un muso più
-  affilato, probabilmente con due loft distinti invece di uno solo.
+- **Il raccordo fra cupolino e fiancate.** I tre pezzi del frontale sono
+  costruiti separatamente e si sovrappongono, ma il punto in cui il cupolino
+  incontra il bordo alto del pannello mostra una discontinuità. Servirebbe far
+  coincidere le due curve invece di lasciarle sovrapporre.
+- **La zona fra fiancata e motore.** Dietro il radiatore restano volumi
+  scatolati che leggono come scatole, non come componenti.
 - Il gruppo ottico anteriore è schematico: la firma a V si legge, i proiettori no.
 - Non c'è pilota, e senza un corpo umano di riferimento la scala è più
   difficile da percepire.
