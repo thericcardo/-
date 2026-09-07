@@ -1,9 +1,10 @@
 /**
  * Calzino — la licenza Pro.
  *
- * Un euro al mese per: calzini ×2 e le decorazioni in più (tavolozze,
- * accessori di Mora, fantasie dei calzini). Tutto il resto — timer, cassetto,
- * statistiche, export — resta gratis e non chiede niente a nessuno.
+ * Due euro al mese per: calzini ×2, sessioni libere fino a sei ore invece di
+ * due, e le decorazioni in più (tavolozze, accessori di Mora, fantasie dei
+ * calzini). Tutto il resto — timer, casa, cassetto, statistiche, export —
+ * resta gratis e non chiede niente a nessuno.
  *
  * ONESTÀ SUL LUCCHETTO. Questo è un sito statico: non c'è un server che possa
  * dire «questa persona ha pagato». Il controllo del codice avviene qui, nel
@@ -23,7 +24,11 @@ const Licenza = (() => {
   /** Cambiandolo, i codici già distribuiti smettono di funzionare. */
   const SALE = "mora-sferruzza-2026";
 
-  const PREZZO = "1 € al mese";
+  const PREZZO = "2 € al mese";
+
+  /** Quanto può durare una sessione libera: due ore, sei con l'abbonamento. */
+  const ORE_LIBERA = 2;
+  const ORE_LIBERA_PRO = 6;
   const GIORNI_ABBONAMENTO = 31;
   const GIORNI_PROVA = 7;
 
@@ -134,6 +139,9 @@ const Licenza = (() => {
   /** L'unica cosa che tocca i dati: quanti calzini vale una sessione finita. */
   const moltiplicatore = () => (attiva() ? 2 : 1);
 
+  /** Il tetto della sessione libera, in millisecondi. */
+  const limiteLibera = () => (attiva() ? ORE_LIBERA_PRO : ORE_LIBERA) * 3600000;
+
   const puoiProvare = () => !stato.provaUsata && !attiva();
 
   function avviaProva() {
@@ -168,6 +176,9 @@ const Licenza = (() => {
   return {
     PREZZO,
     PAGAMENTO_URL,
+    ORE_LIBERA,
+    ORE_LIBERA_PRO,
+    limiteLibera,
     GIORNI_PROVA,
     GIORNI_ABBONAMENTO,
     attiva,

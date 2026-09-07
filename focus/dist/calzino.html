@@ -44,6 +44,13 @@
   --mora-naso:   #35304A;
   --mora-tratto: #F6F1F8;
 
+  --casa-muro:   #EFE3D0;
+  --casa-ombra:  #D8C7AC;
+  --casa-legno:  #A5754A;
+  --casa-vetro:  #C3DAE8;
+  --casa-luce:   #FFD97A;
+  --casa-pietra: #9A8F81;
+
   --radius:      16px;
   --radius-sm:   10px;
   --shadow:      0 1px 2px rgba(30, 36, 56, .06), 0 10px 28px rgba(30, 36, 56, .07);
@@ -86,6 +93,12 @@
     --mora-muso:   #E7C7C0;
     --mora-naso:   #33304A;
     --mora-tratto: #FFFFFF;
+    --casa-muro:   #55506B;
+    --casa-ombra:  #3E3A52;
+    --casa-legno:  #8A6140;
+    --casa-vetro:  #46617A;
+    --casa-luce:   #FFD97A;
+    --casa-pietra: #6B6478;
   }
 }
 
@@ -109,9 +122,19 @@
   --mora-muso:   #E7C7C0;
   --mora-naso:   #33304A;
   --mora-tratto: #FFFFFF;
+  --casa-muro:   #55506B;
+  --casa-ombra:  #3E3A52;
+  --casa-legno:  #8A6140;
+  --casa-vetro:  #46617A;
+  --casa-luce:   #FFD97A;
+  --casa-pietra: #6B6478;
 }
 
 * { box-sizing: border-box; }
+
+/* `hidden` deve vincere sempre: qui dentro mezza interfaccia è flex, e senza
+   questa riga un elemento nascosto con l'attributo resterebbe in pagina. */
+[hidden] { display: none !important; }
 
 html, body { height: 100%; }
 
@@ -581,8 +604,6 @@ input[type="text"], input[type="number"], select {
 
 /* ------------------------------------------------------ fogli e messaggi */
 
-.sheet[hidden], .toast[hidden] { display: none; }
-
 .sheet {
   position: fixed;
   inset: 0;
@@ -674,6 +695,56 @@ input[type="text"], input[type="number"], select {
 }
 .sheet-box { max-height: 88vh; overflow-y: auto; }
 
+/* ------------------------------------------------------------------ casa */
+
+.modo-seg { margin-bottom: .6rem; }
+.modo-seg .seg-btn { font-weight: 600; }
+
+.casa-scena {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-2) 18%, var(--surface-alt)), var(--surface-alt));
+  border-radius: var(--radius);
+  padding: .4rem;
+  margin-bottom: .8rem;
+}
+#casa { display: block; width: 100%; height: auto; }
+#casa g { transition: opacity .4s ease; }
+
+.prato       { fill: color-mix(in srgb, var(--accent-2) 55%, transparent); }
+.palo        { stroke: var(--casa-legno); stroke-width: 5; stroke-linecap: round; }
+.cartello    { fill: var(--casa-legno); }
+.fondamenta  { fill: var(--casa-pietra); }
+.pavimento   { fill: var(--casa-legno); }
+.assi        { stroke: rgba(0, 0, 0, .18); stroke-width: 2; }
+.muri        { fill: var(--casa-muro); stroke: var(--casa-ombra); stroke-width: 3; }
+.finestra    { fill: var(--casa-vetro); stroke: var(--casa-ombra); stroke-width: 3; }
+.croce       { stroke: var(--casa-ombra); stroke-width: 2.5; }
+.porta       { fill: var(--casa-legno); stroke: var(--casa-ombra); stroke-width: 2.5; }
+.maniglia    { fill: var(--accent-2); }
+.tetto       { fill: var(--accent); stroke: color-mix(in srgb, var(--accent) 70%, #000); stroke-width: 3; stroke-linejoin: round; }
+.camino      { fill: var(--casa-pietra); }
+.fumo        { fill: none; stroke: var(--muted); stroke-width: 4; stroke-linecap: round; opacity: .6; }
+.luce        { fill: var(--casa-luce); }
+.tronco      { fill: var(--casa-legno); }
+.chioma      { fill: color-mix(in srgb, var(--accent-2) 75%, #2E5A3E); }
+.mela        { fill: var(--accent); }
+.ravanelli   { stroke: color-mix(in srgb, var(--accent-2) 70%, transparent); stroke-width: 4; stroke-linecap: round; }
+.staccionata, .staccionata-corr {
+  stroke: var(--casa-legno);
+  stroke-width: 6;
+  stroke-linecap: round;
+  fill: none;
+}
+.staccionata-corr { stroke-width: 4; }
+
+.storia { margin: .4rem 0 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: .5rem; }
+.storia li { font-size: .9rem; }
+.storia li.futuro { color: var(--muted); }
+.storia li.futuro b::after { content: " — da fare"; font-weight: 400; font-size: .82em; }
+.storia li.prossimo { color: var(--ink); }
+.storia li.prossimo b::after { content: " — ci stai lavorando"; font-weight: 400; font-size: .82em; color: var(--accent); }
+.storia b { display: block; }
+.storia .segreto { filter: blur(3.5px); user-select: none; }
+
 </style>
 </head>
 <body>
@@ -700,7 +771,7 @@ input[type="text"], input[type="number"], select {
 
   <nav class="tabs" role="tablist" aria-label="Sezioni">
     <button type="button" class="tab is-active" role="tab" data-view="timer" aria-selected="true" aria-controls="view-timer">Timer</button>
-    <button type="button" class="tab" role="tab" data-view="cassetto" aria-selected="false" aria-controls="view-cassetto">Cassetto</button>
+    <button type="button" class="tab" role="tab" data-view="casa" aria-selected="false" aria-controls="view-casa">Casa</button>
     <button type="button" class="tab" role="tab" data-view="statistiche" aria-selected="false" aria-controls="view-statistiche">Statistiche</button>
     <button type="button" class="tab" role="tab" data-view="impostazioni" aria-selected="false" aria-controls="view-impostazioni">Impostazioni</button>
   </nav>
@@ -709,6 +780,11 @@ input[type="text"], input[type="number"], select {
 
     <!-- ================================================== CONCENTRAZIONE -->
     <section id="view-timer" class="view" role="tabpanel" tabindex="-1">
+
+      <div class="seg modo-seg" id="modo-seg" role="group" aria-label="Modo del timer">
+        <button type="button" class="seg-btn is-active" data-modo="timer">A tempo</button>
+        <button type="button" class="seg-btn" data-modo="libera">Libera</button>
+      </div>
 
       <div class="phase-switch" role="group" aria-label="Tipo di sessione">
         <button type="button" class="phase is-active" data-phase="focus">Concentrazione</button>
@@ -819,9 +895,10 @@ input[type="text"], input[type="number"], select {
         <div class="controls">
           <button type="button" class="btn primary big" id="btn-start">Avvia</button>
           <button type="button" class="btn ghost" id="btn-skip">Salta</button>
+          <button type="button" class="btn ghost" id="btn-chiudi" hidden>Chiudi il calzino</button>
           <button type="button" class="btn ghost" id="btn-reset">Azzera</button>
         </div>
-        <p class="hint kbd-hint">Barra spaziatrice: avvia o metti in pausa. <kbd>R</kbd> azzera, <kbd>S</kbd> salta.</p>
+        <p class="hint kbd-hint" id="kbd-hint"></p>
       </div>
 
       <div class="card">
@@ -848,8 +925,84 @@ input[type="text"], input[type="number"], select {
       </div>
     </section>
 
-    <!-- ========================================================= CASSETTO -->
-    <section id="view-cassetto" class="view" role="tabpanel" tabindex="-1" hidden>
+    <!-- ============================================================= CASA -->
+    <section id="view-casa" class="view" role="tabpanel" tabindex="-1" hidden>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>La casa di Mora</h2>
+          <span class="pill" id="casa-fase">0 pezzi su 11</span>
+        </div>
+
+        <div class="casa-scena">
+          <svg id="casa" viewBox="0 0 320 210" role="img" aria-labelledby="casa-title">
+            <title id="casa-title">La casa che Mora sta costruendo</title>
+
+            <g data-fase="1">
+              <ellipse class="prato" cx="160" cy="188" rx="150" ry="17"/>
+              <path class="palo" d="M42 188v-30"/>
+              <rect class="cartello" x="24" y="146" width="40" height="16" rx="3"/>
+            </g>
+
+            <g data-fase="2"><rect class="fondamenta" x="86" y="168" width="150" height="18" rx="3"/></g>
+
+            <g data-fase="3">
+              <rect class="pavimento" x="90" y="156" width="142" height="14" rx="2"/>
+              <path class="assi" d="M112 156v14M140 156v14M168 156v14M196 156v14"/>
+            </g>
+
+            <g data-fase="4"><rect class="muri" x="94" y="96" width="134" height="62" rx="4"/></g>
+
+            <g data-fase="5">
+              <rect class="finestra" x="108" y="110" width="32" height="30" rx="3"/>
+              <rect class="finestra" x="182" y="110" width="32" height="30" rx="3"/>
+              <path class="croce" d="M124 110v30M108 125h32M198 110v30M182 125h32"/>
+            </g>
+
+            <g data-fase="6">
+              <rect class="porta" x="148" y="116" width="28" height="42" rx="4"/>
+              <circle class="maniglia" cx="169" cy="138" r="2.6"/>
+            </g>
+
+            <g data-fase="7"><path class="tetto" d="M82 100l79-50 79 50z"/></g>
+
+            <g data-fase="8">
+              <rect class="camino" x="198" y="60" width="18" height="32" rx="2"/>
+              <path class="fumo" d="M207 56q11-7 3-15t5-13"/>
+            </g>
+
+            <g data-fase="9">
+              <rect class="luce" x="110" y="112" width="28" height="26" rx="2"/>
+              <rect class="luce" x="184" y="112" width="28" height="26" rx="2"/>
+            </g>
+
+            <g data-fase="10">
+              <rect class="tronco" x="266" y="148" width="11" height="38" rx="4"/>
+              <circle class="chioma" cx="271" cy="138" r="27"/>
+              <circle class="mela" cx="260" cy="132" r="4"/>
+              <circle class="mela" cx="282" cy="146" r="4"/>
+              <path class="ravanelli" d="M40 176h34M40 182h34M40 188h34"/>
+            </g>
+
+            <g data-fase="11">
+              <path class="staccionata" d="M10 172v28M32 172v28M54 172v28M244 172v28M266 172v28M288 172v28M310 172v28"/>
+              <path class="staccionata-corr" d="M6 180h56M240 180h74M6 192h56M240 192h74"/>
+            </g>
+          </svg>
+        </div>
+
+        <p class="lede" id="casa-racconto"></p>
+        <div class="goal">
+          <div class="goal-bar"><span id="casa-fill"></span></div>
+          <p class="hint" id="casa-nota"></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>La storia</h2>
+        <ol class="storia" id="storia"></ol>
+      </div>
+
       <div class="card">
         <div class="card-head">
           <h2>Il cassetto</h2>
@@ -953,7 +1106,7 @@ input[type="text"], input[type="number"], select {
         <h2>Aspetto</h2>
         <p class="hint">Tutti i colori e tutti gli accessori sono qui, senza nulla da sbloccare.</p>
         <div class="palette-row" id="palettes"></div>
-        <div class="seg" role="group" aria-label="Tema chiaro o scuro">
+        <div class="seg" id="tema-seg" role="group" aria-label="Tema chiaro o scuro">
           <button type="button" class="seg-btn" data-theme="auto">Automatico</button>
           <button type="button" class="seg-btn" data-theme="light">Chiaro</button>
           <button type="button" class="seg-btn" data-theme="dark">Scuro</button>
@@ -982,10 +1135,12 @@ input[type="text"], input[type="number"], select {
           <span class="pill" id="pro-stato">non attivo</span>
         </div>
         <p class="lede">Un euro al mese. Cambia due cose: ogni sessione finita mette
-          <b>due calzini</b> nel cassetto invece di uno, e si aprono le decorazioni in più —
-          quattro tavolozze, tre accessori per Mora, quattro fantasie per i calzini.</p>
-        <p class="hint">Timer, cassetto, statistiche, esportazione e tutto il resto restano
-          gratis e completi: il Pro non toglie niente a chi non paga.</p>
+          <b>due calzini</b> nel cassetto invece di uno — e la casa di Mora cresce il doppio
+          più in fretta. In più: sessioni libere fino a sei ore invece di due, quattro
+          tavolozze, tre accessori per Mora, quattro fantasie per i calzini.</p>
+        <p class="hint">Timer, casa, cassetto, statistiche, esportazione e tutto il resto restano
+          gratis e completi: la casa si costruisce tutta anche senza pagare, ci vuole il doppio
+          del lavoro. Il Pro non toglie niente a chi non paga.</p>
         <div class="btn-row">
           <button type="button" class="btn primary" id="btn-pro">Vedi il Pro</button>
         </div>
@@ -1024,7 +1179,8 @@ input[type="text"], input[type="number"], select {
     <h2>Calzino Pro — <span id="pro-prezzo">1 € al mese</span></h2>
     <p class="pro-attivo" id="pro-attivo" hidden></p>
     <ul class="pro-lista">
-      <li><b>Calzini ×2</b> — ogni sessione finita ne mette due nel cassetto, segnati come doppi.</li>
+      <li><b>Calzini ×2</b> — ogni sessione finita ne mette due nel cassetto, segnati come doppi: la casa cresce il doppio più in fretta.</li>
+      <li><b>Sessioni libere fino a sei ore</b> invece di due.</li>
       <li><b>Quattro tavolozze in più</b> — Tramonto, Menta, Lavanda, Rame.</li>
       <li><b>Tre accessori per Mora</b> — coroncina, papillon, fiorellino.</li>
       <li><b>Quattro fantasie</b> per i calzini del cassetto.</li>
@@ -1123,6 +1279,41 @@ const Store = (() => {
   /** Colori della lana: il cassetto deve restare leggibile anche pieno. */
   const FILATI = ["#E0785C", "#F2A65A", "#E7C46B", "#8FBF6A", "#7FD1B9", "#5FB6D9", "#9AB6E8", "#D98BB0"];
 
+  /**
+   * La casa di Mora: undici pezzi, pagati in paia di calzini. È il filo lungo
+   * dell'app — il cassetto dice quanto hai lavorato oggi, la casa dice dove sta
+   * andando a finire tutto quel lavoro.
+   *
+   * `paia` è il totale che serve per avere quel pezzo, non il costo del singolo
+   * passo: così spostare una soglia non obbliga a ricalcolare le altre.
+   */
+  const CASA = [
+    { id: "terreno",     nome: "Il terreno",     paia: 1,
+      racconto: "Con il primo paio Mora ha pagato la caparra: un quadrato di terra buona, in fondo al prato." },
+    { id: "fondamenta",  nome: "Le fondamenta",  paia: 3,
+      racconto: "Tre paia, e lo scavo è fatto. Adesso c'è dove appoggiare i muri, anche se i muri non ci sono ancora." },
+    { id: "pavimento",   nome: "Il pavimento",   paia: 6,
+      racconto: "Sei paia diventate assi di legno chiaro. Mora ci cammina sopra scalza, per sentire quali scricchiolano." },
+    { id: "muri",        nome: "I muri",         paia: 10,
+      racconto: "Dieci paia: quattro muri dritti. Per la prima volta esiste un dentro, e quindi anche un fuori." },
+    { id: "finestre",    nome: "Le finestre",    paia: 15,
+      racconto: "Quindici paia comprano due finestre. Da lì si vede il prato — e il prato vede lei." },
+    { id: "porta",       nome: "La porta",       paia: 21,
+      racconto: "Ventuno paia per una porta con la maniglia d'ottone. Adesso si può bussare, e si può non aprire." },
+    { id: "tetto",       nome: "Il tetto",       paia: 28,
+      racconto: "Ventotto paia di tegole rosse. La prima notte di pioggia Mora è rimasta sveglia apposta, per sentirla cadere di sopra." },
+    { id: "camino",      nome: "Il camino",      paia: 36,
+      racconto: "Trentasei paia: un camino che tira. Il fumo esce storto, ma esce." },
+    { id: "luce",        nome: "La luce",        paia: 45,
+      racconto: "Quarantacinque paia per l'impianto. La sera, alla finestra, adesso c'è una luce gialla che prima non c'era." },
+    { id: "giardino",    nome: "Il giardino",    paia: 55,
+      racconto: "Cinquantacinque paia, e davanti alla porta crescono un melo e tre file di ravanelli." },
+    { id: "staccionata", nome: "La staccionata", paia: 66,
+      racconto: "Sessantasei paia. La staccionata non serve a tenere fuori nessuno: serve a dire che quella casa è finita, ed è sua." }
+  ];
+
+  const CASA_FINITA = "La casa è finita. Mora continua a sferruzzare, ma adesso lo fa per il gusto di farlo.";
+
   const DEFAULT_SETTINGS = {
     focusMin: 25,
     shortMin: 5,
@@ -1140,6 +1331,7 @@ const Store = (() => {
     outfit: { cappello: false, occhiali: false, grembiule: true, ditale: false,
               coroncina: false, papillon: false, fiore: false },
     fantasia: "tinta",
+    modo: "timer",
     distractors: ["Instagram", "YouTube", "Chat di gruppo"]
   };
 
@@ -1178,6 +1370,7 @@ const Store = (() => {
     if (!["auto", "light", "dark"].includes(s.theme)) s.theme = "auto";
     if (!PALETTES.some((p) => p.id === s.palette)) s.palette = "notte";
     if (!FANTASIE.some((f) => f.id === s.fantasia)) s.fantasia = "tinta";
+    if (s.modo !== "libera") s.modo = "timer";
     const outfit = Object.assign({}, DEFAULT_SETTINGS.outfit, s.outfit && typeof s.outfit === "object" ? s.outfit : {});
     for (const k of Object.keys(outfit)) outfit[k] = Boolean(outfit[k]);
     s.outfit = outfit;
@@ -1383,6 +1576,27 @@ const Store = (() => {
     return out;
   }
 
+  /**
+   * Lo stato della casa, ricavato dalle paia: `fatte` sono i pezzi già pagati,
+   * `prossimo` quello a cui si sta lavorando (null se la casa è finita).
+   */
+  function casa() {
+    const paia = Math.floor(socks().length / CALZINI_PER_PAIO);
+    const fatte = CASA.filter((f) => paia >= f.paia);
+    const prossimo = CASA.find((f) => paia < f.paia) || null;
+    const precedente = fatte.length ? fatte[fatte.length - 1].paia : 0;
+    return {
+      paia,
+      fase: fatte.length,
+      fatte,
+      prossimo,
+      mancano: prossimo ? prossimo.paia - paia : 0,
+      // quanto manca al pezzo dopo, da 0 a 1, per la barra
+      avanzamento: prossimo ? (paia - precedente) / (prossimo.paia - precedente) : 1,
+      finita: !prossimo
+    };
+  }
+
   function colorOf(session, i) {
     const task = session.taskId ? getTask(session.taskId) : null;
     return task ? task.color : FILATI[i % FILATI.length];
@@ -1454,6 +1668,8 @@ const Store = (() => {
 
   return {
     PALETTES,
+    CASA,
+    CASA_FINITA,
     ACCESSORI,
     FANTASIE,
     FILATI,
@@ -1473,6 +1689,7 @@ const Store = (() => {
     sessions,
     addSession,
     socks,
+    casa,
     running,
     setRunning,
     exportAll,
@@ -1485,9 +1702,10 @@ const Store = (() => {
 /**
  * Calzino — la licenza Pro.
  *
- * Un euro al mese per: calzini ×2 e le decorazioni in più (tavolozze,
- * accessori di Mora, fantasie dei calzini). Tutto il resto — timer, cassetto,
- * statistiche, export — resta gratis e non chiede niente a nessuno.
+ * Due euro al mese per: calzini ×2, sessioni libere fino a sei ore invece di
+ * due, e le decorazioni in più (tavolozze, accessori di Mora, fantasie dei
+ * calzini). Tutto il resto — timer, casa, cassetto, statistiche, export —
+ * resta gratis e non chiede niente a nessuno.
  *
  * ONESTÀ SUL LUCCHETTO. Questo è un sito statico: non c'è un server che possa
  * dire «questa persona ha pagato». Il controllo del codice avviene qui, nel
@@ -1507,7 +1725,11 @@ const Licenza = (() => {
   /** Cambiandolo, i codici già distribuiti smettono di funzionare. */
   const SALE = "mora-sferruzza-2026";
 
-  const PREZZO = "1 € al mese";
+  const PREZZO = "2 € al mese";
+
+  /** Quanto può durare una sessione libera: due ore, sei con l'abbonamento. */
+  const ORE_LIBERA = 2;
+  const ORE_LIBERA_PRO = 6;
   const GIORNI_ABBONAMENTO = 31;
   const GIORNI_PROVA = 7;
 
@@ -1618,6 +1840,9 @@ const Licenza = (() => {
   /** L'unica cosa che tocca i dati: quanti calzini vale una sessione finita. */
   const moltiplicatore = () => (attiva() ? 2 : 1);
 
+  /** Il tetto della sessione libera, in millisecondi. */
+  const limiteLibera = () => (attiva() ? ORE_LIBERA_PRO : ORE_LIBERA) * 3600000;
+
   const puoiProvare = () => !stato.provaUsata && !attiva();
 
   function avviaProva() {
@@ -1652,6 +1877,9 @@ const Licenza = (() => {
   return {
     PREZZO,
     PAGAMENTO_URL,
+    ORE_LIBERA,
+    ORE_LIBERA_PRO,
+    limiteLibera,
     GIORNI_PROVA,
     GIORNI_ABBONAMENTO,
     attiva,
@@ -1684,12 +1912,17 @@ const Timer = (() => {
 
   const TICK_MS = 250;
 
+  /** Sotto i cinque minuti una sessione libera non fa calzino: è un'occhiata,
+      non del lavoro. Sopra il tetto si chiude da sola. */
+  const MINIMO_LIBERA = 5 * 60000;
+
   const listeners = new Set();
   let ticker = null;
   let audioCtx = null;
   let wakeLock = null;
 
   let s = {
+    modo: "timer",         // timer (conto alla rovescia) | libera (cronometro)
     phase: "focus",        // focus | short | long
     status: "idle",        // idle | running | paused
     endsAt: 0,             // epoch ms, valido solo se status === "running"
@@ -1700,9 +1933,22 @@ const Timer = (() => {
     escapes: 0             // volte che si è usciti dalla scheda in questa fase
   };
 
+  /** Il tetto di una sessione libera: due ore, sei con il Pro. */
+  function limiteLibera() {
+    return typeof Licenza !== "undefined" ? Licenza.limiteLibera() : 2 * 3600000;
+  }
+
+  /** Quanto dura la fase corrente. In libera il conto sale, ma il tetto resta
+      un conto alla rovescia come gli altri: cambia solo come lo si mostra. */
+  function totaleMs() {
+    if (s.modo === "libera" && s.phase === "focus") return limiteLibera();
+    return Store.durationFor(s.phase) * 60000;
+  }
+
   /* ------------------------------------------------------------ ripristino */
 
   function boot() {
+    s.modo = Store.settings().modo === "libera" ? "libera" : "timer";
     const saved = Store.running();
     if (saved && typeof saved === "object" && ["focus", "short", "long"].includes(saved.phase)) {
       s = Object.assign({}, s, saved);
@@ -1715,7 +1961,7 @@ const Timer = (() => {
         startTicker();
       }
     } else {
-      s.remainingMs = Store.durationFor(s.phase) * 60000;
+      s.remainingMs = totaleMs();
     }
     emit();
   }
@@ -1745,7 +1991,9 @@ const Timer = (() => {
       taskId: s.taskId,
       cycle: s.cycle,
       escapes: s.escapes,
-      totalMs: Store.durationFor(s.phase) * 60000,
+      modo: s.modo,
+      totalMs: totaleMs(),
+      minimoMs: MINIMO_LIBERA,
       remainingMs: s.status === "running" ? Math.max(0, s.endsAt - Date.now()) : Math.max(0, s.remainingMs)
     };
   }
@@ -1768,11 +2016,17 @@ const Timer = (() => {
 
   function setPhase(phase, { keepCycle = true } = {}) {
     if (!["focus", "short", "long"].includes(phase)) return;
+    // Cambiare fase a sessione avviata non deve far sparire i minuti già
+    // fatti: `reset` li mette nel registro come sessione interrotta.
+    if (s.startedAt) reset();
     stopTicker();
     releaseWakeLock();
+    // Le pause appartengono al conto alla rovescia: sceglierne una esce dal
+    // modo libero invece di lasciare uno stato a metà.
+    if (phase !== "focus" && s.modo === "libera") setModo("timer", { silenzioso: true });
     s.phase = phase;
     s.status = "idle";
-    s.remainingMs = Store.durationFor(phase) * 60000;
+    s.remainingMs = totaleMs();
     s.startedAt = null;
     s.escapes = 0;
     if (!keepCycle) s.cycle = 0;
@@ -1780,9 +2034,28 @@ const Timer = (() => {
     emit({ type: "phase" });
   }
 
+  /** Passa fra conto alla rovescia e cronometro. Il modo resta scritto nelle
+      impostazioni: riaprendo l'app ci si ritrova dove si era. */
+  function setModo(modo, { silenzioso = false } = {}) {
+    const nuovo = modo === "libera" ? "libera" : "timer";
+    if (nuovo === s.modo) return;
+    if (s.startedAt) reset();
+    stopTicker();
+    releaseWakeLock();
+    s.modo = nuovo;
+    s.phase = "focus";
+    s.status = "idle";
+    s.startedAt = null;
+    s.escapes = 0;
+    s.remainingMs = totaleMs();
+    Store.setSetting("modo", nuovo);
+    persist();
+    if (!silenzioso) emit({ type: "modo" });
+  }
+
   function start() {
     if (s.status === "running") return;
-    const total = Store.durationFor(s.phase) * 60000;
+    const total = totaleMs();
     if (s.status === "idle" || s.remainingMs <= 0) {
       s.remainingMs = total;
       s.startedAt = new Date().toISOString();
@@ -1833,7 +2106,7 @@ const Timer = (() => {
     s.status = "idle";
     s.startedAt = null;
     s.escapes = 0;
-    s.remainingMs = Store.durationFor(s.phase) * 60000;
+    s.remainingMs = totaleMs();
     persist();
     emit({ type: "reset", partial: had && done >= 1 ? done : 0 });
   }
@@ -1848,9 +2121,22 @@ const Timer = (() => {
     return typeof Licenza !== "undefined" ? Licenza.moltiplicatore() : 1;
   }
 
+  /** Chiude a mano una sessione libera: il calzino c'è se si è arrivati al
+      minimo, altrimenti restano solo i minuti nel registro. */
+  function chiudiLibera() {
+    if (s.modo !== "libera" || !s.startedAt) return;
+    complete(elapsedMs() >= MINIMO_LIBERA);
+  }
+
+  function elapsedMs() {
+    if (!s.startedAt) return 0;
+    const left = s.status === "running" ? Math.max(0, s.endsAt - Date.now()) : Math.max(0, s.remainingMs);
+    return Math.max(0, totaleMs() - left);
+  }
+
   function elapsedMinutes() {
     if (!s.startedAt) return 0;
-    const total = Store.durationFor(s.phase) * 60000;
+    const total = totaleMs();
     const left = s.status === "running" ? Math.max(0, s.endsAt - Date.now()) : Math.max(0, s.remainingMs);
     return Math.round((total - left) / 60000);
   }
@@ -1863,7 +2149,9 @@ const Timer = (() => {
     stopTicker();
     releaseWakeLock();
     const wasPhase = s.phase;
-    const minutes = natural ? Store.durationFor(wasPhase) : elapsedMinutes();
+    // In libera contano i minuti davvero passati, anche quando il tetto arriva
+    // da solo: la sessione è lunga quanto è stata, non quanto poteva essere.
+    const minutes = natural && s.modo !== "libera" ? Store.durationFor(wasPhase) : elapsedMinutes();
     let session = null;
 
     if (s.startedAt && minutes >= 1) {
@@ -1881,14 +2169,14 @@ const Timer = (() => {
       });
     }
 
-    if (wasPhase === "focus" && natural) s.cycle += 1;
+    if (wasPhase === "focus" && natural && s.modo !== "libera") s.cycle += 1;
 
-    const next = nextPhase(wasPhase);
+    const next = s.modo === "libera" ? "focus" : nextPhase(wasPhase);
     s.phase = next;
     s.status = "idle";
     s.startedAt = null;
     s.escapes = 0;
-    s.remainingMs = Store.durationFor(next) * 60000;
+    s.remainingMs = totaleMs();
     if (next === "focus" && wasPhase === "long") s.cycle = 0;
     persist();
 
@@ -1898,9 +2186,10 @@ const Timer = (() => {
     }
     emit({ type: "complete", natural: Boolean(natural), phase: wasPhase, session });
 
+    // Nel modo libero non c'è una fase dopo da far partire: si riparte a mano.
     const settings = Store.settings();
     const auto = next === "focus" ? settings.autoStartFocus : settings.autoStartBreak;
-    if (natural && auto) start();
+    if (natural && auto && s.modo !== "libera") start();
   }
 
   function nextPhase(phase) {
@@ -2001,13 +2290,14 @@ const Timer = (() => {
   /** Cambiare le durate da Impostazioni deve aggiornare un timer fermo. */
   function syncIdleDuration() {
     if (s.status !== "idle") return;
-    s.remainingMs = Store.durationFor(s.phase) * 60000;
+    s.remainingMs = totaleMs();
     emit();
   }
 
   return {
-    boot, on, snapshot, setPhase, start, pause, toggle, reset, skip,
-    noteEscape, refreshWakeLock, syncIdleDuration, unlockAudio
+    MINIMO_LIBERA,
+    boot, on, snapshot, setPhase, setModo, start, pause, toggle, reset, skip,
+    chiudiLibera, limiteLibera, noteEscape, refreshWakeLock, syncIdleDuration, unlockAudio
   };
 })();
 
@@ -2053,6 +2343,9 @@ const Timer = (() => {
   /** Quanto si aspetta prima di contare un'uscita: sotto, è un rimbalzo. */
   const ATTESA_FUGA = 500;
 
+  /** L'ultimo pezzo di casa già annunciato: serve a festeggiare una volta sola. */
+  let faseCasa = -1;
+
   let lastEscapeInfo = null;
   let escapeTimer = null;
   let toastTimer = null;
@@ -2061,8 +2354,13 @@ const Timer = (() => {
 
   const pad = (n) => String(n).padStart(2, "0");
 
-  function mmss(ms) {
-    const total = Math.max(0, Math.ceil(ms / 1000));
+  /**
+   * Il conto alla rovescia arrotonda per eccesso (a 25:00 esatti si legge
+   * 25:00, e l'ultimo secondo esiste); il cronometro per difetto, altrimenti
+   * segnerebbe 00:01 prima ancora di aver contato un secondo.
+   */
+  function mmss(ms, perDifetto = false) {
+    const total = Math.max(0, perDifetto ? Math.floor(ms / 1000) : Math.ceil(ms / 1000));
     const h = Math.floor(total / 3600);
     const m = Math.floor((total % 3600) / 60);
     const sec = total % 60;
@@ -2137,7 +2435,9 @@ const Timer = (() => {
       t.setAttribute("aria-selected", String(on));
     });
     $$(".view").forEach((v) => { v.hidden = v.id !== "view-" + name; });
-    if (name === "cassetto") renderCassetto();
+    // La casa e il cassetto guardano gli stessi dati: si ridisegnano insieme,
+    // altrimenti la scheda mostra due verità diverse.
+    if (name === "casa") { renderCasa(); renderCassetto(); }
     if (name === "statistiche") renderStats();
     if (name === "impostazioni") renderSettings();
   }
@@ -2145,22 +2445,44 @@ const Timer = (() => {
   /* --------------------------------------------------------------- timer */
 
   function renderTimer(snap) {
+    const libera = snap.modo === "libera";
     const scene = $("#scene");
     const isBreak = snap.phase !== "focus";
     scene.dataset.state = snap.status === "running"
       ? (isBreak ? "break" : "running")
       : (snap.status === "paused" ? "paused" : (isBreak ? "break" : "idle"));
 
-    $("#clock").textContent = mmss(snap.remainingMs);
+    const trascorso = Math.max(0, snap.totalMs - snap.remainingMs);
+    const mostrato = mmss(libera ? trascorso : snap.remainingMs, libera);
+    $("#clock").textContent = mostrato;
     document.title = snap.status === "running"
-      ? `${mmss(snap.remainingMs)} · ${PHASE_LABEL[snap.phase]}`
+      ? `${mostrato} · ${libera ? "Libera" : PHASE_LABEL[snap.phase]}`
       : "Calzino";
 
+    // In libera il calzino è "assicurato" appena si superano i cinque minuti:
+    // da lì in poi la sessione vale, per quanto la si voglia tirare avanti.
+    const assicurato = trascorso >= snap.minimoMs;
+    const ore = Math.round(snap.totalMs / 3600000);
     const minuti = Math.round(snap.totalMs / 60000);
-    $("#clock-note").textContent = snap.phase === "focus"
-      ? `Sessione da ${minuti} minuti` + (snap.escapes ? ` · ${snap.escapes} uscite` : "")
-      : `${PHASE_LABEL[snap.phase]} da ${minuti} minuti`;
+    if (libera) {
+      $("#clock-note").textContent = snap.status === "idle"
+        ? `Il conto sale: minimo ${Math.round(snap.minimoMs / 60000)} minuti, tetto ${ore} ore`
+        : (assicurato
+          ? `Calzino assicurato · si chiude da sé a ${ore} ore`
+          : `Ancora ${mmss(snap.minimoMs - trascorso)} perché il calzino conti`) +
+          (snap.escapes ? ` · ${snap.escapes} uscite` : "");
+    } else {
+      $("#clock-note").textContent = snap.phase === "focus"
+        ? `Sessione da ${minuti} minuti` + (snap.escapes ? ` · ${snap.escapes} uscite` : "")
+        : `${PHASE_LABEL[snap.phase]} da ${minuti} minuti`;
+    }
 
+    $$("#modo-seg .seg-btn").forEach((b) => b.classList.toggle("is-active", (b.dataset.modo === "libera") === libera));
+    $(".phase-switch").hidden = libera;
+    $("#cycles").hidden = libera;
+    $("#btn-skip").hidden = libera;
+    $("#btn-chiudi").hidden = !libera;
+    $("#btn-chiudi").disabled = snap.status === "idle";
     $$(".phase").forEach((b) => b.classList.toggle("is-active", b.dataset.phase === snap.phase));
 
     const start = $("#btn-start");
@@ -2175,8 +2497,14 @@ const Timer = (() => {
     // La lana sale dal fondo del calzino man mano che la sessione va avanti.
     // La sagoma vive fra y=8 e y=90 del suo viewBox: il riempimento si muove
     // dentro quella fascia, altrimenti il primo quarto di sessione non si vede.
-    const frazione = snap.totalMs > 0 ? 1 - snap.remainingMs / snap.totalMs : 0;
+    // In libera il pieno arriva al minimo: dopo, il calzino c'è comunque.
+    const frazione = libera
+      ? Math.min(1, snap.minimoMs > 0 ? trascorso / snap.minimoMs : 0)
+      : (snap.totalMs > 0 ? 1 - snap.remainingMs / snap.totalMs : 0);
     $("#calzino-lana").setAttribute("y", String(Math.round(90 - frazione * 82)));
+
+    $("#kbd-hint").innerHTML = "Barra spaziatrice: avvia o metti in pausa. <kbd>R</kbd> azzera, " +
+      (libera ? "<kbd>S</kbd> chiude il calzino." : "<kbd>S</kbd> salta.");
 
     $("#top-sub").textContent = subtitle(snap);
   }
@@ -2340,6 +2668,44 @@ const Timer = (() => {
     $("#log-empty").hidden = ultime.length > 0;
   }
 
+  /* ------------------------------------------------------------------ casa */
+
+  function renderCasa() {
+    const c = Store.casa();
+    const svg = $("#casa");
+    for (const g of $$("[data-fase]", svg)) {
+      g.style.display = Number(g.dataset.fase) <= c.fase ? "" : "none";
+    }
+
+    $("#casa-fase").textContent = `${c.fase} ${c.fase === 1 ? "pezzo" : "pezzi"} su ${Store.CASA.length}`;
+    $("#casa-racconto").textContent = c.finita
+      ? Store.CASA_FINITA
+      : (c.fase ? Store.CASA[c.fase - 1].racconto : "Il prato è vuoto. Il primo paio di calzini paga la caparra del terreno.");
+
+    $("#casa-fill").style.width = Math.round(Math.max(0, Math.min(1, c.avanzamento)) * 100) + "%";
+    $("#casa-nota").textContent = c.finita
+      ? `${c.paia} paia in tutto: la casa è finita.`
+      : `${c.paia} ${c.paia === 1 ? "paio" : "paia"} — ne ${c.mancano === 1 ? "manca" : "mancano"} ${c.mancano} per ${articolo(c.prossimo.nome)}.`;
+
+    faseCasa = c.fase;
+
+    // Il racconto del pezzo che verrà resta coperto: si legge costruendolo.
+    $("#storia").innerHTML = Store.CASA.map((f, i) => {
+      const fatto = i < c.fase;
+      const prossimo = i === c.fase;
+      const classe = fatto ? "" : (prossimo ? "prossimo" : "futuro");
+      const testo = fatto
+        ? esc(f.racconto)
+        : `<span class="segreto">${esc(f.racconto)}</span>`;
+      return `<li class="${classe}"><b>${esc(f.nome)}</b>${testo}</li>`;
+    }).join("");
+  }
+
+  /** «per il tetto», «per le finestre»: l'articolo sta nel nome del pezzo. */
+  function articolo(nome) {
+    return nome.replace(/^Il /, "il ").replace(/^La /, "la ").replace(/^Le /, "le ").replace(/^I /, "i ");
+  }
+
   /* -------------------------------------------------------------- cassetto */
 
   /** Le fantasie stanno dentro la sagoma grazie al clipPath condiviso della
@@ -2468,7 +2834,7 @@ const Timer = (() => {
         `<i style="background:${p.scuro}"></i><i style="background:${p.accento}"></i><i style="background:${p.secondo}"></i></button>`;
     }).join("");
 
-    $$(".seg-btn").forEach((b) => b.classList.toggle("is-active", b.dataset.theme === s.theme));
+    $$("#tema-seg .seg-btn").forEach((b) => b.classList.toggle("is-active", b.dataset.theme === s.theme));
 
     $("#outfit").innerHTML = Store.ACCESSORI.map((acc) => {
       const chiusa = !sbloccato(acc);
@@ -2601,6 +2967,16 @@ const Timer = (() => {
 
     $$(".phase").forEach((b) => b.addEventListener("click", () => Timer.setPhase(b.dataset.phase)));
 
+    $$("#modo-seg .seg-btn").forEach((b) => b.addEventListener("click", () => {
+      Timer.setModo(b.dataset.modo);
+      const ore = Math.round(Timer.limiteLibera() / 3600000);
+      if (b.dataset.modo === "libera") {
+        toast(`Sessione libera: il conto sale, minimo ${Math.round(Timer.MINIMO_LIBERA / 60000)} minuti, tetto ${ore} ore.`);
+      }
+    }));
+
+    $("#btn-chiudi").addEventListener("click", () => Timer.chiudiLibera());
+
     $("#btn-start").addEventListener("click", () => { Timer.unlockAudio(); Timer.toggle(); });
     $("#btn-skip").addEventListener("click", () => Timer.skip());
     $("#btn-reset").addEventListener("click", () => Timer.reset());
@@ -2700,7 +3076,7 @@ const Timer = (() => {
       renderSettings();
     });
 
-    $$(".seg-btn").forEach((b) => b.addEventListener("click", () => {
+    $$("#tema-seg .seg-btn").forEach((b) => b.addEventListener("click", () => {
       Store.setSetting("theme", b.dataset.theme);
       applyLook();
       renderSettings();
@@ -2793,7 +3169,10 @@ const Timer = (() => {
       if (tag === "input" || tag === "textarea" || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.code === "Space") { e.preventDefault(); Timer.unlockAudio(); Timer.toggle(); }
       else if (e.key === "r" || e.key === "R") Timer.reset();
-      else if (e.key === "s" || e.key === "S") Timer.skip();
+      else if (e.key === "s" || e.key === "S") {
+        if (Timer.snapshot().modo === "libera") Timer.chiudiLibera();
+        else Timer.skip();
+      }
     });
 
     // Uscite dalla scheda durante la concentrazione. Il conteggio aspetta un
@@ -2837,6 +3216,7 @@ const Timer = (() => {
     renderTimer(Timer.snapshot());
     renderTasks();
     renderToday();
+    renderCasa();
     renderCassetto();
     renderStats();
     renderSettings();
@@ -2847,7 +3227,7 @@ const Timer = (() => {
     if (!event) return;
     if (["complete", "reset", "disfatto"].includes(event.type)) {
       renderToday();
-      if (!$("#view-cassetto").hidden) renderCassetto();
+      if (!$("#view-casa").hidden) { renderCasa(); renderCassetto(); }
       if (!$("#view-statistiche").hidden) renderStats();
     }
     if (event.type === "complete" && event.natural && event.phase === "focus") {
@@ -2858,7 +3238,19 @@ const Timer = (() => {
         ? `${doppio ? "Due calzini in una volta" : "Paio completo"}: ${paia} ${paia === 1 ? "paio" : "paia"} nel cassetto.`
         : `${doppio ? "Due calzini" : "Calzino finito"}: ne manca uno per il paio.`);
     }
+    if (event.type === "complete" && event.natural && event.phase === "focus") controllaCasa();
     if (event.type === "reset" && event.partial) toast(`Registrati ${event.partial} minuti, senza calzino.`);
+  }
+
+  /** Un pezzo di casa in più merita più del messaggio sul calzino: arriva dopo,
+      così è quello che resta sullo schermo. */
+  function controllaCasa() {
+    const c = Store.casa();
+    if (faseCasa >= 0 && c.fase > faseCasa) {
+      const pezzo = Store.CASA[c.fase - 1];
+      toast(c.finita ? "La casa è finita." : `${pezzo.nome}: fatto. La casa cresce.`);
+    }
+    faseCasa = c.fase;
   }
 
   /* -------------------------------------------------------- service worker */

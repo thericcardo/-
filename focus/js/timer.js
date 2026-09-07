@@ -14,12 +14,17 @@ const Timer = (() => {
 
   const TICK_MS = 250;
 
+  /** Sotto i cinque minuti una sessione libera non fa calzino: è un'occhiata,
+      non del lavoro. Sopra il tetto si chiude da sola. */
+  const MINIMO_LIBERA = 5 * 60000;
+
   const listeners = new Set();
   let ticker = null;
   let audioCtx = null;
   let wakeLock = null;
 
   let s = {
+    modo: "timer",         // timer (conto alla rovescia) | libera (cronometro)
     phase: "focus",        // focus | short | long
     status: "idle",        // idle | running | paused
     endsAt: 0,             // epoch ms, valido solo se status === "running"
@@ -30,9 +35,22 @@ const Timer = (() => {
     escapes: 0             // volte che si è usciti dalla scheda in questa fase
   };
 
+  /** Il tetto di una sessione libera: due ore, sei con il Pro. */
+  function limiteLibera() {
+    return typeof Licenza !== "undefined" ? Licenza.limiteLibera() : 2 * 3600000;
+  }
+
+  /** Quanto dura la fase corrente. In libera il conto sale, ma il tetto resta
+      un conto alla rovescia come gli altri: cambia solo come lo si mostra. */
+  function totaleMs() {
+    if (s.modo === "libera" && s.phase === "focus") return limiteLibera();
+    return Store.durationFor(s.phase) * 60000;
+  }
+
   /* ------------------------------------------------------------ ripristino */
 
   function boot() {
+    s.modo = Store.settings().modo === "libera" ? "libera" : "timer";
     const saved = Store.running();
     if (saved && typeof saved === "object" && ["focus", "short", "long"].includes(saved.phase)) {
       s = Object.assign({}, s, saved);
@@ -45,7 +63,7 @@ const Timer = (() => {
         startTicker();
       }
     } else {
-      s.remainingMs = Store.durationFor(s.phase) * 60000;
+      s.remainingMs = totaleMs();
     }
     emit();
   }
@@ -75,7 +93,9 @@ const Timer = (() => {
       taskId: s.taskId,
       cycle: s.cycle,
       escapes: s.escapes,
-      totalMs: Store.durationFor(s.phase) * 60000,
+      modo: s.modo,
+      totalMs: totaleMs(),
+      minimoMs: MINIMO_LIBERA,
       remainingMs: s.status === "running" ? Math.max(0, s.endsAt - Date.now()) : Math.max(0, s.remainingMs)
     };
   }
@@ -98,11 +118,17 @@ const Timer = (() => {
 
   function setPhase(phase, { keepCycle = true } = {}) {
     if (!["focus", "short", "long"].includes(phase)) return;
+    // Cambiare fase a sessione avviata non deve far sparire i minuti già
+    // fatti: `reset` li mette nel registro come sessione interrotta.
+    if (s.startedAt) reset();
     stopTicker();
     releaseWakeLock();
+    // Le pause appartengono al conto alla rovescia: sceglierne una esce dal
+    // modo libero invece di lasciare uno stato a metà.
+    if (phase !== "focus" && s.modo === "libera") setModo("timer", { silenzioso: true });
     s.phase = phase;
     s.status = "idle";
-    s.remainingMs = Store.durationFor(phase) * 60000;
+    s.remainingMs = totaleMs();
     s.startedAt = null;
     s.escapes = 0;
     if (!keepCycle) s.cycle = 0;
@@ -110,9 +136,28 @@ const Timer = (() => {
     emit({ type: "phase" });
   }
 
+  /** Passa fra conto alla rovescia e cronometro. Il modo resta scritto nelle
+      impostazioni: riaprendo l'app ci si ritrova dove si era. */
+  function setModo(modo, { silenzioso = false } = {}) {
+    const nuovo = modo === "libera" ? "libera" : "timer";
+    if (nuovo === s.modo) return;
+    if (s.startedAt) reset();
+    stopTicker();
+    releaseWakeLock();
+    s.modo = nuovo;
+    s.phase = "focus";
+    s.status = "idle";
+    s.startedAt = null;
+    s.escapes = 0;
+    s.remainingMs = totaleMs();
+    Store.setSetting("modo", nuovo);
+    persist();
+    if (!silenzioso) emit({ type: "modo" });
+  }
+
   function start() {
     if (s.status === "running") return;
-    const total = Store.durationFor(s.phase) * 60000;
+    const total = totaleMs();
     if (s.status === "idle" || s.remainingMs <= 0) {
       s.remainingMs = total;
       s.startedAt = new Date().toISOString();
@@ -163,7 +208,7 @@ const Timer = (() => {
     s.status = "idle";
     s.startedAt = null;
     s.escapes = 0;
-    s.remainingMs = Store.durationFor(s.phase) * 60000;
+    s.remainingMs = totaleMs();
     persist();
     emit({ type: "reset", partial: had && done >= 1 ? done : 0 });
   }
@@ -178,9 +223,22 @@ const Timer = (() => {
     return typeof Licenza !== "undefined" ? Licenza.moltiplicatore() : 1;
   }
 
+  /** Chiude a mano una sessione libera: il calzino c'è se si è arrivati al
+      minimo, altrimenti restano solo i minuti nel registro. */
+  function chiudiLibera() {
+    if (s.modo !== "libera" || !s.startedAt) return;
+    complete(elapsedMs() >= MINIMO_LIBERA);
+  }
+
+  function elapsedMs() {
+    if (!s.startedAt) return 0;
+    const left = s.status === "running" ? Math.max(0, s.endsAt - Date.now()) : Math.max(0, s.remainingMs);
+    return Math.max(0, totaleMs() - left);
+  }
+
   function elapsedMinutes() {
     if (!s.startedAt) return 0;
-    const total = Store.durationFor(s.phase) * 60000;
+    const total = totaleMs();
     const left = s.status === "running" ? Math.max(0, s.endsAt - Date.now()) : Math.max(0, s.remainingMs);
     return Math.round((total - left) / 60000);
   }
@@ -193,7 +251,9 @@ const Timer = (() => {
     stopTicker();
     releaseWakeLock();
     const wasPhase = s.phase;
-    const minutes = natural ? Store.durationFor(wasPhase) : elapsedMinutes();
+    // In libera contano i minuti davvero passati, anche quando il tetto arriva
+    // da solo: la sessione è lunga quanto è stata, non quanto poteva essere.
+    const minutes = natural && s.modo !== "libera" ? Store.durationFor(wasPhase) : elapsedMinutes();
     let session = null;
 
     if (s.startedAt && minutes >= 1) {
@@ -211,14 +271,14 @@ const Timer = (() => {
       });
     }
 
-    if (wasPhase === "focus" && natural) s.cycle += 1;
+    if (wasPhase === "focus" && natural && s.modo !== "libera") s.cycle += 1;
 
-    const next = nextPhase(wasPhase);
+    const next = s.modo === "libera" ? "focus" : nextPhase(wasPhase);
     s.phase = next;
     s.status = "idle";
     s.startedAt = null;
     s.escapes = 0;
-    s.remainingMs = Store.durationFor(next) * 60000;
+    s.remainingMs = totaleMs();
     if (next === "focus" && wasPhase === "long") s.cycle = 0;
     persist();
 
@@ -228,9 +288,10 @@ const Timer = (() => {
     }
     emit({ type: "complete", natural: Boolean(natural), phase: wasPhase, session });
 
+    // Nel modo libero non c'è una fase dopo da far partire: si riparte a mano.
     const settings = Store.settings();
     const auto = next === "focus" ? settings.autoStartFocus : settings.autoStartBreak;
-    if (natural && auto) start();
+    if (natural && auto && s.modo !== "libera") start();
   }
 
   function nextPhase(phase) {
@@ -331,12 +392,13 @@ const Timer = (() => {
   /** Cambiare le durate da Impostazioni deve aggiornare un timer fermo. */
   function syncIdleDuration() {
     if (s.status !== "idle") return;
-    s.remainingMs = Store.durationFor(s.phase) * 60000;
+    s.remainingMs = totaleMs();
     emit();
   }
 
   return {
-    boot, on, snapshot, setPhase, start, pause, toggle, reset, skip,
-    noteEscape, refreshWakeLock, syncIdleDuration, unlockAudio
+    MINIMO_LIBERA,
+    boot, on, snapshot, setPhase, setModo, start, pause, toggle, reset, skip,
+    chiudiLibera, limiteLibera, noteEscape, refreshWakeLock, syncIdleDuration, unlockAudio
   };
 })();

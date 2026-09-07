@@ -4,15 +4,24 @@ Un timer di concentrazione con una compagna di lavoro: **Mora**, la talpa che
 sferruzza. Quando il timer parte lei prende i ferri; quando la sessione arriva
 in fondo, nel cassetto c'è **un calzino**. Due calzini fanno **un paio**.
 
-Un calzino per sessione. Con **Calzino Pro** — 1 € al mese — ne fa due e si
-aprono le decorazioni in più; tutto il resto (timer, cassetto, statistiche,
-esportazione) è gratis e completo, e resta tale.
+E i paia servono a qualcosa: **Mora si sta costruendo una casa**, e ogni paio ne
+paga un pezzo — il terreno, le fondamenta, i muri, le finestre, il tetto, fino
+alla staccionata. Undici pezzi, ognuno con la sua riga di racconto che si legge
+solo quando l'hai costruito. È il filo lungo dell'app: il cassetto dice quanto
+hai lavorato oggi, la casa dice dove sta andando a finire tutto quel lavoro.
+
+Con **Calzino Pro** — 2 € al mese — ogni sessione vale due calzini (la casa
+cresce il doppio più in fretta), le sessioni libere arrivano a sei ore e si
+aprono le decorazioni in più. Tutto il resto è gratis e completo, e resta tale:
+la casa si finisce anche senza pagare, ci vuole il doppio del lavoro.
 
 ## Come si usa
 
 1. Apri `index.html` (doppio clic va benissimo) oppure il sito pubblicato.
-2. **Timer** → scegli l'attività, premi **Avvia** e lascia perdere il telefono.
-3. **Cassetto** → i calzini fatti, appaiati due a due, e i traguardi.
+2. **Timer** → scegli il modo (**a tempo** o **libera**), l'attività, premi
+   **Avvia** e lascia perdere il telefono.
+3. **Casa** → la casa di Mora che cresce, la storia, il cassetto dei calzini e i
+   traguardi.
 4. **Statistiche** → oggi, la striscia di giorni, gli ultimi 14 giorni, il tempo
    per attività, il registro delle sessioni.
 5. **Impostazioni** → durate, avvisi, distrattori, aspetto, dati.
@@ -20,11 +29,25 @@ esportazione) è gratis e completo, e resta tale.
 Scorciatoie da tastiera: barra spaziatrice avvia o mette in pausa, `R` azzera,
 `S` salta alla fase dopo.
 
+## I due modi del timer
+
+- **A tempo** — il classico conto alla rovescia: concentrazione, pausa breve,
+  pausa lunga, con le durate che vuoi e l'avvio automatico delle pause.
+- **Libera** — il conto sale invece di scendere, e la sessione finisce quando lo
+  decidi tu. Sotto i **5 minuti** non fa calzino (è un'occhiata, non del
+  lavoro); il calzino è assicurato appena li superi, e la sessione si chiude da
+  sola al tetto: **2 ore**, **6 con il Pro**. I minuti restano registrati
+  comunque, anche quelli delle sessioni troppo corte.
+
 ## Che cosa c'è dentro
 
 - **Durate libere**: concentrazione, pausa breve, pausa lunga, quante sessioni
   prima della pausa lunga, obiettivo giornaliero. Quattro preimpostati
   (25/5/15, 50/10/30, 90/20/30, 15/3/10) e avvio automatico delle pause.
+- **La casa di Mora**: undici pezzi da pagare in paia di calzini (1, 3, 6, 10,
+  15, 21, 28, 36, 45, 55, 66), disegnati uno alla volta, con il racconto che si
+  scopre costruendo. Sessantasei paia sono 132 sessioni: un arco lungo mesi, che
+  è il punto.
 - **Attività senza limite**, ognuna con il suo colore: il calzino prende il
   colore dell'attività su cui hai lavorato.
 - **Traguardi** che si accendono da soli guardando le sessioni.
@@ -37,14 +60,15 @@ Scorciatoie da tastiera: barra spaziatrice avvia o mette in pausa, `R` azzera,
 - **Offline e installabile**: service worker e manifest, quindi «Aggiungi a
   schermata Home» funziona.
 
-## Calzino Pro — 1 € al mese
+## Calzino Pro — 2 € al mese
 
-Cambia due cose:
+Cambia tre cose:
 
 - **Calzini ×2**: ogni sessione portata a termine ne mette due nel cassetto
-  invece di uno. Il secondo porta un marchio «2» e nel dettaglio dice da dove
-  viene: il cassetto deve restare leggibile come registro del lavoro fatto, non
-  diventare un mucchio.
+  invece di uno, quindi la casa cresce il doppio più in fretta. Il secondo porta
+  un marchio «2» e nel dettaglio dice da dove viene: il cassetto deve restare
+  leggibile come registro del lavoro fatto, non diventare un mucchio.
+- **Sessioni libere fino a sei ore** invece di due.
 - **Decorazioni in più**: quattro tavolozze (Tramonto, Menta, Lavanda, Rame),
   tre accessori per Mora (coroncina, papillon, fiorellino) e quattro fantasie
   per i calzini del cassetto (righe, pois, rombi, punta a contrasto).
@@ -138,12 +162,12 @@ sostituire.
 ## Struttura
 
 ```
-index.html              markup delle quattro schermate
-css/styles.css          stile, tavolozze, il disegno di Mora
+index.html              markup delle quattro schermate e i disegni (Mora, la casa)
+css/styles.css          stile, tavolozze, i colori di Mora e della casa
 js/storage.js           impostazioni, attività e sessioni su localStorage
 js/licenza.js           abbonamento Pro: prova, codici, scadenza
-js/timer.js             fasi, conteggio, suono, notifiche, schermo acceso
-js/app.js               interfaccia, cassetto, statistiche, import/export
+js/timer.js             fasi, modo libero, suono, notifiche, schermo acceso
+js/app.js               interfaccia, casa, cassetto, statistiche, import/export
 sw.js                   cache offline
 manifest.webmanifest    installazione come app
 icon.svg                icona
@@ -160,5 +184,6 @@ L'idea — un timer con una creatura che lavora mentre lavori tu — viene da
 *Focus Friend* di Hank Green. Qui non c'è niente di suo: personaggio, disegni,
 nome e codice sono originali. Anche il confine gratis/a pagamento somiglia:
 lì l'abbonamento dà decorazioni e premi più veloci, qui decorazioni e calzini
-doppi. La differenza è il prezzo — 1 € al mese invece di 1,99 $ — e il fatto
-che qui il lucchetto è dichiarato per quello che è.
+doppi. La differenza è il prezzo — 2 € al mese invece di 1,99 $ — la casa da
+costruire al posto della stanza da arredare, e il fatto che qui il lucchetto è
+dichiarato per quello che è.

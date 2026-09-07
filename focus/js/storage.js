@@ -52,6 +52,41 @@ const Store = (() => {
   /** Colori della lana: il cassetto deve restare leggibile anche pieno. */
   const FILATI = ["#E0785C", "#F2A65A", "#E7C46B", "#8FBF6A", "#7FD1B9", "#5FB6D9", "#9AB6E8", "#D98BB0"];
 
+  /**
+   * La casa di Mora: undici pezzi, pagati in paia di calzini. È il filo lungo
+   * dell'app — il cassetto dice quanto hai lavorato oggi, la casa dice dove sta
+   * andando a finire tutto quel lavoro.
+   *
+   * `paia` è il totale che serve per avere quel pezzo, non il costo del singolo
+   * passo: così spostare una soglia non obbliga a ricalcolare le altre.
+   */
+  const CASA = [
+    { id: "terreno",     nome: "Il terreno",     paia: 1,
+      racconto: "Con il primo paio Mora ha pagato la caparra: un quadrato di terra buona, in fondo al prato." },
+    { id: "fondamenta",  nome: "Le fondamenta",  paia: 3,
+      racconto: "Tre paia, e lo scavo è fatto. Adesso c'è dove appoggiare i muri, anche se i muri non ci sono ancora." },
+    { id: "pavimento",   nome: "Il pavimento",   paia: 6,
+      racconto: "Sei paia diventate assi di legno chiaro. Mora ci cammina sopra scalza, per sentire quali scricchiolano." },
+    { id: "muri",        nome: "I muri",         paia: 10,
+      racconto: "Dieci paia: quattro muri dritti. Per la prima volta esiste un dentro, e quindi anche un fuori." },
+    { id: "finestre",    nome: "Le finestre",    paia: 15,
+      racconto: "Quindici paia comprano due finestre. Da lì si vede il prato — e il prato vede lei." },
+    { id: "porta",       nome: "La porta",       paia: 21,
+      racconto: "Ventuno paia per una porta con la maniglia d'ottone. Adesso si può bussare, e si può non aprire." },
+    { id: "tetto",       nome: "Il tetto",       paia: 28,
+      racconto: "Ventotto paia di tegole rosse. La prima notte di pioggia Mora è rimasta sveglia apposta, per sentirla cadere di sopra." },
+    { id: "camino",      nome: "Il camino",      paia: 36,
+      racconto: "Trentasei paia: un camino che tira. Il fumo esce storto, ma esce." },
+    { id: "luce",        nome: "La luce",        paia: 45,
+      racconto: "Quarantacinque paia per l'impianto. La sera, alla finestra, adesso c'è una luce gialla che prima non c'era." },
+    { id: "giardino",    nome: "Il giardino",    paia: 55,
+      racconto: "Cinquantacinque paia, e davanti alla porta crescono un melo e tre file di ravanelli." },
+    { id: "staccionata", nome: "La staccionata", paia: 66,
+      racconto: "Sessantasei paia. La staccionata non serve a tenere fuori nessuno: serve a dire che quella casa è finita, ed è sua." }
+  ];
+
+  const CASA_FINITA = "La casa è finita. Mora continua a sferruzzare, ma adesso lo fa per il gusto di farlo.";
+
   const DEFAULT_SETTINGS = {
     focusMin: 25,
     shortMin: 5,
@@ -69,6 +104,7 @@ const Store = (() => {
     outfit: { cappello: false, occhiali: false, grembiule: true, ditale: false,
               coroncina: false, papillon: false, fiore: false },
     fantasia: "tinta",
+    modo: "timer",
     distractors: ["Instagram", "YouTube", "Chat di gruppo"]
   };
 
@@ -107,6 +143,7 @@ const Store = (() => {
     if (!["auto", "light", "dark"].includes(s.theme)) s.theme = "auto";
     if (!PALETTES.some((p) => p.id === s.palette)) s.palette = "notte";
     if (!FANTASIE.some((f) => f.id === s.fantasia)) s.fantasia = "tinta";
+    if (s.modo !== "libera") s.modo = "timer";
     const outfit = Object.assign({}, DEFAULT_SETTINGS.outfit, s.outfit && typeof s.outfit === "object" ? s.outfit : {});
     for (const k of Object.keys(outfit)) outfit[k] = Boolean(outfit[k]);
     s.outfit = outfit;
@@ -312,6 +349,27 @@ const Store = (() => {
     return out;
   }
 
+  /**
+   * Lo stato della casa, ricavato dalle paia: `fatte` sono i pezzi già pagati,
+   * `prossimo` quello a cui si sta lavorando (null se la casa è finita).
+   */
+  function casa() {
+    const paia = Math.floor(socks().length / CALZINI_PER_PAIO);
+    const fatte = CASA.filter((f) => paia >= f.paia);
+    const prossimo = CASA.find((f) => paia < f.paia) || null;
+    const precedente = fatte.length ? fatte[fatte.length - 1].paia : 0;
+    return {
+      paia,
+      fase: fatte.length,
+      fatte,
+      prossimo,
+      mancano: prossimo ? prossimo.paia - paia : 0,
+      // quanto manca al pezzo dopo, da 0 a 1, per la barra
+      avanzamento: prossimo ? (paia - precedente) / (prossimo.paia - precedente) : 1,
+      finita: !prossimo
+    };
+  }
+
   function colorOf(session, i) {
     const task = session.taskId ? getTask(session.taskId) : null;
     return task ? task.color : FILATI[i % FILATI.length];
@@ -383,6 +441,8 @@ const Store = (() => {
 
   return {
     PALETTES,
+    CASA,
+    CASA_FINITA,
     ACCESSORI,
     FANTASIE,
     FILATI,
@@ -402,6 +462,7 @@ const Store = (() => {
     sessions,
     addSession,
     socks,
+    casa,
     running,
     setRunning,
     exportAll,
