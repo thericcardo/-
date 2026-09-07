@@ -114,3 +114,11 @@ build.mjs               genera la versione a file unico in dist/
 
 Nessuna dipendenza e nessuna compilazione per lavorarci: si modifica un file e si
 ricarica la pagina.
+
+## E accanto: Calzino
+
+In `focus/` c'è una seconda app, indipendente da questa: **Calzino**, un timer
+di concentrazione con Mora, la talpa che sferruzza — ogni sessione finita è un
+calzino, due calzini fanno un paio. Stessa filosofia: sito statico, nessuna
+dipendenza, dati solo nel browser. Si apre da `focus/index.html`, e ha il suo
+[README](focus/README.md).

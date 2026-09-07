@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calzino</title>
+<meta name="description" content="Timer di concentrazione con Mora, la talpa che sferruzza: ogni sessione finita è un calzino, due calzini fanno un paio. Tutto incluso, nessun abbonamento.">
+<meta name="theme-color" content="#1E2438">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <img src="icon.svg" alt="" width="34" height="34">
+      <div class="brand-text">
+        <strong>Calzino</strong>
+        <span class="sub" id="top-sub">Mora è pronta a sferruzzare.</span>
+      </div>
+    </div>
+    <button type="button" class="btn ghost small" id="btn-theme" aria-label="Cambia tema">Tema</button>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sezioni">
+    <button type="button" class="tab is-active" role="tab" data-view="timer" aria-selected="true" aria-controls="view-timer">Timer</button>
+    <button type="button" class="tab" role="tab" data-view="cassetto" aria-selected="false" aria-controls="view-cassetto">Cassetto</button>
+    <button type="button" class="tab" role="tab" data-view="statistiche" aria-selected="false" aria-controls="view-statistiche">Statistiche</button>
+    <button type="button" class="tab" role="tab" data-view="impostazioni" aria-selected="false" aria-controls="view-impostazioni">Impostazioni</button>
+  </nav>
+
+  <main class="views">
+
+    <!-- ================================================== CONCENTRAZIONE -->
+    <section id="view-timer" class="view" role="tabpanel" tabindex="-1">
+
+      <div class="phase-switch" role="group" aria-label="Tipo di sessione">
+        <button type="button" class="phase is-active" data-phase="focus">Concentrazione</button>
+        <button type="button" class="phase" data-phase="short">Pausa breve</button>
+        <button type="button" class="phase" data-phase="long">Pausa lunga</button>
+      </div>
+
+      <div class="card scene-card">
+        <div class="scene" id="scene" data-state="idle">
+
+          <!-- Mora la talpa. Gli accessori si accendono da Impostazioni. -->
+          <svg class="mora" id="mora" viewBox="0 0 220 190" role="img" aria-labelledby="mora-title">
+            <title id="mora-title">Mora, la talpa che sferruzza</title>
+
+            <ellipse class="mora-ombra" cx="110" cy="173" rx="58" ry="8"/>
+
+            <!-- corpo a goccia, pancia più chiara -->
+            <path class="mora-corpo" d="M110 40c-30 0-52 24-52 58 0 40 22 66 52 66s52-26 52-66c0-34-22-58-52-58z"/>
+            <ellipse class="mora-pancia" cx="110" cy="124" rx="34" ry="30"/>
+
+            <!-- il grembiule sta sulla pancia, sotto le zampe -->
+            <g class="acc acc-grembiule">
+              <path d="M92 104q18 8 36 0l7 38q-25 10-50 0z"/>
+              <path d="M99 104l-5-10M121 104l5-10"/>
+            </g>
+
+            <!-- musetto -->
+            <path class="mora-muso" d="M110 60c-16 0-27 10-27 22s11 20 27 20 27-8 27-20-11-22-27-22z"/>
+            <circle class="mora-naso" cx="110" cy="70" r="6"/>
+            <g class="mora-occhi">
+              <path class="occhio" d="M84 54q7 7 14 0"/>
+              <path class="occhio" d="M122 54q7 7 14 0"/>
+            </g>
+            <g class="mora-baffi">
+              <path d="M82 82h-14M82 88h-12M138 82h14M138 88h12"/>
+            </g>
+
+            <g class="acc acc-occhiali">
+              <circle cx="91" cy="55" r="13"/>
+              <circle cx="129" cy="55" r="13"/>
+              <path d="M104 55h12"/>
+            </g>
+            <g class="acc acc-cappello">
+              <path d="M78 45q32-26 64 0z"/>
+              <path d="M70 47h80"/>
+              <circle cx="110" cy="21" r="7"/>
+            </g>
+
+            <!-- il gomitolo, appoggiato accanto -->
+            <g class="gomitolo">
+              <circle cx="34" cy="156" r="15"/>
+              <path d="M23 150q11 10 22 3M25 162q9-12 20-7"/>
+              <path class="filo" d="M47 150q22-12 42-6"/>
+            </g>
+
+            <!-- zampe davanti a tutto: la destra muove i ferri -->
+            <ellipse class="mora-zampa" cx="86" cy="142" rx="13" ry="10"/>
+            <g class="mora-braccio" id="mora-braccio">
+              <g class="ferri">
+                <path d="M84 150l54-35M88 158l54-35"/>
+              </g>
+              <ellipse class="mora-zampa" cx="134" cy="132" rx="13" ry="10"/>
+              <g class="acc acc-ditale">
+                <path d="M142 124q9-5 13 4t-8 9"/>
+              </g>
+            </g>
+          </svg>
+
+          <!-- il calzino in lavorazione: la lana sale mentre la sessione va -->
+          <svg class="calzino-live" viewBox="0 0 120 120" role="img" aria-label="Calzino in lavorazione">
+            <defs>
+              <clipPath id="clip-calzino">
+                <rect x="42" y="12" width="34" height="62" rx="10"/>
+                <rect x="18" y="58" width="58" height="32" rx="16"/>
+              </clipPath>
+            </defs>
+            <g clip-path="url(#clip-calzino)">
+              <rect class="calzino-vuoto" x="0" y="0" width="120" height="120"/>
+              <rect class="calzino-lana" id="calzino-lana" x="0" y="120" width="120" height="120"/>
+            </g>
+            <g class="calzino-bordo">
+              <rect x="42" y="12" width="34" height="62" rx="10"/>
+              <rect x="18" y="58" width="58" height="32" rx="16"/>
+              <path d="M42 26h34"/>
+            </g>
+          </svg>
+        </div>
+
+        <p class="clock" id="clock" aria-live="off">25:00</p>
+        <p class="clock-note" id="clock-note">Sessione da 25 minuti</p>
+
+        <div class="cycles" id="cycles" aria-label="Sessioni prima della pausa lunga"></div>
+
+        <div class="controls">
+          <button type="button" class="btn primary big" id="btn-start">Avvia</button>
+          <button type="button" class="btn ghost" id="btn-skip">Salta</button>
+          <button type="button" class="btn ghost" id="btn-reset">Azzera</button>
+        </div>
+        <p class="hint kbd-hint">Barra spaziatrice: avvia o metti in pausa. <kbd>R</kbd> azzera, <kbd>S</kbd> salta.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Su che cosa stai lavorando</h2>
+          <button type="button" class="btn ghost small" id="btn-task-new">+ Attività</button>
+        </div>
+        <div class="task-chips" id="task-chips"></div>
+        <form id="form-task" class="inline-form" autocomplete="off" hidden>
+          <input id="task-name" type="text" maxlength="40" placeholder="es. Matematica, Tesi, Correzioni">
+          <button type="submit" class="btn primary small">Aggiungi</button>
+          <button type="button" class="btn ghost small" id="btn-task-cancel">Annulla</button>
+        </form>
+        <p class="error" id="task-error" role="alert" hidden></p>
+      </div>
+
+      <div class="card today-card">
+        <h2>Oggi</h2>
+        <div class="stat-row" id="today-stats"></div>
+        <div class="goal">
+          <div class="goal-bar"><span id="goal-fill"></span></div>
+          <p class="hint" id="goal-note"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= CASSETTO -->
+    <section id="view-cassetto" class="view" role="tabpanel" tabindex="-1" hidden>
+      <div class="card">
+        <div class="card-head">
+          <h2>Il cassetto</h2>
+          <span class="pill" id="paia-count">0 paia</span>
+        </div>
+        <p class="lede" id="cassetto-lede"></p>
+        <div class="cassetto" id="cassetto"></div>
+        <p class="empty" id="cassetto-empty">Il cassetto è vuoto: la prima sessione finita è il primo calzino.</p>
+      </div>
+
+      <div class="card">
+        <h2>Traguardi</h2>
+        <div class="badges" id="badges"></div>
+      </div>
+    </section>
+
+    <!-- ===================================================== STATISTICHE -->
+    <section id="view-statistiche" class="view" role="tabpanel" tabindex="-1" hidden>
+      <div class="card">
+        <h2>In breve</h2>
+        <div class="stat-row" id="stats-row"></div>
+      </div>
+
+      <div class="card">
+        <h2>Ultimi 14 giorni</h2>
+        <div class="chart" id="chart" role="img" aria-label="Minuti di concentrazione degli ultimi 14 giorni"></div>
+      </div>
+
+      <div class="card">
+        <h2>Per attività</h2>
+        <div class="breakdown" id="breakdown"></div>
+        <p class="empty" id="breakdown-empty">Nessuna sessione registrata.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Ultime sessioni</h2>
+          <span class="pill" id="sessions-count">0</span>
+        </div>
+        <ul class="log" id="log"></ul>
+        <p class="empty" id="log-empty">Il registro è vuoto.</p>
+      </div>
+    </section>
+
+    <!-- ==================================================== IMPOSTAZIONI -->
+    <section id="view-impostazioni" class="view" role="tabpanel" tabindex="-1" hidden>
+
+      <div class="card">
+        <h2>Durate</h2>
+        <div class="grid grid-2">
+          <label class="field"><span>Concentrazione (min)</span>
+            <input id="s-focus" type="number" min="1" max="180" step="1" inputmode="numeric"></label>
+          <label class="field"><span>Pausa breve (min)</span>
+            <input id="s-short" type="number" min="1" max="60" step="1" inputmode="numeric"></label>
+          <label class="field"><span>Pausa lunga (min)</span>
+            <input id="s-long" type="number" min="1" max="90" step="1" inputmode="numeric"></label>
+          <label class="field"><span>Sessioni prima della pausa lunga</span>
+            <input id="s-cycles" type="number" min="2" max="12" step="1" inputmode="numeric"></label>
+          <label class="field"><span>Obiettivo giornaliero (min)</span>
+            <input id="s-goal" type="number" min="10" max="960" step="5" inputmode="numeric"></label>
+        </div>
+        <div class="preset-row">
+          <span class="hint">Preimpostati:</span>
+          <button type="button" class="chip" data-preset="25-5-15-4">25 / 5 / 15</button>
+          <button type="button" class="chip" data-preset="50-10-30-2">50 / 10 / 30</button>
+          <button type="button" class="chip" data-preset="90-20-30-2">90 / 20 / 30</button>
+          <button type="button" class="chip" data-preset="15-3-10-4">15 / 3 / 10</button>
+        </div>
+        <div class="switches">
+          <label class="switch"><input type="checkbox" id="s-auto-break"><span>Avvia da sola la pausa</span></label>
+          <label class="switch"><input type="checkbox" id="s-auto-focus"><span>Avvia da sola la sessione dopo la pausa</span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Avvisi</h2>
+        <div class="switches">
+          <label class="switch"><input type="checkbox" id="s-sound"><span>Suono a fine sessione</span></label>
+          <label class="switch"><input type="checkbox" id="s-notify"><span>Notifica di sistema</span></label>
+          <label class="switch"><input type="checkbox" id="s-wake"><span>Tieni acceso lo schermo mentre il timer va</span></label>
+        </div>
+        <p class="hint" id="notify-note"></p>
+      </div>
+
+      <div class="card">
+        <h2>Distrattori</h2>
+        <p class="lede">Una pagina web non può spegnere le altre app del telefono: quello lo può fare
+          solo un'app installata con i permessi di sistema. Qui il patto è diverso — scrivi che cosa
+          ti ruba il tempo, e se esci dalla scheda mentre lavori Mora se ne accorge.</p>
+        <div class="chips-edit" id="distractors"></div>
+        <form id="form-distractor" class="inline-form" autocomplete="off">
+          <input id="distractor-name" type="text" maxlength="30" placeholder="es. Instagram, YouTube, chat di gruppo">
+          <button type="submit" class="btn primary small">Aggiungi</button>
+        </form>
+        <div class="switches">
+          <label class="switch"><input type="checkbox" id="s-strict"><span>Modalità severa: uscire dalla scheda disfa il calzino</span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Aspetto</h2>
+        <p class="hint">Tutti i colori e tutti gli accessori sono qui, senza nulla da sbloccare.</p>
+        <div class="palette-row" id="palettes"></div>
+        <div class="seg" role="group" aria-label="Tema chiaro o scuro">
+          <button type="button" class="seg-btn" data-theme="auto">Automatico</button>
+          <button type="button" class="seg-btn" data-theme="light">Chiaro</button>
+          <button type="button" class="seg-btn" data-theme="dark">Scuro</button>
+        </div>
+        <h3>Accessori di Mora</h3>
+        <div class="outfit-row" id="outfit"></div>
+      </div>
+
+      <div class="card">
+        <h2>I tuoi dati</h2>
+        <p class="lede">Tutto sta nel <code>localStorage</code> di questo browser: niente account,
+          niente server. Svuotare i dati del browser cancella anche il cassetto.</p>
+        <div class="btn-row">
+          <button type="button" class="btn ghost" id="btn-export">Esporta</button>
+          <label class="btn ghost file-btn">Importa<input type="file" id="file-import" accept="application/json,.json" hidden></label>
+          <button type="button" class="btn danger ghost" id="btn-wipe">Cancella tutto</button>
+        </div>
+        <p class="hint" id="data-note"></p>
+      </div>
+
+      <div class="card about">
+        <h2>Perché è tutto incluso</h2>
+        <p>Non c'è una versione Pro: un calzino per sessione, sempre allo stesso ritmo — niente
+          da comprare per averne di più. Durate libere, accessori, temi, statistiche complete,
+          esportazione. Se un domani vuoi il blocco vero delle app, serve un'app Android
+          nativa: questa è una pagina web, e una pagina web non ha quel permesso.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <p class="error block-warning" id="storage-warning" role="alert" hidden>
+    Questo browser non permette di salvare i dati (navigazione privata?). Il timer funziona,
+    ma i calzini non verranno conservati.
+  </p>
+</div>
+
+<!-- rientro da una fuga: compare quando torni sulla scheda -->
+<div class="sheet" id="sheet-escape" hidden>
+  <div class="sheet-box">
+    <h2 id="escape-title">Bentornato</h2>
+    <p id="escape-text"></p>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-escape-ok">Riprendo</button>
+    </div>
+  </div>
+</div>
+
+<!-- dettaglio di un calzino -->
+<div class="sheet" id="sheet-calzino" hidden>
+  <div class="sheet-box">
+    <h2>Calzino</h2>
+    <dl class="detail" id="calzino-detail"></dl>
+    <div class="btn-row">
+      <button type="button" class="btn ghost" id="btn-calzino-close">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<p class="toast" id="toast" role="status" aria-live="polite" hidden></p>
+
+<script src="js/storage.js"></script>
+<script src="js/timer.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
