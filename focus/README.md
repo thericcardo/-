@@ -4,8 +4,9 @@ Un timer di concentrazione con una compagna di lavoro: **Mora**, la talpa che
 sferruzza. Quando il timer parte lei prende i ferri; quando la sessione arriva
 in fondo, nel cassetto c'è **un calzino**. Due calzini fanno **un paio**.
 
-Un calzino per sessione, sempre. Niente monete, niente premi che vanno più
-veloce se paghi, niente versione Pro: quello che c'è, c'è per tutti.
+Un calzino per sessione. Con **Calzino Pro** — 1 € al mese — ne fa due e si
+aprono le decorazioni in più; tutto il resto (timer, cassetto, statistiche,
+esportazione) è gratis e completo, e resta tale.
 
 ## Come si usa
 
@@ -28,13 +29,55 @@ Scorciatoie da tastiera: barra spaziatrice avvia o mette in pausa, `R` azzera,
   colore dell'attività su cui hai lavorato.
 - **Traguardi** che si accendono da soli guardando le sessioni.
 - **Sei tavolozze**, tema chiaro/scuro/automatico e quattro accessori per Mora
-  (cappellino, occhiali, grembiule, ditale). Tutti disponibili da subito.
+  (cappellino, occhiali, grembiule, ditale).
 - **Suono** di fine sessione sintetizzato (nessun file da scaricare),
   **notifica** di sistema se il browser dà il permesso, **schermo acceso**
   mentre il timer va (Screen Wake Lock, dove c'è).
 - **Esporta / importa** in JSON, e cancellazione completa.
 - **Offline e installabile**: service worker e manifest, quindi «Aggiungi a
   schermata Home» funziona.
+
+## Calzino Pro — 1 € al mese
+
+Cambia due cose:
+
+- **Calzini ×2**: ogni sessione portata a termine ne mette due nel cassetto
+  invece di uno. Il secondo porta un marchio «2» e nel dettaglio dice da dove
+  viene: il cassetto deve restare leggibile come registro del lavoro fatto, non
+  diventare un mucchio.
+- **Decorazioni in più**: quattro tavolozze (Tramonto, Menta, Lavanda, Rame),
+  tre accessori per Mora (coroncina, papillon, fiorellino) e quattro fantasie
+  per i calzini del cassetto (righe, pois, rombi, punta a contrasto).
+
+Sette giorni di prova gratuita, una volta sola. Alla scadenza le decorazioni Pro
+si spengono ma **la scelta resta salvata**: rinnovando, ritrovi la tua tavolozza
+dov'era. I calzini doppi già cuciti non spariscono mai — sono lavoro fatto.
+
+### Come si incassa davvero
+
+L'abbonamento si sblocca con un codice `CALZ-XXXX-XXXX-XXXX`:
+
+```
+node focus/tools/genera-codice.mjs          un codice da 31 giorni
+node focus/tools/genera-codice.mjs 90 5     cinque codici da 90 giorni
+```
+
+Il giro completo, oggi: metti un link di pagamento (Stripe Payment Link o simili)
+in `PAGAMENTO_URL` dentro `js/licenza.js`, e quando arriva un pagamento generi un
+codice e lo mandi. Manuale, ma funziona da subito e senza server.
+
+### Quanto tiene il lucchetto
+
+Poco, e va detto: **il controllo del codice avviene nel browser**, con il sale
+scritto nel sorgente. Chi apre `js/licenza.js` si fabbrica un codice in un
+minuto, e chiunque può scrivere a mano la scadenza in `localStorage`. È una
+porta chiusa, non una cassaforte: chi paga lo fa perché gli va che questa cosa
+esista.
+
+Per un lucchetto vero serve un server che chieda a chi incassa se
+l'abbonamento è attivo. Il punto da sostituire è **uno solo**: la funzione
+`verifica()` in `js/licenza.js`, che oggi guarda la forma del codice e domani
+diventa una `fetch`. La firma non cambia, il resto dell'app non se ne accorge.
 
 ## Il patto sui distrattori
 
@@ -98,12 +141,14 @@ sostituire.
 index.html              markup delle quattro schermate
 css/styles.css          stile, tavolozze, il disegno di Mora
 js/storage.js           impostazioni, attività e sessioni su localStorage
+js/licenza.js           abbonamento Pro: prova, codici, scadenza
 js/timer.js             fasi, conteggio, suono, notifiche, schermo acceso
 js/app.js               interfaccia, cassetto, statistiche, import/export
 sw.js                   cache offline
 manifest.webmanifest    installazione come app
 icon.svg                icona
 build.mjs               genera la versione a file unico in dist/
+tools/genera-codice.mjs genera i codici di sblocco del Pro
 ```
 
 Nessuna dipendenza e nessuna compilazione per lavorarci: si modifica un file e
@@ -113,5 +158,7 @@ si ricarica la pagina.
 
 L'idea — un timer con una creatura che lavora mentre lavori tu — viene da
 *Focus Friend* di Hank Green. Qui non c'è niente di suo: personaggio, disegni,
-nome e codice sono originali, e le cose che lì stanno dietro l'abbonamento
-(decorazioni, ritmo dei premi) qui non sono un abbonamento: sono l'app.
+nome e codice sono originali. Anche il confine gratis/a pagamento somiglia:
+lì l'abbonamento dà decorazioni e premi più veloci, qui decorazioni e calzini
+doppi. La differenza è il prezzo — 1 € al mese invece di 1,99 $ — e il fatto
+che qui il lucchetto è dichiarato per quello che è.

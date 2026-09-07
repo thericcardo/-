@@ -49,6 +49,10 @@
 :root[data-palette="argilla"] { --deep: #2E211C; --accent: #E0785C; --accent-2: #E8C79A; }
 :root[data-palette="oceano"]  { --deep: #12242E; --accent: #5FB6D9; --accent-2: #A8E0C6; }
 :root[data-palette="carbone"] { --deep: #212121; --accent: #C9C4BC; --accent-2: #8FA0A6; }
+:root[data-palette="tramonto"] { --deep: #2B1B2E; --accent: #FF8A5B; --accent-2: #FFC9A0; }
+:root[data-palette="menta"]    { --deep: #12291F; --accent: #4FD1A5; --accent-2: #BDF0DA; }
+:root[data-palette="lavanda"]  { --deep: #241F3A; --accent: #A88CF0; --accent-2: #D9CBFF; }
+:root[data-palette="rame"]     { --deep: #2A1E18; --accent: #C9713A; --accent-2: #E6B98F; }
 
 /* --- tema scuro: le due regole vanno tenute allineate -------------------- */
 @media (prefers-color-scheme: dark) {
@@ -327,10 +331,18 @@ kbd {
 .acc-grembiule { stroke: var(--accent-2); stroke-width: 3.4; }
 .acc-grembiule path:first-child { fill: color-mix(in srgb, var(--accent-2) 45%, transparent); }
 .acc-ditale { stroke: var(--accent-2); }
+.acc-coroncina path { fill: var(--accent); stroke: var(--accent); stroke-width: 2; }
+.acc-fiore circle { fill: var(--accent-2); stroke: none; }
+.acc-fiore .cuore { fill: var(--accent); }
+.acc-papillon path { fill: var(--accent); stroke: none; }
+.acc-papillon .cuore { fill: var(--accent-2); stroke: none; }
 .scene.has-cappello .acc-cappello,
 .scene.has-occhiali .acc-occhiali,
 .scene.has-grembiule .acc-grembiule,
-.scene.has-ditale  .acc-ditale { display: block; }
+.scene.has-ditale .acc-ditale,
+.scene.has-coroncina .acc-coroncina,
+.scene.has-fiore .acc-fiore,
+.scene.has-papillon .acc-papillon { display: block; }
 
 /* il calzino in lavorazione: la lana sale dal fondo */
 .calzino-live { width: min(118px, 30%); height: auto; margin-bottom: .6rem; }
@@ -428,6 +440,8 @@ input[type="text"], input[type="number"], select {
 
 /* ------------------------------------------------------------- cassetto */
 
+.sagoma-condivisa { position: absolute; width: 0; height: 0; overflow: hidden; }
+
 .cassetto {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
@@ -468,6 +482,14 @@ input[type="text"], input[type="number"], select {
 .calzino .corpo { stroke: rgba(0, 0, 0, .18); stroke-width: 3; }
 .calzino .bordo { stroke: rgba(255, 255, 255, .75); stroke-width: 4; stroke-linecap: round; fill: none; }
 .calzino.vuoto { cursor: default; opacity: .45; }
+.calzino .fantasia { fill: rgba(255, 255, 255, .42); stroke: none; }
+.calzino .fantasia-scura { fill: rgba(0, 0, 0, .16); stroke: none; }
+.calzino .doppio {
+  fill: none;
+  stroke: rgba(255, 255, 255, .9);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
 .calzino.vuoto .corpo { fill: none; stroke: var(--line); stroke-dasharray: 6 5; }
 
 .badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .6rem; margin-top: .4rem; }
@@ -604,3 +626,40 @@ input[type="text"], input[type="number"], select {
 .chip .as-text { font-size: inherit; }
 .chip .x:hover { color: var(--danger); }
 .patch { transition: transform .12s ease; }
+
+/* ------------------------------------------------------------------- Pro */
+
+.chip.bloccata { opacity: .6; }
+.chip.bloccata::after {
+  content: "1 €";
+  font-size: .68rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 .32rem;
+  color: var(--muted);
+}
+.pal.bloccata { opacity: .55; }
+.pal.bloccata::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(45deg, rgba(0, 0, 0, .12) 0 4px, transparent 4px 8px);
+}
+.pal { position: relative; }
+
+.pro-card {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 10%, var(--surface)), var(--surface));
+}
+.pro-card.is-attivo .pill { background: var(--accent); color: #1A1A1A; }
+
+.pro-lista { margin: .6rem 0; padding-left: 1.1rem; font-size: .9rem; }
+.pro-lista li { margin-bottom: .35rem; }
+.pro-attivo {
+  background: color-mix(in srgb, var(--accent) 20%, var(--surface));
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: .5rem .7rem;
+  font-size: .9rem;
+}
+.sheet-box { max-height: 88vh; overflow-y: auto; }

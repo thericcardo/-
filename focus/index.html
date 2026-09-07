@@ -4,13 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Calzino</title>
-<meta name="description" content="Timer di concentrazione con Mora, la talpa che sferruzza: ogni sessione finita è un calzino, due calzini fanno un paio. Tutto incluso, nessun abbonamento.">
+<meta name="description" content="Timer di concentrazione con Mora, la talpa che sferruzza: ogni sessione finita è un calzino, due calzini fanno un paio. Gratis; con il Pro a 1 € al mese i calzini sono due e si aprono le decorazioni.">
 <meta name="theme-color" content="#1E2438">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+
+<!-- La sagoma del calzino, definita una volta sola: i calzini del cassetto la
+     usano per ritagliare dentro il contorno le fantasie. -->
+<svg class="sagoma-condivisa" aria-hidden="true" focusable="false">
+  <clipPath id="clip-sagoma" clipPathUnits="userSpaceOnUse">
+    <path d="M43 8h14a9 9 0 0 1 9 9v56a9 9 0 0 1-9 9h-30a15 15 0 0 1 0-30h7v-35a9 9 0 0 1 9-9z"/>
+  </clipPath>
+</svg>
 
 <div class="app">
 
@@ -82,6 +90,20 @@
               <path d="M78 45q32-26 64 0z"/>
               <path d="M70 47h80"/>
               <circle cx="110" cy="21" r="7"/>
+            </g>
+
+            <!-- decorazioni Pro -->
+            <g class="acc acc-coroncina">
+              <path d="M80 46l5-22 11 13 14-18 14 18 11-13 5 22z"/>
+            </g>
+            <g class="acc acc-fiore">
+              <circle cx="148" cy="46" r="6"/><circle cx="160" cy="46" r="6"/>
+              <circle cx="154" cy="36" r="6"/><circle cx="154" cy="56" r="6"/>
+              <circle class="cuore" cx="154" cy="46" r="4.5"/>
+            </g>
+            <g class="acc acc-papillon">
+              <path d="M110 106l-17-10v20zM110 106l17-10v20z"/>
+              <circle class="cuore" cx="110" cy="106" r="4.5"/>
             </g>
 
             <!-- il gomitolo, appoggiato accanto -->
@@ -273,6 +295,8 @@
         </div>
         <h3>Accessori di Mora</h3>
         <div class="outfit-row" id="outfit"></div>
+        <h3>Fantasia dei calzini</h3>
+        <div class="outfit-row" id="fantasie"></div>
       </div>
 
       <div class="card">
@@ -287,12 +311,26 @@
         <p class="hint" id="data-note"></p>
       </div>
 
+      <div class="card pro-card" id="pro-card">
+        <div class="card-head">
+          <h2>Calzino Pro</h2>
+          <span class="pill" id="pro-stato">non attivo</span>
+        </div>
+        <p class="lede">Un euro al mese. Cambia due cose: ogni sessione finita mette
+          <b>due calzini</b> nel cassetto invece di uno, e si aprono le decorazioni in più —
+          quattro tavolozze, tre accessori per Mora, quattro fantasie per i calzini.</p>
+        <p class="hint">Timer, cassetto, statistiche, esportazione e tutto il resto restano
+          gratis e completi: il Pro non toglie niente a chi non paga.</p>
+        <div class="btn-row">
+          <button type="button" class="btn primary" id="btn-pro">Vedi il Pro</button>
+        </div>
+      </div>
+
       <div class="card about">
-        <h2>Perché è tutto incluso</h2>
-        <p>Non c'è una versione Pro: un calzino per sessione, sempre allo stesso ritmo — niente
-          da comprare per averne di più. Durate libere, accessori, temi, statistiche complete,
-          esportazione. Se un domani vuoi il blocco vero delle app, serve un'app Android
-          nativa: questa è una pagina web, e una pagina web non ha quel permesso.</p>
+        <h2>Il blocco delle app</h2>
+        <p>Non c'è, né gratis né a pagamento: questa è una pagina web e quel permesso
+          non ce l'ha. Per spegnere davvero le altre app servirebbe un'app Android
+          installata. Qui restano l'elenco dei distrattori e il conteggio delle uscite.</p>
       </div>
     </section>
 
@@ -315,6 +353,43 @@
   </div>
 </div>
 
+<!-- il Pro: prova, pagamento, codice -->
+<div class="sheet" id="sheet-pro" hidden>
+  <div class="sheet-box">
+    <h2>Calzino Pro — <span id="pro-prezzo">1 € al mese</span></h2>
+    <p class="pro-attivo" id="pro-attivo" hidden></p>
+    <ul class="pro-lista">
+      <li><b>Calzini ×2</b> — ogni sessione finita ne mette due nel cassetto, segnati come doppi.</li>
+      <li><b>Quattro tavolozze in più</b> — Tramonto, Menta, Lavanda, Rame.</li>
+      <li><b>Tre accessori per Mora</b> — coroncina, papillon, fiorellino.</li>
+      <li><b>Quattro fantasie</b> per i calzini del cassetto.</li>
+    </ul>
+
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-prova">Prova 7 giorni</button>
+      <button type="button" class="btn ghost" id="btn-paga">Abbonati</button>
+    </div>
+    <p class="hint" id="pro-pagamento-nota"></p>
+
+    <h3>Hai un codice?</h3>
+    <form id="form-codice" class="inline-form" autocomplete="off">
+      <input id="pro-codice" type="text" maxlength="19" placeholder="CALZ-0000-0000-0000"
+             autocapitalize="characters" spellcheck="false">
+      <button type="submit" class="btn primary small">Sblocca</button>
+    </form>
+    <p class="error" id="pro-errore" role="alert" hidden></p>
+
+    <p class="hint">Il codice viene controllato qui dentro, nel browser: è una porta
+      chiusa, non una cassaforte. Chi apre il sorgente può aggirarla — se paghi, paghi
+      perché ti va che questa cosa esista.</p>
+
+    <div class="btn-row">
+      <button type="button" class="btn ghost small" id="btn-pro-rimuovi" hidden>Togli la licenza da qui</button>
+      <button type="button" class="btn ghost" id="btn-pro-close">Chiudi</button>
+    </div>
+  </div>
+</div>
+
 <!-- dettaglio di un calzino -->
 <div class="sheet" id="sheet-calzino" hidden>
   <div class="sheet-box">
@@ -329,6 +404,7 @@
 <p class="toast" id="toast" role="status" aria-live="polite" hidden></p>
 
 <script src="js/storage.js"></script>
+<script src="js/licenza.js"></script>
 <script src="js/timer.js"></script>
 <script src="js/app.js"></script>
 </body>

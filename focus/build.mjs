@@ -60,7 +60,7 @@ const standalone = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Timer di concentrazione con Mora, la talpa che sferruzza: ogni sessione finita è un calzino, due calzini fanno un paio. Tutto incluso, nessun abbonamento.">
+<meta name="description" content="Timer di concentrazione con Mora, la talpa che sferruzza: ogni sessione finita è un calzino, due calzini fanno un paio. Gratis; con il Pro a 1 € al mese i calzini sono due e si aprono le decorazioni.">
 <meta name="theme-color" content="#1E2438">
 <link rel="icon" href="${iconDataUri}" type="image/svg+xml">
 <title>${TITLE}</title>

@@ -173,6 +173,11 @@ const Timer = (() => {
     complete(false);
   }
 
+  /** Il Pro raddoppia i calzini; senza licenza (o senza il modulo) resta uno. */
+  function moltiplicatore() {
+    return typeof Licenza !== "undefined" ? Licenza.moltiplicatore() : 1;
+  }
+
   function elapsedMinutes() {
     if (!s.startedAt) return 0;
     const total = Store.durationFor(s.phase) * 60000;
@@ -199,7 +204,10 @@ const Timer = (() => {
         kind: wasPhase,
         completed: Boolean(natural),
         taskId: s.taskId,
-        escapes: s.escapes
+        escapes: s.escapes,
+        // Il moltiplicatore si legge adesso e resta scritto nella sessione:
+        // un calzino guadagnato col Pro non sparisce quando il Pro scade.
+        calzini: natural && wasPhase === "focus" ? moltiplicatore() : 1
       });
     }
 

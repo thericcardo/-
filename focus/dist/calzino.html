@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Timer di concentrazione con Mora, la talpa che sferruzza: ogni sessione finita è un calzino, due calzini fanno un paio. Tutto incluso, nessun abbonamento.">
+<meta name="description" content="Timer di concentrazione con Mora, la talpa che sferruzza: ogni sessione finita è un calzino, due calzini fanno un paio. Gratis; con il Pro a 1 € al mese i calzini sono due e si aprono le decorazioni.">
 <meta name="theme-color" content="#1E2438">
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNhbHppbm8iPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTEyIiBmaWxsPSIjMUUyNDM4Ii8+CiAgPHBhdGggZD0iTTIxNCA5Nmg3MmE0MCA0MCAwIDAgMSA0MCA0MHYyMzhhNDAgNDAgMCAwIDEtNDAgNDBIMTUwYTY2IDY2IDAgMCAxIDAtMTMyaDMyVjEzNmE0MCA0MCAwIDAgMSAzMi00MHoiCiAgICAgICAgZmlsbD0iI0YyQTY1QSIvPgogIDxwYXRoIGQ9Ik0xOTYgMTYwaDEwOCIgc3Ryb2tlPSIjMUUyNDM4IiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMTk2IDIxMGgxMDhNMTk2IDI1OGgxMDgiIHN0cm9rZT0iIzdGRDFCOSIgc3Ryb2tlLXdpZHRoPSIxNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtZGFzaGFycmF5PSIyNiAyMiIvPgo8L3N2Zz4K" type="image/svg+xml">
 <title>Calzino</title>
@@ -59,6 +59,10 @@
 :root[data-palette="argilla"] { --deep: #2E211C; --accent: #E0785C; --accent-2: #E8C79A; }
 :root[data-palette="oceano"]  { --deep: #12242E; --accent: #5FB6D9; --accent-2: #A8E0C6; }
 :root[data-palette="carbone"] { --deep: #212121; --accent: #C9C4BC; --accent-2: #8FA0A6; }
+:root[data-palette="tramonto"] { --deep: #2B1B2E; --accent: #FF8A5B; --accent-2: #FFC9A0; }
+:root[data-palette="menta"]    { --deep: #12291F; --accent: #4FD1A5; --accent-2: #BDF0DA; }
+:root[data-palette="lavanda"]  { --deep: #241F3A; --accent: #A88CF0; --accent-2: #D9CBFF; }
+:root[data-palette="rame"]     { --deep: #2A1E18; --accent: #C9713A; --accent-2: #E6B98F; }
 
 /* --- tema scuro: le due regole vanno tenute allineate -------------------- */
 @media (prefers-color-scheme: dark) {
@@ -337,10 +341,18 @@ kbd {
 .acc-grembiule { stroke: var(--accent-2); stroke-width: 3.4; }
 .acc-grembiule path:first-child { fill: color-mix(in srgb, var(--accent-2) 45%, transparent); }
 .acc-ditale { stroke: var(--accent-2); }
+.acc-coroncina path { fill: var(--accent); stroke: var(--accent); stroke-width: 2; }
+.acc-fiore circle { fill: var(--accent-2); stroke: none; }
+.acc-fiore .cuore { fill: var(--accent); }
+.acc-papillon path { fill: var(--accent); stroke: none; }
+.acc-papillon .cuore { fill: var(--accent-2); stroke: none; }
 .scene.has-cappello .acc-cappello,
 .scene.has-occhiali .acc-occhiali,
 .scene.has-grembiule .acc-grembiule,
-.scene.has-ditale  .acc-ditale { display: block; }
+.scene.has-ditale .acc-ditale,
+.scene.has-coroncina .acc-coroncina,
+.scene.has-fiore .acc-fiore,
+.scene.has-papillon .acc-papillon { display: block; }
 
 /* il calzino in lavorazione: la lana sale dal fondo */
 .calzino-live { width: min(118px, 30%); height: auto; margin-bottom: .6rem; }
@@ -438,6 +450,8 @@ input[type="text"], input[type="number"], select {
 
 /* ------------------------------------------------------------- cassetto */
 
+.sagoma-condivisa { position: absolute; width: 0; height: 0; overflow: hidden; }
+
 .cassetto {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
@@ -478,6 +492,14 @@ input[type="text"], input[type="number"], select {
 .calzino .corpo { stroke: rgba(0, 0, 0, .18); stroke-width: 3; }
 .calzino .bordo { stroke: rgba(255, 255, 255, .75); stroke-width: 4; stroke-linecap: round; fill: none; }
 .calzino.vuoto { cursor: default; opacity: .45; }
+.calzino .fantasia { fill: rgba(255, 255, 255, .42); stroke: none; }
+.calzino .fantasia-scura { fill: rgba(0, 0, 0, .16); stroke: none; }
+.calzino .doppio {
+  fill: none;
+  stroke: rgba(255, 255, 255, .9);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
 .calzino.vuoto .corpo { fill: none; stroke: var(--line); stroke-dasharray: 6 5; }
 
 .badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .6rem; margin-top: .4rem; }
@@ -615,9 +637,54 @@ input[type="text"], input[type="number"], select {
 .chip .x:hover { color: var(--danger); }
 .patch { transition: transform .12s ease; }
 
+/* ------------------------------------------------------------------- Pro */
+
+.chip.bloccata { opacity: .6; }
+.chip.bloccata::after {
+  content: "1 €";
+  font-size: .68rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 .32rem;
+  color: var(--muted);
+}
+.pal.bloccata { opacity: .55; }
+.pal.bloccata::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(45deg, rgba(0, 0, 0, .12) 0 4px, transparent 4px 8px);
+}
+.pal { position: relative; }
+
+.pro-card {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 10%, var(--surface)), var(--surface));
+}
+.pro-card.is-attivo .pill { background: var(--accent); color: #1A1A1A; }
+
+.pro-lista { margin: .6rem 0; padding-left: 1.1rem; font-size: .9rem; }
+.pro-lista li { margin-bottom: .35rem; }
+.pro-attivo {
+  background: color-mix(in srgb, var(--accent) 20%, var(--surface));
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: .5rem .7rem;
+  font-size: .9rem;
+}
+.sheet-box { max-height: 88vh; overflow-y: auto; }
+
 </style>
 </head>
 <body>
+<!-- La sagoma del calzino, definita una volta sola: i calzini del cassetto la
+     usano per ritagliare dentro il contorno le fantasie. -->
+<svg class="sagoma-condivisa" aria-hidden="true" focusable="false">
+  <clipPath id="clip-sagoma" clipPathUnits="userSpaceOnUse">
+    <path d="M43 8h14a9 9 0 0 1 9 9v56a9 9 0 0 1-9 9h-30a15 15 0 0 1 0-30h7v-35a9 9 0 0 1 9-9z"/>
+  </clipPath>
+</svg>
+
 <div class="app">
 
   <header class="topbar">
@@ -688,6 +755,20 @@ input[type="text"], input[type="number"], select {
               <path d="M78 45q32-26 64 0z"/>
               <path d="M70 47h80"/>
               <circle cx="110" cy="21" r="7"/>
+            </g>
+
+            <!-- decorazioni Pro -->
+            <g class="acc acc-coroncina">
+              <path d="M80 46l5-22 11 13 14-18 14 18 11-13 5 22z"/>
+            </g>
+            <g class="acc acc-fiore">
+              <circle cx="148" cy="46" r="6"/><circle cx="160" cy="46" r="6"/>
+              <circle cx="154" cy="36" r="6"/><circle cx="154" cy="56" r="6"/>
+              <circle class="cuore" cx="154" cy="46" r="4.5"/>
+            </g>
+            <g class="acc acc-papillon">
+              <path d="M110 106l-17-10v20zM110 106l17-10v20z"/>
+              <circle class="cuore" cx="110" cy="106" r="4.5"/>
             </g>
 
             <!-- il gomitolo, appoggiato accanto -->
@@ -879,6 +960,8 @@ input[type="text"], input[type="number"], select {
         </div>
         <h3>Accessori di Mora</h3>
         <div class="outfit-row" id="outfit"></div>
+        <h3>Fantasia dei calzini</h3>
+        <div class="outfit-row" id="fantasie"></div>
       </div>
 
       <div class="card">
@@ -893,12 +976,26 @@ input[type="text"], input[type="number"], select {
         <p class="hint" id="data-note"></p>
       </div>
 
+      <div class="card pro-card" id="pro-card">
+        <div class="card-head">
+          <h2>Calzino Pro</h2>
+          <span class="pill" id="pro-stato">non attivo</span>
+        </div>
+        <p class="lede">Un euro al mese. Cambia due cose: ogni sessione finita mette
+          <b>due calzini</b> nel cassetto invece di uno, e si aprono le decorazioni in più —
+          quattro tavolozze, tre accessori per Mora, quattro fantasie per i calzini.</p>
+        <p class="hint">Timer, cassetto, statistiche, esportazione e tutto il resto restano
+          gratis e completi: il Pro non toglie niente a chi non paga.</p>
+        <div class="btn-row">
+          <button type="button" class="btn primary" id="btn-pro">Vedi il Pro</button>
+        </div>
+      </div>
+
       <div class="card about">
-        <h2>Perché è tutto incluso</h2>
-        <p>Non c'è una versione Pro: un calzino per sessione, sempre allo stesso ritmo — niente
-          da comprare per averne di più. Durate libere, accessori, temi, statistiche complete,
-          esportazione. Se un domani vuoi il blocco vero delle app, serve un'app Android
-          nativa: questa è una pagina web, e una pagina web non ha quel permesso.</p>
+        <h2>Il blocco delle app</h2>
+        <p>Non c'è, né gratis né a pagamento: questa è una pagina web e quel permesso
+          non ce l'ha. Per spegnere davvero le altre app servirebbe un'app Android
+          installata. Qui restano l'elenco dei distrattori e il conteggio delle uscite.</p>
       </div>
     </section>
 
@@ -917,6 +1014,43 @@ input[type="text"], input[type="number"], select {
     <p id="escape-text"></p>
     <div class="btn-row">
       <button type="button" class="btn primary" id="btn-escape-ok">Riprendo</button>
+    </div>
+  </div>
+</div>
+
+<!-- il Pro: prova, pagamento, codice -->
+<div class="sheet" id="sheet-pro" hidden>
+  <div class="sheet-box">
+    <h2>Calzino Pro — <span id="pro-prezzo">1 € al mese</span></h2>
+    <p class="pro-attivo" id="pro-attivo" hidden></p>
+    <ul class="pro-lista">
+      <li><b>Calzini ×2</b> — ogni sessione finita ne mette due nel cassetto, segnati come doppi.</li>
+      <li><b>Quattro tavolozze in più</b> — Tramonto, Menta, Lavanda, Rame.</li>
+      <li><b>Tre accessori per Mora</b> — coroncina, papillon, fiorellino.</li>
+      <li><b>Quattro fantasie</b> per i calzini del cassetto.</li>
+    </ul>
+
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-prova">Prova 7 giorni</button>
+      <button type="button" class="btn ghost" id="btn-paga">Abbonati</button>
+    </div>
+    <p class="hint" id="pro-pagamento-nota"></p>
+
+    <h3>Hai un codice?</h3>
+    <form id="form-codice" class="inline-form" autocomplete="off">
+      <input id="pro-codice" type="text" maxlength="19" placeholder="CALZ-0000-0000-0000"
+             autocapitalize="characters" spellcheck="false">
+      <button type="submit" class="btn primary small">Sblocca</button>
+    </form>
+    <p class="error" id="pro-errore" role="alert" hidden></p>
+
+    <p class="hint">Il codice viene controllato qui dentro, nel browser: è una porta
+      chiusa, non una cassaforte. Chi apre il sorgente può aggirarla — se paghi, paghi
+      perché ti va che questa cosa esista.</p>
+
+    <div class="btn-row">
+      <button type="button" class="btn ghost small" id="btn-pro-rimuovi" hidden>Togli la licenza da qui</button>
+      <button type="button" class="btn ghost" id="btn-pro-close">Chiudi</button>
     </div>
   </div>
 </div>
@@ -958,7 +1092,32 @@ const Store = (() => {
     { id: "prugna",   nome: "Prugna",    accento: "#D98BB0", secondo: "#9AB6E8", scuro: "#2A1E30" },
     { id: "argilla",  nome: "Argilla",   accento: "#E0785C", secondo: "#E8C79A", scuro: "#2E211C" },
     { id: "oceano",   nome: "Oceano",    accento: "#5FB6D9", secondo: "#A8E0C6", scuro: "#12242E" },
-    { id: "carbone",  nome: "Carbone",   accento: "#C9C4BC", secondo: "#8FA0A6", scuro: "#212121" }
+    { id: "carbone",  nome: "Carbone",   accento: "#C9C4BC", secondo: "#8FA0A6", scuro: "#212121" },
+    { id: "tramonto", nome: "Tramonto",  accento: "#FF8A5B", secondo: "#FFC9A0", scuro: "#2B1B2E", pro: true },
+    { id: "menta",    nome: "Menta",     accento: "#4FD1A5", secondo: "#BDF0DA", scuro: "#12291F", pro: true },
+    { id: "lavanda",  nome: "Lavanda",   accento: "#A88CF0", secondo: "#D9CBFF", scuro: "#241F3A", pro: true },
+    { id: "rame",     nome: "Rame",      accento: "#C9713A", secondo: "#E6B98F", scuro: "#2A1E18", pro: true }
+  ];
+
+  /** Accessori di Mora e fantasie dei calzini: quelli con `pro` stanno dietro
+      l'abbonamento, gli altri no. L'elenco vive qui perché lo guardano sia
+      l'interfaccia sia il controllo di quello che è davvero sbloccato. */
+  const ACCESSORI = [
+    { id: "cappello",  nome: "Cappellino" },
+    { id: "occhiali",  nome: "Occhiali" },
+    { id: "grembiule", nome: "Grembiule" },
+    { id: "ditale",    nome: "Ditale" },
+    { id: "coroncina", nome: "Coroncina", pro: true },
+    { id: "papillon",  nome: "Papillon",  pro: true },
+    { id: "fiore",     nome: "Fiorellino", pro: true }
+  ];
+
+  const FANTASIE = [
+    { id: "tinta",  nome: "Tinta unita" },
+    { id: "righe",  nome: "A righe",   pro: true },
+    { id: "pois",   nome: "A pois",    pro: true },
+    { id: "rombi",  nome: "A rombi",   pro: true },
+    { id: "punta",  nome: "Punta a contrasto", pro: true }
   ];
 
   /** Colori della lana: il cassetto deve restare leggibile anche pieno. */
@@ -978,7 +1137,9 @@ const Store = (() => {
     strict: false,
     theme: "auto",
     palette: "notte",
-    outfit: { cappello: false, occhiali: false, grembiule: true, ditale: false },
+    outfit: { cappello: false, occhiali: false, grembiule: true, ditale: false,
+              coroncina: false, papillon: false, fiore: false },
+    fantasia: "tinta",
     distractors: ["Instagram", "YouTube", "Chat di gruppo"]
   };
 
@@ -1016,6 +1177,7 @@ const Store = (() => {
     }
     if (!["auto", "light", "dark"].includes(s.theme)) s.theme = "auto";
     if (!PALETTES.some((p) => p.id === s.palette)) s.palette = "notte";
+    if (!FANTASIE.some((f) => f.id === s.fantasia)) s.fantasia = "tinta";
     const outfit = Object.assign({}, DEFAULT_SETTINGS.outfit, s.outfit && typeof s.outfit === "object" ? s.outfit : {});
     for (const k of Object.keys(outfit)) outfit[k] = Boolean(outfit[k]);
     s.outfit = outfit;
@@ -1027,6 +1189,14 @@ const Store = (() => {
 
   function isTask(t) {
     return t && typeof t === "object" && typeof t.id === "string" && typeof t.name === "string";
+  }
+
+  /** Quanti calzini ha fruttato una sessione: uno di suo, due con il Pro.
+      Resta scritto nella sessione, non ricalcolato: se l'abbonamento scade, i
+      calzini già cuciti restano quelli che erano. */
+  function clampCalzini(v) {
+    const n = Math.round(Number(v));
+    return Number.isFinite(n) && n >= 1 && n <= 4 ? n : 1;
   }
 
   function isSession(s) {
@@ -1050,7 +1220,8 @@ const Store = (() => {
             kind: s.kind === "short" || s.kind === "long" ? s.kind : "focus",
             completed: Boolean(s.completed),
             taskId: typeof s.taskId === "string" ? s.taskId : null,
-            escapes: Math.max(0, Math.round(Number(s.escapes) || 0))
+            escapes: Math.max(0, Math.round(Number(s.escapes) || 0)),
+            calzini: clampCalzini(s.calzini)
           }))
         : [];
       return {
@@ -1177,24 +1348,39 @@ const Store = (() => {
       kind: data.kind || "focus",
       completed: Boolean(data.completed),
       taskId: data.taskId || null,
-      escapes: Math.max(0, Math.round(Number(data.escapes) || 0))
+      escapes: Math.max(0, Math.round(Number(data.escapes) || 0)),
+      calzini: clampCalzini(data.calzini)
     };
     state.sessions.push(session);
     save();
     return session;
   }
 
-  /** I calzini sono le sessioni di concentrazione finite, dalla più vecchia. */
+  /**
+   * I calzini sono le sessioni di concentrazione finite, dalla più vecchia.
+   * Una sessione ne vale uno; con il Pro attivo al momento in cui è finita ne
+   * vale due, e il secondo resta segnato come doppio — il cassetto deve poter
+   * dire quanto lavoro c'è dietro, non solo quanti calzini ci sono.
+   */
   function socks() {
-    return state.sessions
+    const out = [];
+    const complete = state.sessions
       .filter((s) => s.kind === "focus" && s.completed)
-      .sort((a, b) => String(a.endedAt).localeCompare(String(b.endedAt)))
-      .map((s, i) => ({
-        index: i,
-        session: s,
-        color: colorOf(s, i),
-        paio: Math.floor(i / CALZINI_PER_PAIO)
-      }));
+      .sort((a, b) => String(a.endedAt).localeCompare(String(b.endedAt)));
+    for (const s of complete) {
+      const quanti = clampCalzini(s.calzini);
+      for (let k = 0; k < quanti; k++) {
+        out.push({
+          index: out.length,
+          id: k === 0 ? s.id : `${s.id}#${k + 1}`,
+          session: s,
+          doppio: k > 0,
+          color: colorOf(s, out.length),
+          paio: Math.floor(out.length / CALZINI_PER_PAIO)
+        });
+      }
+    }
+    return out;
   }
 
   function colorOf(session, i) {
@@ -1268,6 +1454,8 @@ const Store = (() => {
 
   return {
     PALETTES,
+    ACCESSORI,
+    FANTASIE,
     FILATI,
     CALZINI_PER_PAIO,
     DEFAULT_SETTINGS,
@@ -1290,6 +1478,192 @@ const Store = (() => {
     exportAll,
     importAll,
     wipe
+  };
+})();
+
+
+/**
+ * Calzino — la licenza Pro.
+ *
+ * Un euro al mese per: calzini ×2 e le decorazioni in più (tavolozze,
+ * accessori di Mora, fantasie dei calzini). Tutto il resto — timer, cassetto,
+ * statistiche, export — resta gratis e non chiede niente a nessuno.
+ *
+ * ONESTÀ SUL LUCCHETTO. Questo è un sito statico: non c'è un server che possa
+ * dire «questa persona ha pagato». Il controllo del codice avviene qui, nel
+ * browser, con il sale scritto due righe più sotto: chi apre il sorgente può
+ * fabbricarsi un codice in un minuto. È una porta chiusa, non una cassaforte —
+ * tiene fuori la distrazione, non chi ci tiene a entrare.
+ *
+ * Per un lucchetto vero serve un server che verifichi l'abbonamento presso chi
+ * incassa (Stripe e simili). Il punto da sostituire è uno solo: `verifica()`.
+ * Diventa una `fetch` al tuo server, il resto del file non cambia.
+ */
+const Licenza = (() => {
+  "use strict";
+
+  const KEY = "calzino.licenza.v1";
+
+  /** Cambiandolo, i codici già distribuiti smettono di funzionare. */
+  const SALE = "mora-sferruzza-2026";
+
+  const PREZZO = "1 € al mese";
+  const GIORNI_ABBONAMENTO = 31;
+  const GIORNI_PROVA = 7;
+
+  /** Il link del pagamento (Stripe Payment Link, PayPal, quello che usi).
+      Finché resta vuoto, l'app lo dice invece di fingere un bottone che funziona. */
+  const PAGAMENTO_URL = "";
+
+  let stato = carica();
+
+  function vuoto() {
+    return { codice: null, scadenza: null, provaUsata: false, attivataIl: null };
+  }
+
+  function carica() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return vuoto();
+      const p = JSON.parse(raw);
+      if (!p || typeof p !== "object") return vuoto();
+      return {
+        codice: typeof p.codice === "string" ? p.codice : null,
+        scadenza: typeof p.scadenza === "string" ? p.scadenza : null,
+        provaUsata: Boolean(p.provaUsata),
+        attivataIl: typeof p.attivataIl === "string" ? p.attivataIl : null
+      };
+    } catch (err) {
+      return vuoto();
+    }
+  }
+
+  function salva() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(stato));
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  /* ------------------------------------------------------------- il codice */
+
+  /** FNV-1a: corta, senza dipendenze, uguale in tools/genera-codice.mjs. */
+  function impronta(testo) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < testo.length; i++) {
+      h ^= testo.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h >>> 0;
+  }
+
+  const pulisci = (codice) => String(codice || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+  /**
+   * Un codice è `CALZ-AAAA-BBBB-CCCC`: otto caratteri di contenuto (i primi
+   * cinque sono il giorno di scadenza in base 36) più quattro di controllo.
+   */
+  function leggi(codice) {
+    const c = pulisci(codice);
+    if (!c.startsWith("CALZ") || c.length !== 16) return null;
+    const corpo = c.slice(4, 12);
+    const controllo = c.slice(12);
+    const atteso = impronta(corpo + SALE).toString(36).toUpperCase().padStart(7, "0").slice(-4);
+    if (controllo !== atteso) return null;
+    const giorno = parseInt(corpo.slice(0, 5), 36);
+    if (!Number.isFinite(giorno)) return null;
+    const scadenza = new Date(giorno * 86400000);
+    // Un codice buono per dieci anni non è un codice: è un errore di stampa.
+    if (scadenza.getFullYear() > new Date().getFullYear() + 5) return null;
+    return { scadenza, formattato: `CALZ-${corpo.slice(0, 4)}-${corpo.slice(4)}-${controllo}` };
+  }
+
+  /**
+   * QUI si innesta il controllo vero. Oggi guarda solo la forma del codice;
+   * domani può diventare:
+   *
+   *   const r = await fetch("https://tuo-server/licenza", {...});
+   *
+   * La firma resta questa — una promessa che risolve {ok, scadenza} — quindi
+   * l'interfaccia non si accorge del cambio.
+   */
+  async function verifica(codice) {
+    const letto = leggi(codice);
+    if (!letto) return { ok: false, error: "Codice non valido. Controlla di averlo copiato per intero." };
+    if (letto.scadenza <= new Date()) return { ok: false, error: "Questo codice è scaduto." };
+    return { ok: true, scadenza: letto.scadenza, codice: letto.formattato };
+  }
+
+  /* ------------------------------------------------------------- lo stato */
+
+  function scadenza() {
+    return stato.scadenza ? new Date(stato.scadenza) : null;
+  }
+
+  function attiva() {
+    const s = scadenza();
+    return Boolean(s && s > new Date());
+  }
+
+  const inProva = () => attiva() && !stato.codice;
+
+  function giorniRimasti() {
+    const s = scadenza();
+    if (!s) return 0;
+    return Math.max(0, Math.ceil((s - new Date()) / 86400000));
+  }
+
+  /** L'unica cosa che tocca i dati: quanti calzini vale una sessione finita. */
+  const moltiplicatore = () => (attiva() ? 2 : 1);
+
+  const puoiProvare = () => !stato.provaUsata && !attiva();
+
+  function avviaProva() {
+    if (!puoiProvare()) return { ok: false, error: "La prova è già stata usata." };
+    const fine = new Date(Date.now() + GIORNI_PROVA * 86400000);
+    stato.scadenza = fine.toISOString();
+    stato.provaUsata = true;
+    stato.attivataIl = new Date().toISOString();
+    stato.codice = null;
+    salva();
+    return { ok: true, scadenza: fine };
+  }
+
+  async function riscatta(codice) {
+    const esito = await verifica(codice);
+    if (!esito.ok) return esito;
+    stato.codice = esito.codice;
+    stato.scadenza = esito.scadenza.toISOString();
+    stato.attivataIl = new Date().toISOString();
+    salva();
+    return { ok: true, scadenza: esito.scadenza };
+  }
+
+  /** Toglie la licenza da questo dispositivo: il codice resta valido altrove. */
+  function rimuovi() {
+    stato.codice = null;
+    stato.scadenza = null;
+    stato.attivataIl = null;
+    salva();
+  }
+
+  return {
+    PREZZO,
+    PAGAMENTO_URL,
+    GIORNI_PROVA,
+    GIORNI_ABBONAMENTO,
+    attiva,
+    inProva,
+    scadenza,
+    giorniRimasti,
+    moltiplicatore,
+    puoiProvare,
+    avviaProva,
+    riscatta,
+    rimuovi,
+    codice: () => stato.codice
   };
 })();
 
@@ -1469,6 +1843,11 @@ const Timer = (() => {
     complete(false);
   }
 
+  /** Il Pro raddoppia i calzini; senza licenza (o senza il modulo) resta uno. */
+  function moltiplicatore() {
+    return typeof Licenza !== "undefined" ? Licenza.moltiplicatore() : 1;
+  }
+
   function elapsedMinutes() {
     if (!s.startedAt) return 0;
     const total = Store.durationFor(s.phase) * 60000;
@@ -1495,7 +1874,10 @@ const Timer = (() => {
         kind: wasPhase,
         completed: Boolean(natural),
         taskId: s.taskId,
-        escapes: s.escapes
+        escapes: s.escapes,
+        // Il moltiplicatore si legge adesso e resta scritto nella sessione:
+        // un calzino guadagnato col Pro non sparisce quando il Pro scade.
+        calzini: natural && wasPhase === "focus" ? moltiplicatore() : 1
       });
     }
 
@@ -1649,12 +2031,6 @@ const Timer = (() => {
      interne quando lo si riempie di colore. */
   const SAGOMA = "M43 8h14a9 9 0 0 1 9 9v56a9 9 0 0 1-9 9h-30a15 15 0 0 1 0-30h7v-35a9 9 0 0 1 9-9z";
 
-  const ACCESSORI = [
-    { id: "cappello", nome: "Cappellino" },
-    { id: "occhiali", nome: "Occhiali" },
-    { id: "grembiule", nome: "Grembiule" },
-    { id: "ditale", nome: "Ditale" }
-  ];
 
   /* Traguardi: si accendono da soli guardando le sessioni. Non c'è nulla da
      comprare, nulla da riscattare e nessun premio che vada più veloce. */
@@ -1721,17 +2097,35 @@ const Timer = (() => {
 
   /* --------------------------------------------------------- tema e colori */
 
+  /** Vale per tavolozze, accessori e fantasie: quelle segnate `pro` si vedono
+      solo con l'abbonamento attivo. */
+  const sbloccato = (voce) => Boolean(voce) && (!voce.pro || Licenza.attiva());
+
+  /** La tavolozza scelta resta scritta anche se il Pro scade: qui si sceglie
+      solo che cosa mostrare, così quando rinnovi ritrovi le tue cose. */
+  function palettaInUso() {
+    const scelta = Store.PALETTES.find((p) => p.id === Store.settings().palette);
+    return sbloccato(scelta) ? scelta : Store.PALETTES[0];
+  }
+
+  function fantasiaInUso() {
+    const scelta = Store.FANTASIE.find((f) => f.id === Store.settings().fantasia);
+    return sbloccato(scelta) ? scelta.id : "tinta";
+  }
+
   function applyLook() {
     const s = Store.settings();
     const root = document.documentElement;
-    root.dataset.palette = s.palette;
+    const pal = palettaInUso();
+    root.dataset.palette = pal.id;
     if (s.theme === "auto") root.removeAttribute("data-theme");
     else root.dataset.theme = s.theme;
-    const pal = Store.PALETTES.find((p) => p.id === s.palette);
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta && pal) meta.setAttribute("content", pal.scuro);
+    if (meta) meta.setAttribute("content", pal.scuro);
     const scene = $("#scene");
-    for (const a of ACCESSORI) scene.classList.toggle("has-" + a.id, Boolean(s.outfit[a.id]));
+    for (const acc of Store.ACCESSORI) {
+      scene.classList.toggle("has-" + acc.id, Boolean(s.outfit[acc.id]) && sbloccato(acc));
+    }
   }
 
   /* ------------------------------------------------------------- sezioni */
@@ -1948,10 +2342,44 @@ const Timer = (() => {
 
   /* -------------------------------------------------------------- cassetto */
 
-  function svgCalzino(colore) {
+  /** Le fantasie stanno dentro la sagoma grazie al clipPath condiviso della
+      pagina: un solo ritaglio per tutti i calzini, che hanno lo stesso viewBox. */
+  function svgFantasia(id) {
+    if (id === "righe") {
+      return [16, 34, 52, 70, 88].map((y) => `<rect class="fantasia" x="0" y="${y}" width="100" height="7"/>`).join("");
+    }
+    if (id === "pois") {
+      const punti = [];
+      for (const y of [22, 44, 66, 88]) {
+        for (const x of [24, 42, 60, 78]) punti.push(`<circle class="fantasia" cx="${x}" cy="${y}" r="4.5"/>`);
+      }
+      return punti.join("");
+    }
+    if (id === "rombi") {
+      const rombi = [];
+      for (const y of [26, 52, 78]) {
+        for (const x of [30, 52, 74]) rombi.push(`<path class="fantasia" d="M${x} ${y - 9}l9 9-9 9-9-9z"/>`);
+      }
+      return rombi.join("");
+    }
+    if (id === "punta") {
+      return `<rect class="fantasia-scura" x="0" y="60" width="44" height="50"/>` +
+             `<rect class="fantasia" x="0" y="8" width="100" height="13"/>`;
+    }
+    return "";
+  }
+
+  function svgCalzino(colore, fantasia, doppio) {
+    const dentro = svgFantasia(fantasia);
     return `<svg viewBox="0 0 100 110" aria-hidden="true">` +
       `<path class="corpo" d="${SAGOMA}" fill="${colore}"/>` +
-      `<path class="bordo" d="M37 22h26"/></svg>`;
+      (dentro ? `<g clip-path="url(#clip-sagoma)">${dentro}</g>` : "") +
+      `<path class="bordo" d="M37 22h26"/>` +
+      (doppio
+        ? `<g class="marchio"><circle cx="80" cy="90" r="14" fill="${colore}"/>` +
+          `<text x="80" y="97" text-anchor="middle">2</text></g>`
+        : "") +
+      `</svg>`;
   }
 
   function renderCassetto() {
@@ -1967,6 +2395,7 @@ const Timer = (() => {
       : "Un calzino per sessione finita, sempre uno: due fanno un paio.";
     $("#cassetto-empty").hidden = calzini.length > 0;
 
+    const fantasia = fantasiaInUso();
     const gruppi = [];
     for (let i = 0; i < calzini.length; i += per) gruppi.push(calzini.slice(i, i + per));
     gruppi.reverse(); // il paio più recente in cima
@@ -1978,8 +2407,10 @@ const Timer = (() => {
       for (let i = 0; i < per; i++) {
         const c = gruppo[i];
         celle.push(c
-          ? `<button type="button" class="calzino" data-sock="${c.session.id}" aria-label="Calzino del ${dataBreve(new Date(c.session.endedAt))}">${svgCalzino(c.color)}</button>`
-          : `<span class="calzino vuoto">${svgCalzino("none")}</span>`);
+          ? `<button type="button" class="calzino" data-sock="${c.id}" ` +
+            `aria-label="Calzino del ${dataBreve(new Date(c.session.endedAt))}${c.doppio ? ", doppio" : ""}">` +
+            `${svgCalzino(c.color, fantasia, c.doppio)}</button>`
+          : `<span class="calzino vuoto">${svgCalzino("none", "tinta", false)}</span>`);
       }
       return `<div class="paio ${pieno ? "is-full" : ""}">${celle.join("")}<small>${pieno ? "paio " + numero : "in corso"}</small></div>`;
     }).join("");
@@ -1992,16 +2423,19 @@ const Timer = (() => {
   }
 
   function showCalzino(id) {
-    const s = Store.sessions().find((x) => x.id === id);
+    const doppio = id.includes("#");
+    const s = Store.sessions().find((x) => x.id === id.split("#")[0]);
     if (!s) return;
     const t = s.taskId ? Store.getTask(s.taskId) : null;
     const d = new Date(s.endedAt);
-    $("#calzino-detail").innerHTML = [
+    const righe = [
       ["Attività", t ? t.name : "Senza attività"],
       ["Durata", `${s.minutes} minuti`],
       ["Finito il", `${dataBreve(d)}/${d.getFullYear()} alle ${pad(d.getHours())}:${pad(d.getMinutes())}`],
       ["Uscite dalla scheda", String(s.escapes)]
-    ].map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+    ];
+    if (doppio) righe.push(["Da dove viene", "Secondo calzino della stessa sessione, con il Pro attivo"]);
+    $("#calzino-detail").innerHTML = righe.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
     $("#sheet-calzino").hidden = false;
   }
 
@@ -2027,21 +2461,117 @@ const Timer = (() => {
         ? "Le notifiche sono state bloccate nelle impostazioni del browser."
         : "Il suono funziona sempre; la notifica solo se il browser dà il permesso.");
 
-    $("#palettes").innerHTML = Store.PALETTES.map((p) =>
-      `<button type="button" class="pal ${p.id === s.palette ? "is-active" : ""}" data-palette="${p.id}" title="${esc(p.nome)}" aria-label="Tavolozza ${esc(p.nome)}">` +
-      `<i style="background:${p.scuro}"></i><i style="background:${p.accento}"></i><i style="background:${p.secondo}"></i></button>`
-    ).join("");
+    $("#palettes").innerHTML = Store.PALETTES.map((p) => {
+      const chiusa = !sbloccato(p);
+      return `<button type="button" class="pal ${p.id === s.palette && !chiusa ? "is-active" : ""} ${chiusa ? "bloccata" : ""}" ` +
+        `data-palette="${p.id}" title="${esc(p.nome)}${chiusa ? " (Pro)" : ""}" aria-label="Tavolozza ${esc(p.nome)}${chiusa ? ", solo con il Pro" : ""}">` +
+        `<i style="background:${p.scuro}"></i><i style="background:${p.accento}"></i><i style="background:${p.secondo}"></i></button>`;
+    }).join("");
 
     $$(".seg-btn").forEach((b) => b.classList.toggle("is-active", b.dataset.theme === s.theme));
 
-    $("#outfit").innerHTML = ACCESSORI.map((a) =>
-      `<button type="button" class="chip ${s.outfit[a.id] ? "is-active" : ""}" data-outfit="${a.id}">${esc(a.nome)}</button>`
-    ).join("");
+    $("#outfit").innerHTML = Store.ACCESSORI.map((acc) => {
+      const chiusa = !sbloccato(acc);
+      return `<button type="button" class="chip ${s.outfit[acc.id] && !chiusa ? "is-active" : ""} ${chiusa ? "bloccata" : ""}" ` +
+        `data-outfit="${acc.id}">${esc(acc.nome)}</button>`;
+    }).join("");
+
+    const fantasiaViva = fantasiaInUso();
+    $("#fantasie").innerHTML = Store.FANTASIE.map((f) => {
+      const chiusa = !sbloccato(f);
+      return `<button type="button" class="chip ${f.id === fantasiaViva ? "is-active" : ""} ${chiusa ? "bloccata" : ""}" ` +
+        `data-fantasia="${f.id}">${esc(f.nome)}</button>`;
+    }).join("");
+
+    renderPro();
 
     $("#distractors").innerHTML = s.distractors.length
       ? s.distractors.map((d, i) =>
           `<span class="chip">${esc(d)}<button type="button" class="x" data-distractor="${i}" aria-label="Togli ${esc(d)}">×</button></span>`).join("")
       : `<span class="empty">Nessun distrattore in elenco.</span>`;
+  }
+
+  /* ----------------------------------------------------------------- Pro */
+
+  function renderPro() {
+    const attiva = Licenza.attiva();
+    const giorni = Licenza.giorniRimasti();
+    const parolaGiorni = giorni === 1 ? "giorno" : "giorni";
+    $("#pro-card").classList.toggle("is-attivo", attiva);
+    $("#pro-stato").textContent = attiva
+      ? `${Licenza.inProva() ? "prova" : "attivo"} · ${giorni} ${parolaGiorni}`
+      : "non attivo";
+    $("#btn-pro").textContent = attiva ? "Gestisci il Pro" : "Vedi il Pro";
+    $("#pro-prezzo").textContent = Licenza.PREZZO;
+
+    const avviso = $("#pro-attivo");
+    avviso.hidden = !attiva;
+    if (attiva) {
+      const fine = Licenza.scadenza();
+      const quando = `${dataBreve(fine)}/${fine.getFullYear()}`;
+      avviso.textContent = Licenza.inProva()
+        ? `Prova gratuita: ancora ${giorni} ${parolaGiorni}, fino al ${quando}.`
+        : `Pro attivo fino al ${quando} — ${giorni} ${parolaGiorni}.`;
+    }
+
+    $("#btn-prova").hidden = !Licenza.puoiProvare();
+    $("#btn-pro-rimuovi").hidden = !attiva;
+    $("#btn-paga").textContent = attiva && !Licenza.inProva() ? "Rinnova" : "Abbonati";
+    $("#pro-pagamento-nota").textContent = Licenza.PAGAMENTO_URL
+      ? "Dopo il pagamento ricevi un codice da incollare qui sotto."
+      : "Il link del pagamento non è ancora configurato: va messo in js/licenza.js (PAGAMENTO_URL). Fino ad allora si entra solo con un codice.";
+  }
+
+  function apriPro(motivo) {
+    renderPro();
+    $("#pro-errore").hidden = true;
+    $("#sheet-pro").hidden = false;
+    if (motivo) toast(motivo);
+  }
+
+  function bindPro() {
+    $("#btn-pro").addEventListener("click", () => apriPro());
+    $("#btn-pro-close").addEventListener("click", () => { $("#sheet-pro").hidden = true; });
+
+    $("#btn-prova").addEventListener("click", () => {
+      const res = Licenza.avviaProva();
+      if (!res.ok) return toast(res.error);
+      $("#sheet-pro").hidden = true;
+      applyLook();
+      renderAll();
+      toast(`Pro in prova per ${Licenza.GIORNI_PROVA} giorni: da adesso i calzini sono due per sessione.`);
+    });
+
+    $("#btn-paga").addEventListener("click", () => {
+      if (!Licenza.PAGAMENTO_URL) return toast("Manca il link del pagamento: va messo in js/licenza.js.");
+      window.open(Licenza.PAGAMENTO_URL, "_blank", "noopener");
+    });
+
+    $("#form-codice").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const errore = $("#pro-errore");
+      const res = await Licenza.riscatta($("#pro-codice").value);
+      if (!res.ok) {
+        errore.textContent = res.error;
+        errore.hidden = false;
+        return;
+      }
+      errore.hidden = true;
+      $("#pro-codice").value = "";
+      $("#sheet-pro").hidden = true;
+      applyLook();
+      renderAll();
+      toast(`Pro attivo fino al ${dataBreve(res.scadenza)}/${res.scadenza.getFullYear()}.`);
+    });
+
+    $("#btn-pro-rimuovi").addEventListener("click", () => {
+      if (!confirm("Togliere la licenza da questo dispositivo? Il codice resta valido e si può reinserire.")) return;
+      Licenza.rimuovi();
+      $("#sheet-pro").hidden = true;
+      applyLook();
+      renderAll();
+      toast("Licenza tolta da qui.");
+    });
   }
 
   function bindNumber(sel, key) {
@@ -2066,6 +2596,7 @@ const Timer = (() => {
   /* ------------------------------------------------------------- avvio UI */
 
   function bind() {
+    bindPro();
     $$(".tab").forEach((t) => t.addEventListener("click", () => showView(t.dataset.view)));
 
     $$(".phase").forEach((b) => b.addEventListener("click", () => Timer.setPhase(b.dataset.phase)));
@@ -2162,7 +2693,9 @@ const Timer = (() => {
     $("#palettes").addEventListener("click", (e) => {
       const b = e.target.closest("[data-palette]");
       if (!b) return;
-      Store.setSetting("palette", b.dataset.palette);
+      const pal = Store.PALETTES.find((x) => x.id === b.dataset.palette);
+      if (!sbloccato(pal)) return apriPro(`«${pal.nome}» è una tavolozza del Pro.`);
+      Store.setSetting("palette", pal.id);
       applyLook();
       renderSettings();
     });
@@ -2176,11 +2709,23 @@ const Timer = (() => {
     $("#outfit").addEventListener("click", (e) => {
       const b = e.target.closest("[data-outfit]");
       if (!b) return;
+      const acc = Store.ACCESSORI.find((x) => x.id === b.dataset.outfit);
+      if (!sbloccato(acc)) return apriPro(`«${acc.nome}» è un accessorio del Pro.`);
       const outfit = Object.assign({}, Store.settings().outfit);
-      outfit[b.dataset.outfit] = !outfit[b.dataset.outfit];
+      outfit[acc.id] = !outfit[acc.id];
       Store.setSetting("outfit", outfit);
       applyLook();
       renderSettings();
+    });
+
+    $("#fantasie").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-fantasia]");
+      if (!b) return;
+      const f = Store.FANTASIE.find((x) => x.id === b.dataset.fantasia);
+      if (!sbloccato(f)) return apriPro(`«${f.nome}» è una fantasia del Pro.`);
+      Store.setSetting("fantasia", f.id);
+      renderSettings();
+      renderCassetto();
     });
 
     $("#form-distractor").addEventListener("submit", (e) => {
@@ -2307,9 +2852,11 @@ const Timer = (() => {
     }
     if (event.type === "complete" && event.natural && event.phase === "focus") {
       const totali = Store.socks().length;
+      const doppio = event.session && event.session.calzini > 1;
+      const paia = Math.floor(totali / Store.CALZINI_PER_PAIO);
       toast(totali % Store.CALZINI_PER_PAIO === 0
-        ? `Paio completo: ${totali / Store.CALZINI_PER_PAIO} nel cassetto.`
-        : `Calzino finito: ne manca uno per il paio.`);
+        ? `${doppio ? "Due calzini in una volta" : "Paio completo"}: ${paia} ${paia === 1 ? "paio" : "paia"} nel cassetto.`
+        : `${doppio ? "Due calzini" : "Calzino finito"}: ne manca uno per il paio.`);
     }
     if (event.type === "reset" && event.partial) toast(`Registrati ${event.partial} minuti, senza calzino.`);
   }

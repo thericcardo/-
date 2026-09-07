@@ -21,7 +21,32 @@ const Store = (() => {
     { id: "prugna",   nome: "Prugna",    accento: "#D98BB0", secondo: "#9AB6E8", scuro: "#2A1E30" },
     { id: "argilla",  nome: "Argilla",   accento: "#E0785C", secondo: "#E8C79A", scuro: "#2E211C" },
     { id: "oceano",   nome: "Oceano",    accento: "#5FB6D9", secondo: "#A8E0C6", scuro: "#12242E" },
-    { id: "carbone",  nome: "Carbone",   accento: "#C9C4BC", secondo: "#8FA0A6", scuro: "#212121" }
+    { id: "carbone",  nome: "Carbone",   accento: "#C9C4BC", secondo: "#8FA0A6", scuro: "#212121" },
+    { id: "tramonto", nome: "Tramonto",  accento: "#FF8A5B", secondo: "#FFC9A0", scuro: "#2B1B2E", pro: true },
+    { id: "menta",    nome: "Menta",     accento: "#4FD1A5", secondo: "#BDF0DA", scuro: "#12291F", pro: true },
+    { id: "lavanda",  nome: "Lavanda",   accento: "#A88CF0", secondo: "#D9CBFF", scuro: "#241F3A", pro: true },
+    { id: "rame",     nome: "Rame",      accento: "#C9713A", secondo: "#E6B98F", scuro: "#2A1E18", pro: true }
+  ];
+
+  /** Accessori di Mora e fantasie dei calzini: quelli con `pro` stanno dietro
+      l'abbonamento, gli altri no. L'elenco vive qui perché lo guardano sia
+      l'interfaccia sia il controllo di quello che è davvero sbloccato. */
+  const ACCESSORI = [
+    { id: "cappello",  nome: "Cappellino" },
+    { id: "occhiali",  nome: "Occhiali" },
+    { id: "grembiule", nome: "Grembiule" },
+    { id: "ditale",    nome: "Ditale" },
+    { id: "coroncina", nome: "Coroncina", pro: true },
+    { id: "papillon",  nome: "Papillon",  pro: true },
+    { id: "fiore",     nome: "Fiorellino", pro: true }
+  ];
+
+  const FANTASIE = [
+    { id: "tinta",  nome: "Tinta unita" },
+    { id: "righe",  nome: "A righe",   pro: true },
+    { id: "pois",   nome: "A pois",    pro: true },
+    { id: "rombi",  nome: "A rombi",   pro: true },
+    { id: "punta",  nome: "Punta a contrasto", pro: true }
   ];
 
   /** Colori della lana: il cassetto deve restare leggibile anche pieno. */
@@ -41,7 +66,9 @@ const Store = (() => {
     strict: false,
     theme: "auto",
     palette: "notte",
-    outfit: { cappello: false, occhiali: false, grembiule: true, ditale: false },
+    outfit: { cappello: false, occhiali: false, grembiule: true, ditale: false,
+              coroncina: false, papillon: false, fiore: false },
+    fantasia: "tinta",
     distractors: ["Instagram", "YouTube", "Chat di gruppo"]
   };
 
@@ -79,6 +106,7 @@ const Store = (() => {
     }
     if (!["auto", "light", "dark"].includes(s.theme)) s.theme = "auto";
     if (!PALETTES.some((p) => p.id === s.palette)) s.palette = "notte";
+    if (!FANTASIE.some((f) => f.id === s.fantasia)) s.fantasia = "tinta";
     const outfit = Object.assign({}, DEFAULT_SETTINGS.outfit, s.outfit && typeof s.outfit === "object" ? s.outfit : {});
     for (const k of Object.keys(outfit)) outfit[k] = Boolean(outfit[k]);
     s.outfit = outfit;
@@ -90,6 +118,14 @@ const Store = (() => {
 
   function isTask(t) {
     return t && typeof t === "object" && typeof t.id === "string" && typeof t.name === "string";
+  }
+
+  /** Quanti calzini ha fruttato una sessione: uno di suo, due con il Pro.
+      Resta scritto nella sessione, non ricalcolato: se l'abbonamento scade, i
+      calzini già cuciti restano quelli che erano. */
+  function clampCalzini(v) {
+    const n = Math.round(Number(v));
+    return Number.isFinite(n) && n >= 1 && n <= 4 ? n : 1;
   }
 
   function isSession(s) {
@@ -113,7 +149,8 @@ const Store = (() => {
             kind: s.kind === "short" || s.kind === "long" ? s.kind : "focus",
             completed: Boolean(s.completed),
             taskId: typeof s.taskId === "string" ? s.taskId : null,
-            escapes: Math.max(0, Math.round(Number(s.escapes) || 0))
+            escapes: Math.max(0, Math.round(Number(s.escapes) || 0)),
+            calzini: clampCalzini(s.calzini)
           }))
         : [];
       return {
@@ -240,24 +277,39 @@ const Store = (() => {
       kind: data.kind || "focus",
       completed: Boolean(data.completed),
       taskId: data.taskId || null,
-      escapes: Math.max(0, Math.round(Number(data.escapes) || 0))
+      escapes: Math.max(0, Math.round(Number(data.escapes) || 0)),
+      calzini: clampCalzini(data.calzini)
     };
     state.sessions.push(session);
     save();
     return session;
   }
 
-  /** I calzini sono le sessioni di concentrazione finite, dalla più vecchia. */
+  /**
+   * I calzini sono le sessioni di concentrazione finite, dalla più vecchia.
+   * Una sessione ne vale uno; con il Pro attivo al momento in cui è finita ne
+   * vale due, e il secondo resta segnato come doppio — il cassetto deve poter
+   * dire quanto lavoro c'è dietro, non solo quanti calzini ci sono.
+   */
   function socks() {
-    return state.sessions
+    const out = [];
+    const complete = state.sessions
       .filter((s) => s.kind === "focus" && s.completed)
-      .sort((a, b) => String(a.endedAt).localeCompare(String(b.endedAt)))
-      .map((s, i) => ({
-        index: i,
-        session: s,
-        color: colorOf(s, i),
-        paio: Math.floor(i / CALZINI_PER_PAIO)
-      }));
+      .sort((a, b) => String(a.endedAt).localeCompare(String(b.endedAt)));
+    for (const s of complete) {
+      const quanti = clampCalzini(s.calzini);
+      for (let k = 0; k < quanti; k++) {
+        out.push({
+          index: out.length,
+          id: k === 0 ? s.id : `${s.id}#${k + 1}`,
+          session: s,
+          doppio: k > 0,
+          color: colorOf(s, out.length),
+          paio: Math.floor(out.length / CALZINI_PER_PAIO)
+        });
+      }
+    }
+    return out;
   }
 
   function colorOf(session, i) {
@@ -331,6 +383,8 @@ const Store = (() => {
 
   return {
     PALETTES,
+    ACCESSORI,
+    FANTASIE,
     FILATI,
     CALZINI_PER_PAIO,
     DEFAULT_SETTINGS,
