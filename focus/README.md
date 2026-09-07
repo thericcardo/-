@@ -15,6 +15,19 @@ cresce il doppio più in fretta), le sessioni libere arrivano a sei ore e si
 aprono le decorazioni in più. Tutto il resto è gratis e completo, e resta tale:
 la casa si finisce anche senza pagare, ci vuole il doppio del lavoro.
 
+## La stanza
+
+La schermata del timer non è un cronometro con un disegno accanto: è **il posto
+dove Mora vive adesso**. All'inizio lavora sul prato, con un cartello piantato
+nel terreno appena comprato. Quando la casa arriva ai muri, la stessa scena
+diventa un interno, e da lì in poi ogni pezzo costruito compare lì dentro — la
+finestra, la porta, la trave del tetto, la stufa, la lampada accesa, la pianta,
+il quadro. Si guarda la stanza e si vede quanto si è lavorato, senza leggere un
+numero.
+
+Sopra la scena c'è il conto dei calzini; sotto, il timer e un solo bottone
+grande. La navigazione sta in basso, dove arriva il pollice.
+
 ## Come si usa
 
 1. Apri `index.html` (doppio clic va benissimo) oppure il sito pubblicato.
@@ -51,8 +64,9 @@ Scorciatoie da tastiera: barra spaziatrice avvia o mette in pausa, `R` azzera,
 - **Attività senza limite**, ognuna con il suo colore: il calzino prende il
   colore dell'attività su cui hai lavorato.
 - **Traguardi** che si accendono da soli guardando le sessioni.
-- **Sei tavolozze**, tema chiaro/scuro/automatico e quattro accessori per Mora
-  (cappellino, occhiali, grembiule, ditale).
+- **Sette tavolozze**, tema chiaro/scuro/automatico, quattro accessori per Mora
+  (cappellino, occhiali, grembiule, ditale) e **quattro pelli**: Mora, Neve,
+  Cenere, Terra.
 - **Suono** di fine sessione sintetizzato (nessun file da scaricare),
   **notifica** di sistema se il browser dà il permesso, **schermo acceso**
   mentre il timer va (Screen Wake Lock, dove c'è).
@@ -69,9 +83,11 @@ Cambia tre cose:
   un marchio «2» e nel dettaglio dice da dove viene: il cassetto deve restare
   leggibile come registro del lavoro fatto, non diventare un mucchio.
 - **Sessioni libere fino a sei ore** invece di due.
-- **Decorazioni in più**: quattro tavolozze (Tramonto, Menta, Lavanda, Rame),
-  tre accessori per Mora (coroncina, papillon, fiorellino) e quattro fantasie
-  per i calzini del cassetto (righe, pois, rombi, punta a contrasto).
+- **Decorazioni in più**: quattro decorazioni per la stanza (lucine, gatto,
+  tazza, tende), due pelli di Mora (Oro, Notturna), quattro tavolozze
+  (Tramonto, Menta, Lavanda, Rame), tre accessori (coroncina, papillon,
+  fiorellino) e quattro fantasie per i calzini (righe, pois, rombi, punta a
+  contrasto).
 
 Sette giorni di prova gratuita, una volta sola. Alla scadenza le decorazioni Pro
 si spengono ma **la scelta resta salvata**: rinnovando, ritrovi la tua tavolozza
@@ -162,7 +178,7 @@ sostituire.
 ## Struttura
 
 ```
-index.html              markup delle quattro schermate e i disegni (Mora, la casa)
+index.html              markup delle quattro schermate e i disegni (la stanza, Mora, la casa)
 css/styles.css          stile, tavolozze, i colori di Mora e della casa
 js/storage.js           impostazioni, attività e sessioni su localStorage
 js/licenza.js           abbonamento Pro: prova, codici, scadenza
@@ -180,10 +196,20 @@ si ricarica la pagina.
 
 ## Parentela con Focus Friend
 
-L'idea — un timer con una creatura che lavora mentre lavori tu — viene da
-*Focus Friend* di Hank Green. Qui non c'è niente di suo: personaggio, disegni,
-nome e codice sono originali. Anche il confine gratis/a pagamento somiglia:
-lì l'abbonamento dà decorazioni e premi più veloci, qui decorazioni e calzini
-doppi. La differenza è il prezzo — 2 € al mese invece di 1,99 $ — la casa da
-costruire al posto della stanza da arredare, e il fatto che qui il lucchetto è
-dichiarato per quello che è.
+L'idea — un timer con una creatura che lavora mentre lavori tu, una stanza che
+si arreda completando sessioni, un abbonamento che dà decorazioni e premi più
+in fretta — viene da *Focus Friend* di Hank Green. Anche l'impianto è
+volutamente simile: la scena del personaggio in cima, il timer sotto, la barra
+in basso, i colori caldi, le pelli del protagonista.
+
+Quello che **non** viene da lì, e non deve: il personaggio (una talpa, non il
+suo fagiolo), i disegni, il nome, il codice, i testi. Sono tutti originali. Le
+meccaniche di un genere si possono riprendere — la forma di un'app non è di
+nessuno — ma l'espressione di un'opera è protetta dal diritto d'autore, e
+copiarla non è un dettaglio legale: è la differenza fra fare la propria cosa e
+prendere quella di un altro.
+
+Due cose restano nostre anche come idea: la casa da costruire come arco lungo
+(lì la stanza si arreda comprando, qui si costruisce un pezzo alla volta con una
+storia da leggere) e il fatto che il lucchetto del Pro sia dichiarato per quello
+che è.

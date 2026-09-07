@@ -16,6 +16,7 @@ const Store = (() => {
   const CALZINI_PER_PAIO = 2;
 
   const PALETTES = [
+    { id: "panna",    nome: "Panna",     accento: "#E8A87C", secondo: "#8FB996", scuro: "#3B3128" },
     { id: "notte",    nome: "Notte",     accento: "#F2A65A", secondo: "#7FD1B9", scuro: "#1E2438" },
     { id: "bosco",    nome: "Bosco",     accento: "#8FBF6A", secondo: "#E7C46B", scuro: "#1B2A22" },
     { id: "prugna",   nome: "Prugna",    accento: "#D98BB0", secondo: "#9AB6E8", scuro: "#2A1E30" },
@@ -31,6 +32,25 @@ const Store = (() => {
   /** Accessori di Mora e fantasie dei calzini: quelli con `pro` stanno dietro
       l'abbonamento, gli altri no. L'elenco vive qui perché lo guardano sia
       l'interfaccia sia il controllo di quello che è davvero sbloccato. */
+  /** Le pelli di Mora: cambiano solo i colori del personaggio. */
+  const PELLI = [
+    { id: "mora",     nome: "Mora" },
+    { id: "neve",     nome: "Neve" },
+    { id: "cenere",   nome: "Cenere" },
+    { id: "terra",    nome: "Terra" },
+    { id: "oro",      nome: "Oro",      pro: true },
+    { id: "notturna", nome: "Notturna", pro: true }
+  ];
+
+  /** Le decorazioni che si accendono a mano. Quelle della casa arrivano da
+      sole con i pezzi costruiti: queste sono in più, e stanno dietro il Pro. */
+  const DECORAZIONI = [
+    { id: "ghirlanda", nome: "Lucine",  pro: true },
+    { id: "gatto",     nome: "Gatto",   pro: true },
+    { id: "tazza",     nome: "Tazza",   pro: true },
+    { id: "tenda",     nome: "Tende",   pro: true }
+  ];
+
   const ACCESSORI = [
     { id: "cappello",  nome: "Cappellino" },
     { id: "occhiali",  nome: "Occhiali" },
@@ -100,11 +120,13 @@ const Store = (() => {
     wakeLock: true,
     strict: false,
     theme: "auto",
-    palette: "notte",
+    palette: "panna",
     outfit: { cappello: false, occhiali: false, grembiule: true, ditale: false,
               coroncina: false, papillon: false, fiore: false },
     fantasia: "tinta",
     modo: "timer",
+    pelle: "mora",
+    decorazioni: { ghirlanda: false, gatto: false, tazza: false, tenda: false },
     distractors: ["Instagram", "YouTube", "Chat di gruppo"]
   };
 
@@ -141,9 +163,14 @@ const Store = (() => {
       s[k] = Boolean(s[k]);
     }
     if (!["auto", "light", "dark"].includes(s.theme)) s.theme = "auto";
-    if (!PALETTES.some((p) => p.id === s.palette)) s.palette = "notte";
+    if (!PALETTES.some((p) => p.id === s.palette)) s.palette = "panna";
     if (!FANTASIE.some((f) => f.id === s.fantasia)) s.fantasia = "tinta";
     if (s.modo !== "libera") s.modo = "timer";
+    if (!PELLI.some((x) => x.id === s.pelle)) s.pelle = "mora";
+    const deco = Object.assign({}, DEFAULT_SETTINGS.decorazioni,
+      s.decorazioni && typeof s.decorazioni === "object" ? s.decorazioni : {});
+    for (const k of Object.keys(deco)) deco[k] = Boolean(deco[k]);
+    s.decorazioni = deco;
     const outfit = Object.assign({}, DEFAULT_SETTINGS.outfit, s.outfit && typeof s.outfit === "object" ? s.outfit : {});
     for (const k of Object.keys(outfit)) outfit[k] = Boolean(outfit[k]);
     s.outfit = outfit;
@@ -241,6 +268,7 @@ const Store = (() => {
     if (!(key in DEFAULT_SETTINGS)) return false;
     if (key in LIMITS) state.settings[key] = clampNum(value, LIMITS[key], DEFAULT_SETTINGS[key]);
     else if (key === "outfit") state.settings.outfit = cleanSettings({ outfit: value }).outfit;
+    else if (key === "decorazioni") state.settings.decorazioni = cleanSettings({ decorazioni: value }).decorazioni;
     else if (key === "distractors") state.settings.distractors = cleanSettings({ distractors: value }).distractors;
     else if (typeof DEFAULT_SETTINGS[key] === "boolean") state.settings[key] = Boolean(value);
     else state.settings[key] = cleanSettings(Object.assign({}, state.settings, { [key]: value }))[key];
@@ -441,6 +469,8 @@ const Store = (() => {
 
   return {
     PALETTES,
+    PELLI,
+    DECORAZIONI,
     CASA,
     CASA_FINITA,
     ACCESSORI,

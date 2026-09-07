@@ -34,10 +34,22 @@
   </header>
 
   <nav class="tabs" role="tablist" aria-label="Sezioni">
-    <button type="button" class="tab is-active" role="tab" data-view="timer" aria-selected="true" aria-controls="view-timer">Timer</button>
-    <button type="button" class="tab" role="tab" data-view="casa" aria-selected="false" aria-controls="view-casa">Casa</button>
-    <button type="button" class="tab" role="tab" data-view="statistiche" aria-selected="false" aria-controls="view-statistiche">Statistiche</button>
-    <button type="button" class="tab" role="tab" data-view="impostazioni" aria-selected="false" aria-controls="view-impostazioni">Impostazioni</button>
+    <button type="button" class="tab is-active" role="tab" data-view="timer" aria-selected="true" aria-controls="view-timer">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>
+      <span>Timer</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-view="casa" aria-selected="false" aria-controls="view-casa">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+      <span>Casa</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-view="statistiche" aria-selected="false" aria-controls="view-statistiche">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      <span>Numeri</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-view="impostazioni" aria-selected="false" aria-controls="view-impostazioni">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+      <span>Impostazioni</span>
+    </button>
   </nav>
 
   <main class="views">
@@ -58,97 +70,176 @@
 
       <div class="card scene-card">
         <div class="scene" id="scene" data-state="idle">
-
-          <!-- Mora la talpa. Gli accessori si accendono da Impostazioni. -->
-          <svg class="mora" id="mora" viewBox="0 0 220 190" role="img" aria-labelledby="mora-title">
-            <title id="mora-title">Mora, la talpa che sferruzza</title>
-
-            <ellipse class="mora-ombra" cx="110" cy="173" rx="58" ry="8"/>
-
-            <!-- corpo a goccia, pancia più chiara -->
-            <path class="mora-corpo" d="M110 40c-30 0-52 24-52 58 0 40 22 66 52 66s52-26 52-66c0-34-22-58-52-58z"/>
-            <ellipse class="mora-pancia" cx="110" cy="124" rx="34" ry="30"/>
-
-            <!-- il grembiule sta sulla pancia, sotto le zampe -->
-            <g class="acc acc-grembiule">
-              <path d="M92 104q18 8 36 0l7 38q-25 10-50 0z"/>
-              <path d="M99 104l-5-10M121 104l5-10"/>
-            </g>
-
-            <!-- musetto -->
-            <path class="mora-muso" d="M110 60c-16 0-27 10-27 22s11 20 27 20 27-8 27-20-11-22-27-22z"/>
-            <circle class="mora-naso" cx="110" cy="70" r="6"/>
-            <g class="mora-occhi">
-              <path class="occhio" d="M84 54q7 7 14 0"/>
-              <path class="occhio" d="M122 54q7 7 14 0"/>
-            </g>
-            <g class="mora-baffi">
-              <path d="M82 82h-14M82 88h-12M138 82h14M138 88h12"/>
-            </g>
-
-            <g class="acc acc-occhiali">
-              <circle cx="91" cy="55" r="13"/>
-              <circle cx="129" cy="55" r="13"/>
-              <path d="M104 55h12"/>
-            </g>
-            <g class="acc acc-cappello">
-              <path d="M78 45q32-26 64 0z"/>
-              <path d="M70 47h80"/>
-              <circle cx="110" cy="21" r="7"/>
-            </g>
-
-            <!-- decorazioni Pro -->
-            <g class="acc acc-coroncina">
-              <path d="M80 46l5-22 11 13 14-18 14 18 11-13 5 22z"/>
-            </g>
-            <g class="acc acc-fiore">
-              <circle cx="148" cy="46" r="6"/><circle cx="160" cy="46" r="6"/>
-              <circle cx="154" cy="36" r="6"/><circle cx="154" cy="56" r="6"/>
-              <circle class="cuore" cx="154" cy="46" r="4.5"/>
-            </g>
-            <g class="acc acc-papillon">
-              <path d="M110 106l-17-10v20zM110 106l17-10v20z"/>
-              <circle class="cuore" cx="110" cy="106" r="4.5"/>
-            </g>
-
-            <!-- il gomitolo, appoggiato accanto -->
-            <g class="gomitolo">
-              <circle cx="34" cy="156" r="15"/>
-              <path d="M23 150q11 10 22 3M25 162q9-12 20-7"/>
-              <path class="filo" d="M47 150q22-12 42-6"/>
-            </g>
-
-            <!-- zampe davanti a tutto: la destra muove i ferri -->
-            <ellipse class="mora-zampa" cx="86" cy="142" rx="13" ry="10"/>
-            <g class="mora-braccio" id="mora-braccio">
-              <g class="ferri">
-                <path d="M84 150l54-35M88 158l54-35"/>
-              </g>
-              <ellipse class="mora-zampa" cx="134" cy="132" rx="13" ry="10"/>
-              <g class="acc acc-ditale">
-                <path d="M142 124q9-5 13 4t-8 9"/>
-              </g>
-            </g>
-          </svg>
-
-          <!-- il calzino in lavorazione: la lana sale mentre la sessione va -->
-          <svg class="calzino-live" viewBox="0 0 120 120" role="img" aria-label="Calzino in lavorazione">
+          <svg class="stanza" id="stanza" viewBox="0 0 340 192" role="img" aria-labelledby="stanza-title">
+            <title id="stanza-title">La stanza di Mora</title>
             <defs>
-              <clipPath id="clip-calzino">
+              <clipPath id="clip-calzino" clipPathUnits="userSpaceOnUse">
                 <rect x="42" y="12" width="34" height="62" rx="10"/>
                 <rect x="18" y="58" width="58" height="32" rx="16"/>
               </clipPath>
             </defs>
-            <g clip-path="url(#clip-calzino)">
-              <rect class="calzino-vuoto" x="0" y="0" width="120" height="120"/>
-              <rect class="calzino-lana" id="calzino-lana" x="0" y="120" width="120" height="120"/>
+
+            <!-- Finché la casa non ha i muri, Mora lavora fuori, sul prato. -->
+            <g id="fuori">
+              <rect class="cielo" x="0" y="0" width="340" height="152"/>
+              <circle class="sole" cx="46" cy="34" r="17"/>
+              <ellipse class="collina" cx="50" cy="168" rx="110" ry="34"/>
+              <ellipse class="collina lontana" cx="290" cy="172" rx="120" ry="38"/>
+              <rect class="erba" x="0" y="152" width="340" height="68"/>
             </g>
-            <g class="calzino-bordo">
-              <rect x="42" y="12" width="34" height="62" rx="10"/>
-              <rect x="18" y="58" width="58" height="32" rx="16"/>
-              <path d="M42 26h34"/>
+
+            <!-- Dai muri in poi, la stessa scena è un interno. -->
+            <g id="dentro">
+              <rect class="parete" x="0" y="0" width="340" height="146"/>
+              <rect class="battiscopa" x="0" y="140" width="340" height="10"/>
+              <rect class="assito" x="0" y="150" width="340" height="70"/>
+              <path class="fughe" d="M46 150v70M108 150v70M170 150v70M232 150v70M294 150v70"/>
+            </g>
+
+            <g class="arredo" data-fase="7"><rect class="trave" x="0" y="0" width="340" height="13"/></g>
+
+            <g class="arredo" data-fase="5">
+              <rect class="vetro" x="256" y="18" width="80" height="60" rx="4"/>
+              <path class="telaio" d="M296 18v60M256 48h80"/>
+              <rect class="davanzale" x="250" y="78" width="92" height="8" rx="3"/>
+            </g>
+
+            <g class="arredo" data-deco="tenda">
+              <path class="tenda" d="M250 12q13 36 4 68h-15q9-34-2-68z"/>
+              <path class="tenda" d="M336 12q-13 36-4 68h-15q9-34 2-68z"/>
+            </g>
+
+            <g class="arredo" data-fase="6">
+              <rect class="porta-s" x="-10" y="40" width="46" height="112" rx="5"/>
+              <circle class="pomo" cx="27" cy="100" r="3.6"/>
+            </g>
+
+            <g class="arredo" data-fase="8">
+              <rect class="stufa" x="50" y="104" width="40" height="48" rx="5"/>
+              <rect class="tubo" x="65" y="72" width="10" height="34" rx="3"/>
+              <path class="fuoco" d="M70 142q-10-11 0-23 10 12 0 23z"/>
+            </g>
+
+            <g class="arredo" data-fase="11">
+              <rect class="cornice" x="46" y="34" width="46" height="36" rx="3"/>
+              <path class="quadro-dentro" d="M52 64l12-16 10 12 8-8 10 12z"/>
+            </g>
+
+            <g class="arredo" data-fase="9">
+              <path class="filo-lampada" d="M170 13v22"/>
+              <path class="paralume" d="M150 56l20-22 20 22z"/>
+              <circle class="alone" cx="170" cy="62" r="14"/>
+            </g>
+
+            <g class="arredo" data-deco="ghirlanda">
+              <path class="corda" d="M6 22q84 26 164 0t164 0"/>
+              <g class="lucine">
+                <circle cx="48" cy="30" r="4"/><circle cx="90" cy="34" r="4"/><circle cx="132" cy="34" r="4"/>
+                <circle cx="174" cy="30" r="4"/><circle cx="216" cy="26" r="4"/><circle cx="258" cy="24" r="4"/>
+                <circle cx="300" cy="24" r="4"/>
+              </g>
+            </g>
+
+            <g class="arredo fuori-solo" data-fase="1">
+              <path class="palo-s" d="M300 176v-30"/>
+              <rect class="cartello-s" x="284" y="136" width="32" height="14" rx="3"/>
+            </g>
+            <g class="arredo fuori-solo" data-fase="2">
+              <rect class="gradino" x="94" y="150" width="150" height="12" rx="4"/>
+            </g>
+
+            <g class="arredo" data-fase="3"><ellipse class="tappeto" cx="166" cy="160" rx="90" ry="14"/></g>
+
+            <g class="arredo" data-fase="10">
+              <rect class="vaso" x="300" y="128" width="30" height="24" rx="4"/>
+              <path class="foglie" d="M315 128q-16-8-14-26 14 4 14 26zM315 128q16-10 15-30-16 6-15 30z"/>
+            </g>
+
+            <g class="arredo" data-deco="gatto">
+              <ellipse class="gatto-corpo" cx="72" cy="146" rx="26" ry="12"/>
+              <circle class="gatto-corpo" cx="52" cy="140" r="10"/>
+              <path class="gatto-tratto" d="M46 133l-3-6 6 2M58 133l3-6-6 2M44 140h-6M44 144h-6"/>
+            </g>
+
+            <g class="arredo" data-deco="tazza">
+              <path class="tazza" d="M8 140h18v9a5 5 0 0 1-5 5h-8a5 5 0 0 1-5-5z"/>
+              <path class="manico" d="M26 143q6 0 6 4t-6 4"/>
+              <path class="vapore" d="M14 136q4-5 0-9M21 136q4-5 0-9"/>
+            </g>
+
+            <!-- Mora, dentro la scena: la pelle cambia solo i suoi colori. -->
+            <g class="mora" id="mora" data-pelle="mora" transform="translate(92 27) scale(0.72)">
+              <ellipse class="mora-ombra" cx="110" cy="173" rx="58" ry="8"/>
+              <path class="mora-corpo" d="M110 40c-30 0-52 24-52 58 0 40 22 66 52 66s52-26 52-66c0-34-22-58-52-58z"/>
+              <ellipse class="mora-pancia" cx="110" cy="124" rx="34" ry="30"/>
+
+              <g class="acc acc-grembiule">
+                <path d="M92 104q18 8 36 0l7 38q-25 10-50 0z"/>
+                <path d="M99 104l-5-10M121 104l5-10"/>
+              </g>
+
+              <path class="mora-muso" d="M110 60c-16 0-27 10-27 22s11 20 27 20 27-8 27-20-11-22-27-22z"/>
+              <circle class="mora-naso" cx="110" cy="70" r="6"/>
+              <g class="mora-occhi">
+                <path class="occhio" d="M84 54q7 7 14 0"/>
+                <path class="occhio" d="M122 54q7 7 14 0"/>
+              </g>
+              <g class="mora-baffi">
+                <path d="M82 82h-14M82 88h-12M138 82h14M138 88h12"/>
+              </g>
+
+              <g class="acc acc-occhiali">
+                <circle cx="91" cy="55" r="13"/>
+                <circle cx="129" cy="55" r="13"/>
+                <path d="M104 55h12"/>
+              </g>
+              <g class="acc acc-cappello">
+                <path d="M78 45q32-26 64 0z"/>
+                <path d="M70 47h80"/>
+                <circle cx="110" cy="21" r="7"/>
+              </g>
+              <g class="acc acc-coroncina">
+                <path d="M80 46l5-22 11 13 14-18 14 18 11-13 5 22z"/>
+              </g>
+              <g class="acc acc-fiore">
+                <circle cx="148" cy="46" r="6"/><circle cx="160" cy="46" r="6"/>
+                <circle cx="154" cy="36" r="6"/><circle cx="154" cy="56" r="6"/>
+                <circle class="cuore" cx="154" cy="46" r="4.5"/>
+              </g>
+              <g class="acc acc-papillon">
+                <path d="M110 106l-17-10v20zM110 106l17-10v20z"/>
+                <circle class="cuore" cx="110" cy="106" r="4.5"/>
+              </g>
+
+              <g class="gomitolo">
+                <circle cx="34" cy="156" r="15"/>
+                <path d="M23 150q11 10 22 3M25 162q9-12 20-7"/>
+                <path class="filo" d="M47 150q22-12 42-6"/>
+              </g>
+
+              <ellipse class="mora-zampa" cx="86" cy="142" rx="13" ry="10"/>
+              <g class="mora-braccio" id="mora-braccio">
+                <g class="ferri"><path d="M84 150l54-35M88 158l54-35"/></g>
+                <ellipse class="mora-zampa" cx="134" cy="132" rx="13" ry="10"/>
+                <g class="acc acc-ditale"><path d="M142 124q9-5 13 4t-8 9"/></g>
+              </g>
+            </g>
+
+            <!-- il calzino in lavorazione, per terra davanti a lei -->
+            <g id="calzino-live" transform="translate(196 92) scale(0.52)">
+              <g clip-path="url(#clip-calzino)">
+                <rect class="calzino-vuoto" x="0" y="0" width="120" height="120"/>
+                <rect class="calzino-lana" id="calzino-lana" x="0" y="120" width="120" height="120"/>
+              </g>
+              <g class="calzino-bordo">
+                <rect x="42" y="12" width="34" height="62" rx="10"/>
+                <rect x="18" y="58" width="58" height="32" rx="16"/>
+                <path d="M42 26h34"/>
+              </g>
             </g>
           </svg>
+
+          <p class="conta-calzini" id="conta-calzini"></p>
         </div>
 
         <p class="clock" id="clock" aria-live="off">25:00</p>
@@ -379,6 +470,11 @@
         <div class="outfit-row" id="outfit"></div>
         <h3>Fantasia dei calzini</h3>
         <div class="outfit-row" id="fantasie"></div>
+        <h3>Come è fatta Mora</h3>
+        <div class="outfit-row" id="pelli"></div>
+        <h3>Decorazioni della stanza</h3>
+        <p class="hint">I mobili arrivano da soli con i pezzi della casa. Queste si accendono a mano.</p>
+        <div class="outfit-row" id="decorazioni"></div>
       </div>
 
       <div class="card">

@@ -122,6 +122,37 @@
     }
   }
 
+  /**
+   * La stanza segue la casa: finché non ci sono i muri Mora lavora sul prato,
+   * poi la stessa scena diventa un interno e i mobili compaiono uno alla volta.
+   * Le decorazioni del Pro, invece, si accendono a mano.
+   */
+  function renderStanza() {
+    const fase = Store.casa().fase;
+    const dentro = fase >= 4;
+    const s = Store.settings();
+
+    $("#fuori").style.display = dentro ? "none" : "";
+    $("#dentro").style.display = dentro ? "" : "none";
+
+    for (const g of $$("#stanza .arredo")) {
+      if (g.dataset.fase) {
+        const suo = Number(g.dataset.fase) <= fase;
+        // Cartello e gradino sono roba da prato: sparire una volta dentro.
+        g.style.display = suo && !(dentro && g.classList.contains("fuori-solo")) ? "" : "none";
+      } else if (g.dataset.deco) {
+        const deco = Store.DECORAZIONI.find((d) => d.id === g.dataset.deco);
+        g.style.display = s.decorazioni[g.dataset.deco] && sbloccato(deco) ? "" : "none";
+      }
+    }
+
+    const pelle = Store.PELLI.find((x) => x.id === s.pelle);
+    $("#mora").dataset.pelle = sbloccato(pelle) ? pelle.id : "mora";
+
+    const calzini = Store.socks().length;
+    $("#conta-calzini").textContent = `${calzini} ${calzini === 1 ? "calzino" : "calzini"}`;
+  }
+
   /* ------------------------------------------------------------- sezioni */
 
   function showView(name) {
@@ -538,6 +569,18 @@
         `data-outfit="${acc.id}">${esc(acc.nome)}</button>`;
     }).join("");
 
+    $("#pelli").innerHTML = Store.PELLI.map((x) => {
+      const chiusa = !sbloccato(x);
+      return `<button type="button" class="chip ${x.id === s.pelle && !chiusa ? "is-active" : ""} ${chiusa ? "bloccata" : ""}" ` +
+        `data-pelle="${x.id}">${esc(x.nome)}</button>`;
+    }).join("");
+
+    $("#decorazioni").innerHTML = Store.DECORAZIONI.map((d) => {
+      const chiusa = !sbloccato(d);
+      return `<button type="button" class="chip ${s.decorazioni[d.id] && !chiusa ? "is-active" : ""} ${chiusa ? "bloccata" : ""}" ` +
+        `data-deco="${d.id}">${esc(d.nome)}</button>`;
+    }).join("");
+
     const fantasiaViva = fantasiaInUso();
     $("#fantasie").innerHTML = Store.FANTASIE.map((f) => {
       const chiusa = !sbloccato(f);
@@ -790,6 +833,28 @@
       renderSettings();
     });
 
+    $("#pelli").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-pelle]");
+      if (!b) return;
+      const pelle = Store.PELLI.find((x) => x.id === b.dataset.pelle);
+      if (!sbloccato(pelle)) return apriPro(`«${pelle.nome}» è una pelle del Pro.`);
+      Store.setSetting("pelle", pelle.id);
+      renderStanza();
+      renderSettings();
+    });
+
+    $("#decorazioni").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-deco]");
+      if (!b) return;
+      const deco = Store.DECORAZIONI.find((x) => x.id === b.dataset.deco);
+      if (!sbloccato(deco)) return apriPro(`«${deco.nome}» è una decorazione del Pro.`);
+      const attuali = Object.assign({}, Store.settings().decorazioni);
+      attuali[deco.id] = !attuali[deco.id];
+      Store.setSetting("decorazioni", attuali);
+      renderStanza();
+      renderSettings();
+    });
+
     $("#fantasie").addEventListener("click", (e) => {
       const b = e.target.closest("[data-fantasia]");
       if (!b) return;
@@ -910,6 +975,7 @@
 
   function renderAll() {
     renderTimer(Timer.snapshot());
+    renderStanza();
     renderTasks();
     renderToday();
     renderCasa();
@@ -923,6 +989,7 @@
     if (!event) return;
     if (["complete", "reset", "disfatto"].includes(event.type)) {
       renderToday();
+      renderStanza();
       if (!$("#view-casa").hidden) { renderCasa(); renderCassetto(); }
       if (!$("#view-statistiche").hidden) renderStats();
     }

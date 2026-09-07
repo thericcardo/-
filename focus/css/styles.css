@@ -41,6 +41,12 @@
   --casa-luce:   #FFD97A;
   --casa-pietra: #9A8F81;
 
+  --stanza-parete:  #F3E3CE;
+  --stanza-batti:   #D9BF9E;
+  --stanza-pav:     #C9975C;
+  --stanza-cielo:   #CFE7F0;
+  --stanza-erba:    #A8CB92;
+
   --radius:      16px;
   --radius-sm:   10px;
   --shadow:      0 1px 2px rgba(30, 36, 56, .06), 0 10px 28px rgba(30, 36, 56, .07);
@@ -55,6 +61,7 @@
 :root[data-palette="prugna"]  { --deep: #2A1E30; --accent: #D98BB0; --accent-2: #9AB6E8; }
 :root[data-palette="argilla"] { --deep: #2E211C; --accent: #E0785C; --accent-2: #E8C79A; }
 :root[data-palette="oceano"]  { --deep: #12242E; --accent: #5FB6D9; --accent-2: #A8E0C6; }
+:root[data-palette="panna"]   { --deep: #3B3128; --accent: #E8A87C; --accent-2: #8FB996; }
 :root[data-palette="carbone"] { --deep: #212121; --accent: #C9C4BC; --accent-2: #8FA0A6; }
 :root[data-palette="tramonto"] { --deep: #2B1B2E; --accent: #FF8A5B; --accent-2: #FFC9A0; }
 :root[data-palette="menta"]    { --deep: #12291F; --accent: #4FD1A5; --accent-2: #BDF0DA; }
@@ -89,6 +96,11 @@
     --casa-vetro:  #46617A;
     --casa-luce:   #FFD97A;
     --casa-pietra: #6B6478;
+    --stanza-parete:  #3A3348;
+    --stanza-batti:   #4C4460;
+    --stanza-pav:     #6B4F33;
+    --stanza-cielo:   #26364A;
+    --stanza-erba:    #3E5540;
   }
 }
 
@@ -118,6 +130,11 @@
   --casa-vetro:  #46617A;
   --casa-luce:   #FFD97A;
   --casa-pietra: #6B6478;
+  --stanza-parete:  #3A3348;
+  --stanza-batti:   #4C4460;
+  --stanza-pav:     #6B4F33;
+  --stanza-cielo:   #26364A;
+  --stanza-erba:    #3E5540;
 }
 
 * { box-sizing: border-box; }
@@ -147,7 +164,7 @@ code { font-family: var(--mono); font-size: .9em; }
 .app {
   max-width: 720px;
   margin: 0 auto;
-  padding: 1rem 1rem 3rem;
+  padding: 1rem 1rem 5.5rem;
 }
 
 /* ------------------------------------------------------------------ testa */
@@ -168,35 +185,49 @@ code { font-family: var(--mono); font-size: .9em; }
 
 /* ------------------------------------------------------------------ tabs */
 
+/* La navigazione sta in basso, dove arriva il pollice. */
 .tabs {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
   display: flex;
-  gap: .25rem;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: .25rem;
-  margin-bottom: 1rem;
-  overflow-x: auto;
-  scrollbar-width: none;
+  gap: .2rem;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+  padding: .3rem .4rem calc(.3rem + env(safe-area-inset-bottom));
 }
-.tabs::-webkit-scrollbar { display: none; }
 
 .tab {
-  flex: 1 0 auto;
+  flex: 1;
   border: 0;
   background: none;
   color: var(--muted);
   font: inherit;
-  font-size: .88rem;
-  padding: .5rem .8rem;
-  border-radius: 999px;
+  font-size: .68rem;
+  padding: .35rem .2rem .3rem;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .12rem;
+}
+.tab svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .tab:hover { color: var(--ink); }
-.tab.is-active { background: var(--deep); color: #FFF; }
-:root[data-theme="dark"] .tab.is-active,
-:root:not([data-theme="light"]) .tab.is-active { color: #FFF; }
+.tab.is-active { color: var(--accent-ink, var(--ink)); }
+.tab.is-active svg { stroke: var(--accent); }
+.tab.is-active span { font-weight: 600; }
 
 /* ----------------------------------------------------------------- schede */
 
@@ -292,21 +323,80 @@ kbd {
   font-weight: 600;
 }
 
-.scene-card { text-align: center; }
+/* La stanza tocca i bordi della scheda: è lei la protagonista, non la cornice. */
+.scene-card { text-align: center; padding: 0 1rem 1rem; overflow: hidden; }
+.scene-card .scene { margin: 0 -1rem; border-radius: 0; }
 
 .scene {
   position: relative;
-  background: var(--scene-bg);
   border-radius: var(--radius);
-  padding: 1rem .5rem .6rem;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: .4rem;
-  min-height: 210px;
+  overflow: hidden;
+  line-height: 0;
 }
 
-.mora { width: min(230px, 58%); height: auto; }
+.stanza { display: block; width: 100%; height: auto; }
+
+/* Il contatore dei calzini, appoggiato sulla scena come nelle app di gioco. */
+.conta-calzini {
+  position: absolute;
+  top: .55rem;
+  right: .6rem;
+  margin: 0;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .18rem .6rem;
+  font-size: .82rem;
+  line-height: 1.4;
+  color: var(--ink);
+  backdrop-filter: blur(3px);
+}
+
+/* --- la stanza --- */
+.cielo      { fill: var(--stanza-cielo); }
+.sole       { fill: color-mix(in srgb, var(--accent) 75%, #FFF); }
+.collina    { fill: color-mix(in srgb, var(--stanza-erba) 80%, #000 12%); }
+.collina.lontana { fill: color-mix(in srgb, var(--stanza-erba) 92%, #FFF 10%); }
+.erba       { fill: var(--stanza-erba); }
+.parete     { fill: var(--stanza-parete); }
+.battiscopa { fill: var(--stanza-batti); }
+.assito     { fill: var(--stanza-pav); }
+.fughe      { stroke: rgba(0, 0, 0, .13); stroke-width: 2; }
+.trave      { fill: var(--casa-legno); }
+.vetro      { fill: var(--stanza-cielo); stroke: var(--casa-legno); stroke-width: 4; }
+.telaio     { stroke: var(--casa-legno); stroke-width: 4; }
+.davanzale  { fill: var(--casa-legno); }
+.tenda      { fill: color-mix(in srgb, var(--accent) 55%, var(--surface)); }
+.porta-s    { fill: var(--casa-legno); stroke: rgba(0, 0, 0, .18); stroke-width: 3; }
+.pomo       { fill: var(--accent-2); }
+.stufa      { fill: var(--casa-pietra); }
+.tubo       { fill: var(--casa-pietra); }
+.fuoco      { fill: var(--accent); }
+.cornice    { fill: var(--surface); stroke: var(--casa-legno); stroke-width: 4; }
+.quadro-dentro { fill: color-mix(in srgb, var(--accent-2) 70%, transparent); }
+.filo-lampada  { stroke: var(--casa-legno); stroke-width: 2.5; }
+.paralume   { fill: var(--accent); }
+.alone      { fill: var(--casa-luce); opacity: .45; }
+.corda      { fill: none; stroke: var(--muted); stroke-width: 2; opacity: .6; }
+.lucine circle { fill: var(--casa-luce); }
+.palo-s     { stroke: var(--casa-legno); stroke-width: 5; stroke-linecap: round; }
+.cartello-s { fill: var(--casa-legno); }
+.gradino    { fill: var(--casa-pietra); }
+.tappeto    { fill: color-mix(in srgb, var(--accent) 45%, transparent); }
+.vaso       { fill: var(--casa-legno); }
+.foglie     { fill: color-mix(in srgb, var(--accent-2) 85%, #2E5A3E); }
+.gatto-corpo { fill: color-mix(in srgb, var(--deep) 70%, var(--surface)); }
+.gatto-tratto { fill: none; stroke: color-mix(in srgb, var(--deep) 70%, var(--surface)); stroke-width: 2.5; stroke-linecap: round; }
+.tazza      { fill: var(--surface); stroke: var(--accent); stroke-width: 2.5; }
+.manico     { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+.vapore     { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; opacity: .7; }
+
+/* --- le pelli di Mora: cambiano solo i suoi colori --- */
+.mora[data-pelle="neve"]     { --mora-corpo: #E3DEE8; --mora-pancia: #FFFFFF; --mora-tratto: #5A5470; --mora-naso: #6E6580; }
+.mora[data-pelle="cenere"]   { --mora-corpo: #7C7C86; --mora-pancia: #A3A3AD; --mora-tratto: #FFFFFF; }
+.mora[data-pelle="terra"]    { --mora-corpo: #6B4A34; --mora-pancia: #8F6A4C; --mora-tratto: #FFF3E4; --mora-muso: #E9C9B4; }
+.mora[data-pelle="oro"]      { --mora-corpo: #C79A3C; --mora-pancia: #E4C169; --mora-tratto: #4A3A12; --mora-naso: #4A3A12; }
+.mora[data-pelle="notturna"] { --mora-corpo: #2C2A44; --mora-pancia: #423F63; --mora-tratto: #C9C4F0; --mora-naso: #C9C4F0; }
 .mora-ombra { fill: rgba(0, 0, 0, .12); }
 .mora-corpo { fill: var(--mora-corpo); }
 .mora-pancia { fill: var(--mora-pancia); }
@@ -368,7 +458,6 @@ kbd {
 .scene.has-papillon .acc-papillon { display: block; }
 
 /* il calzino in lavorazione: la lana sale dal fondo */
-.calzino-live { width: min(118px, 30%); height: auto; margin-bottom: .6rem; }
 .calzino-vuoto { fill: color-mix(in srgb, var(--accent) 14%, var(--surface)); }
 .calzino-lana { fill: var(--accent); transition: y .4s linear; }
 .calzino-bordo rect, .calzino-bordo path {
