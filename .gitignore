@@ -1,3 +1,6 @@
 .DS_Store
 Thumbs.db
 node_modules/
+
+# Il canvas seminato è generato: si rifà da focus/design/ con seed-canvas.mjs
+calzino-*.html
