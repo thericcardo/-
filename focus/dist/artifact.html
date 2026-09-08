@@ -597,7 +597,10 @@ input[type="text"], input[type="number"], select {
 .calzino .corpo { stroke: rgba(0, 0, 0, .18); stroke-width: 3; }
 .calzino .bordo { stroke: rgba(255, 255, 255, .75); stroke-width: 4; stroke-linecap: round; fill: none; }
 .calzino.vuoto { cursor: default; opacity: .45; }
-.calzino .fantasia { fill: rgba(255, 255, 255, .42); stroke: none; }
+.calzino .fantasia, .calzino-festa .fantasia { fill: rgba(255, 255, 255, .42); stroke: none; }
+.calzino-festa .corpo { stroke: rgba(0, 0, 0, .18); stroke-width: 3; }
+.calzino-festa .bordo { stroke: rgba(255, 255, 255, .8); stroke-width: 4; stroke-linecap: round; fill: none; }
+.calzino-festa .fantasia-scura { fill: rgba(0, 0, 0, .16); stroke: none; }
 .calzino .fantasia-scura { fill: rgba(0, 0, 0, .16); stroke: none; }
 .calzino .doppio {
   fill: none;
@@ -826,6 +829,68 @@ input[type="text"], input[type="number"], select {
 .storia li.prossimo b::after { content: " — ci stai lavorando"; font-weight: 400; font-size: .82em; color: var(--accent); }
 .storia b { display: block; }
 .storia .segreto { filter: blur(3.5px); user-select: none; }
+
+/* --------------------------------------------------- concentrazione profonda */
+
+.profonda-switch { justify-content: center; margin: .2rem 0 .8rem; font-size: .84rem; color: var(--muted); }
+.btn-esci { display: none; margin-top: .6rem; }
+
+/* A schermo intero resta solo quello che serve: la stanza, il conto, un bottone. */
+body.profonda { overflow: hidden; background: var(--deep); }
+body.profonda .topbar,
+body.profonda .tabs,
+body.profonda .modo-seg,
+body.profonda .phase-switch,
+body.profonda .profonda-switch,
+body.profonda .kbd-hint,
+body.profonda .card:not(.scene-card),
+body.profonda #btn-skip,
+body.profonda #btn-reset,
+body.profonda .block-warning { display: none !important; }
+body.profonda .btn-esci { display: inline-flex; }
+body.profonda .app {
+  max-width: 640px;
+  padding: 0 0 1rem;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+}
+body.profonda .views, body.profonda .view { width: 100%; }
+body.profonda .scene-card {
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 0 0 1rem;
+}
+body.profonda .scene { border-radius: 0; margin: 0; }
+body.profonda .clock { font-size: clamp(3.2rem, 17vw, 5.4rem); color: #FFF; }
+body.profonda .clock-note, body.profonda .conta-calzini { color: rgba(255, 255, 255, .8); }
+body.profonda .conta-calzini { background: rgba(255, 255, 255, .14); border-color: transparent; }
+body.profonda .btn.ghost { background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .28); color: #FFF; }
+/* Sul fondo scuro il bottone scuro sparisce: qui comanda l'accento. */
+body.profonda .btn.primary { background: var(--accent); color: #17120E; }
+body.profonda .cycles span { background: rgba(255, 255, 255, .22); }
+body.profonda .cycles span.done { background: var(--accent); }
+
+/* ---------------------------------------------------------- cose da fare */
+
+.todo { list-style: none; margin: .2rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .1rem; }
+.todo li { display: flex; align-items: center; gap: .55rem; padding: .35rem 0; border-bottom: 1px solid var(--line); }
+.todo li:last-child { border-bottom: 0; }
+.todo input[type="checkbox"] { width: 19px; height: 19px; accent-color: var(--accent); flex: none; }
+.todo span { flex: 1; font-size: .92rem; }
+.todo li.fatto span { text-decoration: line-through; color: var(--muted); }
+.todo .via { border: 0; background: none; color: var(--muted); font-size: 1.1rem; line-height: 1; cursor: pointer; padding: 0 .2rem; }
+.todo .via:hover { color: var(--danger); }
+
+/* ------------------------------------------------------- fine e benvenuto */
+
+.festa { text-align: center; }
+.festa .btn-row { justify-content: center; }
+.calzino-festa { width: 92px; height: auto; margin: 0 auto .4rem; display: block; }
+.ciao-icona { border-radius: 16px; margin: 0 auto .6rem; display: block; }
+.festa h2 { font-size: 1.25rem; }
 
 </style>
 
@@ -1064,6 +1129,11 @@ input[type="text"], input[type="number"], select {
 
         <div class="cycles" id="cycles" aria-label="Sessioni prima della pausa lunga"></div>
 
+        <label class="switch profonda-switch" id="profonda-riga">
+          <input type="checkbox" id="s-profonda">
+          <span>Concentrazione profonda: solo Mora, a schermo intero</span>
+        </label>
+
         <div class="controls">
           <button type="button" class="btn primary big" id="btn-start">Avvia</button>
           <button type="button" class="btn ghost" id="btn-skip">Salta</button>
@@ -1071,6 +1141,7 @@ input[type="text"], input[type="number"], select {
           <button type="button" class="btn ghost" id="btn-reset">Azzera</button>
         </div>
         <p class="hint kbd-hint" id="kbd-hint"></p>
+        <button type="button" class="btn ghost small btn-esci" id="btn-esci">Esci dalla concentrazione</button>
       </div>
 
       <div class="card">
@@ -1085,6 +1156,19 @@ input[type="text"], input[type="number"], select {
           <button type="button" class="btn ghost small" id="btn-task-cancel">Annulla</button>
         </form>
         <p class="error" id="task-error" role="alert" hidden></p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Cose da fare</h2>
+          <button type="button" class="btn ghost small" id="btn-todo-pulisci">Togli le fatte</button>
+        </div>
+        <ul class="todo" id="todo"></ul>
+        <p class="empty" id="todo-empty">Niente in lista. Scrivi qui sotto che cosa vuoi finire oggi.</p>
+        <form id="form-todo" class="inline-form" autocomplete="off">
+          <input id="todo-testo" type="text" maxlength="80" placeholder="es. finire il capitolo 3">
+          <button type="submit" class="btn primary small">Aggiungi</button>
+        </form>
       </div>
 
       <div class="card today-card">
@@ -1350,6 +1434,36 @@ input[type="text"], input[type="number"], select {
   </div>
 </div>
 
+<!-- fine sessione: il calzino appena finito -->
+<div class="sheet" id="sheet-fine" hidden>
+  <div class="sheet-box festa">
+    <svg class="calzino-festa" id="calzino-festa" viewBox="0 0 100 110" aria-hidden="true"></svg>
+    <h2 id="festa-titolo">Calzino finito</h2>
+    <p id="festa-testo"></p>
+    <p class="hint" id="festa-casa"></p>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-festa-pausa">Fai la pausa</button>
+      <button type="button" class="btn ghost" id="btn-festa-chiudi">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- il primo incontro con Mora -->
+<div class="sheet" id="sheet-ciao" hidden>
+  <div class="sheet-box festa">
+    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNhbHppbm8iPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTEyIiBmaWxsPSIjMUUyNDM4Ii8+CiAgPHBhdGggZD0iTTIxNCA5Nmg3MmE0MCA0MCAwIDAgMSA0MCA0MHYyMzhhNDAgNDAgMCAwIDEtNDAgNDBIMTUwYTY2IDY2IDAgMCAxIDAtMTMyaDMyVjEzNmE0MCA0MCAwIDAgMSAzMi00MHoiCiAgICAgICAgZmlsbD0iI0YyQTY1QSIvPgogIDxwYXRoIGQ9Ik0xOTYgMTYwaDEwOCIgc3Ryb2tlPSIjMUUyNDM4IiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMTk2IDIxMGgxMDhNMTk2IDI1OGgxMDgiIHN0cm9rZT0iIzdGRDFCOSIgc3Ryb2tlLXdpZHRoPSIxNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtZGFzaGFycmF5PSIyNiAyMiIvPgo8L3N2Zz4K" alt="" width="64" height="64" class="ciao-icona">
+    <h2>Lei è Mora</h2>
+    <p>È una talpa e sferruzza. Quando parte il timer, prende i ferri; quando la sessione
+      arriva in fondo, nel cassetto c'è un calzino. Due calzini fanno un paio, e i paia
+      pagano la casa che si sta costruendo — un pezzo alla volta, dal terreno alla staccionata.</p>
+    <p class="hint">Tu devi solo lasciar stare il telefono finché il timer scende.</p>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-ciao-via">Comincia: 25 minuti</button>
+      <button type="button" class="btn ghost" id="btn-ciao-dopo">Guardo prima in giro</button>
+    </div>
+  </div>
+</div>
+
 <!-- il Pro: prova, pagamento, codice -->
 <div class="sheet" id="sheet-pro" hidden>
   <div class="sheet-box">
@@ -1530,6 +1644,8 @@ const Store = (() => {
     fantasia: "tinta",
     modo: "timer",
     pelle: "mora",
+    profonda: true,
+    presentata: false,
     decorazioni: { ghirlanda: false, gatto: false, tazza: false, tenda: false },
     distractors: ["Instagram", "YouTube", "Chat di gruppo"]
   };
@@ -1542,6 +1658,10 @@ const Store = (() => {
   let available = true;
   let state = load();
 
+  function isTodo(t) {
+    return t && typeof t === "object" && typeof t.testo === "string";
+  }
+
   function blank() {
     return {
       version: 1,
@@ -1550,6 +1670,7 @@ const Store = (() => {
       tasks: [],
       currentTaskId: null,
       sessions: [],
+      todos: [],
       running: null
     };
   }
@@ -1563,7 +1684,8 @@ const Store = (() => {
   function cleanSettings(raw) {
     const s = Object.assign({}, DEFAULT_SETTINGS, raw && typeof raw === "object" ? raw : {});
     for (const [k, range] of Object.entries(LIMITS)) s[k] = clampNum(s[k], range, DEFAULT_SETTINGS[k]);
-    for (const k of ["autoStartBreak", "autoStartFocus", "sound", "notify", "wakeLock", "strict"]) {
+    for (const k of ["autoStartBreak", "autoStartFocus", "sound", "notify", "wakeLock", "strict",
+                     "profonda", "presentata"]) {
       s[k] = Boolean(s[k]);
     }
     if (!["auto", "light", "dark"].includes(s.theme)) s.theme = "auto";
@@ -1628,6 +1750,13 @@ const Store = (() => {
         tasks,
         currentTaskId: tasks.some((t) => t.id === parsed.currentTaskId) ? parsed.currentTaskId : null,
         sessions,
+        todos: Array.isArray(parsed.todos)
+          ? parsed.todos.filter(isTodo).map((t) => ({
+              id: typeof t.id === "string" ? t.id : newId(),
+              testo: String(t.testo).slice(0, 80),
+              fatto: Boolean(t.fatto)
+            }))
+          : [],
         running: parsed.running && typeof parsed.running === "object" ? parsed.running : null
       };
     } catch (err) {
@@ -1816,6 +1945,44 @@ const Store = (() => {
     save();
   }
 
+  /* --------------------------------------------------------- cose da fare */
+
+  const todos = () => state.todos;
+
+  function addTodo(testo) {
+    const pulito = String(testo || "").trim().replace(/\s+/g, " ");
+    if (pulito.length < 2) return { ok: false, error: "Scrivi almeno due caratteri." };
+    if (state.todos.length >= 50) return { ok: false, error: "Cinquanta cose da fare bastano." };
+    const todo = { id: newId(), testo: pulito.slice(0, 80), fatto: false };
+    state.todos.push(todo);
+    save();
+    return { ok: true, value: todo };
+  }
+
+  function toggleTodo(id) {
+    const t = state.todos.find((x) => x.id === id);
+    if (!t) return false;
+    t.fatto = !t.fatto;
+    save();
+    return true;
+  }
+
+  function deleteTodo(id) {
+    const i = state.todos.findIndex((x) => x.id === id);
+    if (i === -1) return false;
+    state.todos.splice(i, 1);
+    save();
+    return true;
+  }
+
+  /** Toglie di mezzo le cose fatte: la lista deve restare quella di adesso. */
+  function pulisciTodo() {
+    const prima = state.todos.length;
+    state.todos = state.todos.filter((t) => !t.fatto);
+    save();
+    return prima - state.todos.length;
+  }
+
   /* ------------------------------------------------------ esporta/importa */
 
   function exportAll() {
@@ -1825,6 +1992,7 @@ const Store = (() => {
       exportedAt: new Date().toISOString(),
       settings: state.settings,
       tasks: state.tasks,
+      todos: state.todos,
       sessions: state.sessions
     };
   }
@@ -1861,6 +2029,13 @@ const Store = (() => {
       state.sessions.push(s);
       added++;
     }
+    if (Array.isArray(payload.todos)) {
+      const noti = new Set(state.todos.map((t) => t.id));
+      for (const t of payload.todos) {
+        if (!isTodo(t) || (t.id && noti.has(t.id))) continue;
+        state.todos.push({ id: t.id || newId(), testo: String(t.testo).slice(0, 80), fatto: Boolean(t.fatto) });
+      }
+    }
     if (payload.settings) state.settings = cleanSettings(Object.assign({}, state.settings, payload.settings));
     save();
     return { ok: true, added, skipped };
@@ -1895,6 +2070,11 @@ const Store = (() => {
     setCurrentTask,
     sessions,
     addSession,
+    todos,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+    pulisciTodo,
     socks,
     casa,
     running,
@@ -2038,10 +2218,12 @@ const Licenza = (() => {
 
   const inProva = () => attiva() && !stato.codice;
 
+  /** I giorni che restano, arrotondati al più vicino: i codici scadono a
+      mezzanotte, e con l'arrotondamento per eccesso un mese ne mostrava 32. */
   function giorniRimasti() {
     const s = scadenza();
     if (!s) return 0;
-    return Math.max(0, Math.ceil((s - new Date()) / 86400000));
+    return Math.max(0, Math.round((s - new Date()) / 86400000));
   }
 
   /** L'unica cosa che tocca i dati: quanti calzini vale una sessione finita. */
@@ -2776,6 +2958,20 @@ const Timer = (() => {
     box.innerHTML = pezzi.join("");
   }
 
+  /* --------------------------------------------------------- cose da fare */
+
+  function renderTodo() {
+    const lista = Store.todos();
+    $("#todo-empty").hidden = lista.length > 0;
+    $("#btn-todo-pulisci").hidden = !lista.some((t) => t.fatto);
+    $("#todo").innerHTML = lista.map((t) =>
+      `<li class="${t.fatto ? "fatto" : ""}">` +
+      `<input type="checkbox" id="todo-${t.id}" data-todo="${t.id}" ${t.fatto ? "checked" : ""}>` +
+      `<span><label for="todo-${t.id}">${esc(t.testo)}</label></span>` +
+      `<button type="button" class="via" data-todo-via="${t.id}" aria-label="Togli ${esc(t.testo)}">×</button></li>`
+    ).join("");
+  }
+
   /* ---------------------------------------------------------- statistiche */
 
   function focusSessions() {
@@ -3058,6 +3254,7 @@ const Timer = (() => {
     $("#s-notify").checked = s.notify;
     $("#s-wake").checked = s.wakeLock;
     $("#s-strict").checked = s.strict;
+    $("#s-profonda").checked = s.profonda;
 
     $("#notify-note").textContent = typeof Notification === "undefined"
       ? "Questo browser non offre le notifiche di sistema."
@@ -3105,6 +3302,27 @@ const Timer = (() => {
       ? s.distractors.map((d, i) =>
           `<span class="chip">${esc(d)}<button type="button" class="x" data-distractor="${i}" aria-label="Togli ${esc(d)}">×</button></span>`).join("")
       : `<span class="empty">Nessun distrattore in elenco.</span>`;
+  }
+
+  /* --------------------------------------------------- concentrazione profonda */
+
+  /**
+   * Non è il blocco delle app — una pagina web non ce l'ha — ma è la cosa più
+   * vicina che può fare: la sessione si prende tutto lo schermo e sparisce
+   * tutto il resto, comprese le altre schede dell'app.
+   */
+  function entraProfonda() {
+    if (!Store.settings().profonda) return;
+    document.body.classList.add("profonda");
+    const el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen().catch(() => { /* il browser può dire di no */ });
+  }
+
+  function esciProfonda() {
+    document.body.classList.remove("profonda");
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => { /* pazienza */ });
+    }
   }
 
   /* ----------------------------------------------------------------- Pro */
@@ -3227,7 +3445,60 @@ const Timer = (() => {
 
     $("#btn-chiudi").addEventListener("click", () => Timer.chiudiLibera());
 
-    $("#btn-start").addEventListener("click", () => { Timer.unlockAudio(); Timer.toggle(); });
+    $("#btn-start").addEventListener("click", () => {
+      Timer.unlockAudio();
+      const prima = Timer.snapshot();
+      Timer.toggle();
+      const dopo = Timer.snapshot();
+      if (dopo.status === "running" && dopo.phase === "focus") entraProfonda();
+      if (prima.status === "running") esciProfonda();
+    });
+
+    $("#btn-esci").addEventListener("click", () => { Timer.pause(); esciProfonda(); });
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) document.body.classList.remove("profonda");
+    });
+
+    // cose da fare
+    $("#form-todo").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const campo = $("#todo-testo");
+      const res = Store.addTodo(campo.value);
+      if (!res.ok) return toast(res.error);
+      campo.value = "";
+      renderTodo();
+    });
+    $("#todo").addEventListener("click", (e) => {
+      const via = e.target.closest("[data-todo-via]");
+      if (via) { Store.deleteTodo(via.dataset.todoVia); return renderTodo(); }
+      const box = e.target.closest("[data-todo]");
+      if (box) { Store.toggleTodo(box.dataset.todo); renderTodo(); }
+    });
+    $("#btn-todo-pulisci").addEventListener("click", () => {
+      const tolte = Store.pulisciTodo();
+      renderTodo();
+      if (tolte) toast(`${tolte} ${tolte === 1 ? "cosa fatta tolta" : "cose fatte tolte"}.`);
+    });
+
+    // fine sessione
+    $("#btn-festa-chiudi").addEventListener("click", () => { $("#sheet-fine").hidden = true; });
+    $("#btn-festa-pausa").addEventListener("click", () => {
+      $("#sheet-fine").hidden = true;
+      Timer.start();
+    });
+
+    // primo incontro
+    $("#btn-ciao-via").addEventListener("click", () => {
+      Store.setSetting("presentata", true);
+      $("#sheet-ciao").hidden = true;
+      Timer.unlockAudio();
+      Timer.start();
+      entraProfonda();
+    });
+    $("#btn-ciao-dopo").addEventListener("click", () => {
+      Store.setSetting("presentata", true);
+      $("#sheet-ciao").hidden = true;
+    });
     $("#btn-skip").addEventListener("click", () => Timer.skip());
     $("#btn-reset").addEventListener("click", () => Timer.reset());
 
@@ -3292,6 +3563,7 @@ const Timer = (() => {
     bindSwitch("#s-sound", "sound", () => Timer.unlockAudio());
     bindSwitch("#s-wake", "wakeLock");
     bindSwitch("#s-strict", "strict");
+    bindSwitch("#s-profonda", "profonda");
     bindSwitch("#s-notify", "notify", async (el) => {
       if (el.checked && typeof Notification !== "undefined" && Notification.permission === "default") {
         const esito = await Notification.requestPermission();
@@ -3488,6 +3760,7 @@ const Timer = (() => {
     renderTimer(Timer.snapshot());
     renderStanza();
     renderTasks();
+    renderTodo();
     renderToday();
     renderCasa();
     renderCassetto();
@@ -3505,15 +3778,50 @@ const Timer = (() => {
       if (!$("#view-statistiche").hidden) renderStats();
     }
     if (event.type === "complete" && event.natural && event.phase === "focus") {
-      const totali = Store.socks().length;
-      const doppio = event.session && event.session.calzini > 1;
-      const paia = Math.floor(totali / Store.CALZINI_PER_PAIO);
-      toast(totali % Store.CALZINI_PER_PAIO === 0
-        ? `${doppio ? "Due calzini in una volta" : "Paio completo"}: ${paia} ${paia === 1 ? "paio" : "paia"} nel cassetto.`
-        : `${doppio ? "Due calzini" : "Calzino finito"}: ne manca uno per il paio.`);
+      esciProfonda();
+      festeggia(event.session);
+      controllaCasa();
     }
-    if (event.type === "complete" && event.natural && event.phase === "focus") controllaCasa();
+    if (event.type === "complete" && event.natural && event.phase !== "focus") esciProfonda();
     if (event.type === "reset" && event.partial) toast(`Registrati ${event.partial} minuti, senza calzino.`);
+  }
+
+  /** La sessione finita si guarda un attimo prima di ripartire: è il momento
+      in cui il lavoro diventa una cosa che si vede. */
+  function festeggia(session) {
+    const quanti = session && session.calzini > 1 ? 2 : 1;
+    const totali = Store.socks().length;
+    const paia = Math.floor(totali / Store.CALZINI_PER_PAIO);
+    const colore = session && session.taskId && Store.getTask(session.taskId)
+      ? Store.getTask(session.taskId).color
+      : Store.FILATI[(totali - 1) % Store.FILATI.length];
+
+    $("#calzino-festa").innerHTML =
+      `<path class="corpo" d="${SAGOMA}" fill="${colore}"/>` +
+      `<g clip-path="url(#clip-sagoma)">${svgFantasia(fantasiaInUso())}</g>` +
+      `<path class="bordo" d="M37 22h26"/>`;
+
+    $("#festa-titolo").textContent = quanti === 2 ? "Due calzini" : "Calzino finito";
+    $("#festa-testo").textContent = `${session ? session.minutes : 0} minuti di lavoro. ` +
+      `Nel cassetto: ${totali} ${totali === 1 ? "calzino" : "calzini"}, ${paia} ${paia === 1 ? "paio" : "paia"}.`;
+
+    const c = Store.casa();
+    $("#festa-casa").textContent = c.finita
+      ? Store.CASA_FINITA
+      : `${c.prossimo.nome}: ${c.mancano === 1 ? "manca un paio" : `mancano ${c.mancano} paia`}.`;
+
+    // Se la pausa è già partita da sola, il bottone non deve promettere di
+    // farla partire: la si sta già facendo.
+    // «Fai la pausa» ha senso solo se una pausa esiste e non è già partita: nel
+    // modo libero non c'è, e con l'avvio automatico è già cominciata.
+    const stato = Timer.snapshot();
+    const pausaAvviata = stato.status === "running" || Store.settings().autoStartBreak;
+    const offriPausa = stato.modo !== "libera" && !pausaAvviata;
+    $("#btn-festa-pausa").hidden = !offriPausa;
+    $("#btn-festa-chiudi").hidden = false;
+    $("#btn-festa-chiudi").textContent = offriPausa ? "Chiudi" : "Va bene";
+
+    $("#sheet-fine").hidden = false;
   }
 
   /** Un pezzo di casa in più merita più del messaggio sul calzino: arriva dopo,
@@ -3542,6 +3850,7 @@ const Timer = (() => {
     renderAll();
     showView("timer");
     $("#storage-warning").hidden = Store.isStorageAvailable();
+    if (!Store.settings().presentata) $("#sheet-ciao").hidden = false;
     // file unico: nessun service worker da registrare
   }
 

@@ -594,7 +594,10 @@ input[type="text"], input[type="number"], select {
 .calzino .corpo { stroke: rgba(0, 0, 0, .18); stroke-width: 3; }
 .calzino .bordo { stroke: rgba(255, 255, 255, .75); stroke-width: 4; stroke-linecap: round; fill: none; }
 .calzino.vuoto { cursor: default; opacity: .45; }
-.calzino .fantasia { fill: rgba(255, 255, 255, .42); stroke: none; }
+.calzino .fantasia, .calzino-festa .fantasia { fill: rgba(255, 255, 255, .42); stroke: none; }
+.calzino-festa .corpo { stroke: rgba(0, 0, 0, .18); stroke-width: 3; }
+.calzino-festa .bordo { stroke: rgba(255, 255, 255, .8); stroke-width: 4; stroke-linecap: round; fill: none; }
+.calzino-festa .fantasia-scura { fill: rgba(0, 0, 0, .16); stroke: none; }
 .calzino .fantasia-scura { fill: rgba(0, 0, 0, .16); stroke: none; }
 .calzino .doppio {
   fill: none;
@@ -823,3 +826,65 @@ input[type="text"], input[type="number"], select {
 .storia li.prossimo b::after { content: " — ci stai lavorando"; font-weight: 400; font-size: .82em; color: var(--accent); }
 .storia b { display: block; }
 .storia .segreto { filter: blur(3.5px); user-select: none; }
+
+/* --------------------------------------------------- concentrazione profonda */
+
+.profonda-switch { justify-content: center; margin: .2rem 0 .8rem; font-size: .84rem; color: var(--muted); }
+.btn-esci { display: none; margin-top: .6rem; }
+
+/* A schermo intero resta solo quello che serve: la stanza, il conto, un bottone. */
+body.profonda { overflow: hidden; background: var(--deep); }
+body.profonda .topbar,
+body.profonda .tabs,
+body.profonda .modo-seg,
+body.profonda .phase-switch,
+body.profonda .profonda-switch,
+body.profonda .kbd-hint,
+body.profonda .card:not(.scene-card),
+body.profonda #btn-skip,
+body.profonda #btn-reset,
+body.profonda .block-warning { display: none !important; }
+body.profonda .btn-esci { display: inline-flex; }
+body.profonda .app {
+  max-width: 640px;
+  padding: 0 0 1rem;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+}
+body.profonda .views, body.profonda .view { width: 100%; }
+body.profonda .scene-card {
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 0 0 1rem;
+}
+body.profonda .scene { border-radius: 0; margin: 0; }
+body.profonda .clock { font-size: clamp(3.2rem, 17vw, 5.4rem); color: #FFF; }
+body.profonda .clock-note, body.profonda .conta-calzini { color: rgba(255, 255, 255, .8); }
+body.profonda .conta-calzini { background: rgba(255, 255, 255, .14); border-color: transparent; }
+body.profonda .btn.ghost { background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .28); color: #FFF; }
+/* Sul fondo scuro il bottone scuro sparisce: qui comanda l'accento. */
+body.profonda .btn.primary { background: var(--accent); color: #17120E; }
+body.profonda .cycles span { background: rgba(255, 255, 255, .22); }
+body.profonda .cycles span.done { background: var(--accent); }
+
+/* ---------------------------------------------------------- cose da fare */
+
+.todo { list-style: none; margin: .2rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .1rem; }
+.todo li { display: flex; align-items: center; gap: .55rem; padding: .35rem 0; border-bottom: 1px solid var(--line); }
+.todo li:last-child { border-bottom: 0; }
+.todo input[type="checkbox"] { width: 19px; height: 19px; accent-color: var(--accent); flex: none; }
+.todo span { flex: 1; font-size: .92rem; }
+.todo li.fatto span { text-decoration: line-through; color: var(--muted); }
+.todo .via { border: 0; background: none; color: var(--muted); font-size: 1.1rem; line-height: 1; cursor: pointer; padding: 0 .2rem; }
+.todo .via:hover { color: var(--danger); }
+
+/* ------------------------------------------------------- fine e benvenuto */
+
+.festa { text-align: center; }
+.festa .btn-row { justify-content: center; }
+.calzino-festa { width: 92px; height: auto; margin: 0 auto .4rem; display: block; }
+.ciao-icona { border-radius: 16px; margin: 0 auto .6rem; display: block; }
+.festa h2 { font-size: 1.25rem; }

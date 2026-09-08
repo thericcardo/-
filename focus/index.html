@@ -247,6 +247,11 @@
 
         <div class="cycles" id="cycles" aria-label="Sessioni prima della pausa lunga"></div>
 
+        <label class="switch profonda-switch" id="profonda-riga">
+          <input type="checkbox" id="s-profonda">
+          <span>Concentrazione profonda: solo Mora, a schermo intero</span>
+        </label>
+
         <div class="controls">
           <button type="button" class="btn primary big" id="btn-start">Avvia</button>
           <button type="button" class="btn ghost" id="btn-skip">Salta</button>
@@ -254,6 +259,7 @@
           <button type="button" class="btn ghost" id="btn-reset">Azzera</button>
         </div>
         <p class="hint kbd-hint" id="kbd-hint"></p>
+        <button type="button" class="btn ghost small btn-esci" id="btn-esci">Esci dalla concentrazione</button>
       </div>
 
       <div class="card">
@@ -268,6 +274,19 @@
           <button type="button" class="btn ghost small" id="btn-task-cancel">Annulla</button>
         </form>
         <p class="error" id="task-error" role="alert" hidden></p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Cose da fare</h2>
+          <button type="button" class="btn ghost small" id="btn-todo-pulisci">Togli le fatte</button>
+        </div>
+        <ul class="todo" id="todo"></ul>
+        <p class="empty" id="todo-empty">Niente in lista. Scrivi qui sotto che cosa vuoi finire oggi.</p>
+        <form id="form-todo" class="inline-form" autocomplete="off">
+          <input id="todo-testo" type="text" maxlength="80" placeholder="es. finire il capitolo 3">
+          <button type="submit" class="btn primary small">Aggiungi</button>
+        </form>
       </div>
 
       <div class="card today-card">
@@ -529,6 +548,36 @@
     <p id="escape-text"></p>
     <div class="btn-row">
       <button type="button" class="btn primary" id="btn-escape-ok">Riprendo</button>
+    </div>
+  </div>
+</div>
+
+<!-- fine sessione: il calzino appena finito -->
+<div class="sheet" id="sheet-fine" hidden>
+  <div class="sheet-box festa">
+    <svg class="calzino-festa" id="calzino-festa" viewBox="0 0 100 110" aria-hidden="true"></svg>
+    <h2 id="festa-titolo">Calzino finito</h2>
+    <p id="festa-testo"></p>
+    <p class="hint" id="festa-casa"></p>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-festa-pausa">Fai la pausa</button>
+      <button type="button" class="btn ghost" id="btn-festa-chiudi">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- il primo incontro con Mora -->
+<div class="sheet" id="sheet-ciao" hidden>
+  <div class="sheet-box festa">
+    <img src="icon.svg" alt="" width="64" height="64" class="ciao-icona">
+    <h2>Lei è Mora</h2>
+    <p>È una talpa e sferruzza. Quando parte il timer, prende i ferri; quando la sessione
+      arriva in fondo, nel cassetto c'è un calzino. Due calzini fanno un paio, e i paia
+      pagano la casa che si sta costruendo — un pezzo alla volta, dal terreno alla staccionata.</p>
+    <p class="hint">Tu devi solo lasciar stare il telefono finché il timer scende.</p>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-ciao-via">Comincia: 25 minuti</button>
+      <button type="button" class="btn ghost" id="btn-ciao-dopo">Guardo prima in giro</button>
     </div>
   </div>
 </div>

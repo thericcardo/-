@@ -265,6 +265,20 @@
     box.innerHTML = pezzi.join("");
   }
 
+  /* --------------------------------------------------------- cose da fare */
+
+  function renderTodo() {
+    const lista = Store.todos();
+    $("#todo-empty").hidden = lista.length > 0;
+    $("#btn-todo-pulisci").hidden = !lista.some((t) => t.fatto);
+    $("#todo").innerHTML = lista.map((t) =>
+      `<li class="${t.fatto ? "fatto" : ""}">` +
+      `<input type="checkbox" id="todo-${t.id}" data-todo="${t.id}" ${t.fatto ? "checked" : ""}>` +
+      `<span><label for="todo-${t.id}">${esc(t.testo)}</label></span>` +
+      `<button type="button" class="via" data-todo-via="${t.id}" aria-label="Togli ${esc(t.testo)}">×</button></li>`
+    ).join("");
+  }
+
   /* ---------------------------------------------------------- statistiche */
 
   function focusSessions() {
@@ -547,6 +561,7 @@
     $("#s-notify").checked = s.notify;
     $("#s-wake").checked = s.wakeLock;
     $("#s-strict").checked = s.strict;
+    $("#s-profonda").checked = s.profonda;
 
     $("#notify-note").textContent = typeof Notification === "undefined"
       ? "Questo browser non offre le notifiche di sistema."
@@ -594,6 +609,27 @@
       ? s.distractors.map((d, i) =>
           `<span class="chip">${esc(d)}<button type="button" class="x" data-distractor="${i}" aria-label="Togli ${esc(d)}">×</button></span>`).join("")
       : `<span class="empty">Nessun distrattore in elenco.</span>`;
+  }
+
+  /* --------------------------------------------------- concentrazione profonda */
+
+  /**
+   * Non è il blocco delle app — una pagina web non ce l'ha — ma è la cosa più
+   * vicina che può fare: la sessione si prende tutto lo schermo e sparisce
+   * tutto il resto, comprese le altre schede dell'app.
+   */
+  function entraProfonda() {
+    if (!Store.settings().profonda) return;
+    document.body.classList.add("profonda");
+    const el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen().catch(() => { /* il browser può dire di no */ });
+  }
+
+  function esciProfonda() {
+    document.body.classList.remove("profonda");
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => { /* pazienza */ });
+    }
   }
 
   /* ----------------------------------------------------------------- Pro */
@@ -716,7 +752,60 @@
 
     $("#btn-chiudi").addEventListener("click", () => Timer.chiudiLibera());
 
-    $("#btn-start").addEventListener("click", () => { Timer.unlockAudio(); Timer.toggle(); });
+    $("#btn-start").addEventListener("click", () => {
+      Timer.unlockAudio();
+      const prima = Timer.snapshot();
+      Timer.toggle();
+      const dopo = Timer.snapshot();
+      if (dopo.status === "running" && dopo.phase === "focus") entraProfonda();
+      if (prima.status === "running") esciProfonda();
+    });
+
+    $("#btn-esci").addEventListener("click", () => { Timer.pause(); esciProfonda(); });
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) document.body.classList.remove("profonda");
+    });
+
+    // cose da fare
+    $("#form-todo").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const campo = $("#todo-testo");
+      const res = Store.addTodo(campo.value);
+      if (!res.ok) return toast(res.error);
+      campo.value = "";
+      renderTodo();
+    });
+    $("#todo").addEventListener("click", (e) => {
+      const via = e.target.closest("[data-todo-via]");
+      if (via) { Store.deleteTodo(via.dataset.todoVia); return renderTodo(); }
+      const box = e.target.closest("[data-todo]");
+      if (box) { Store.toggleTodo(box.dataset.todo); renderTodo(); }
+    });
+    $("#btn-todo-pulisci").addEventListener("click", () => {
+      const tolte = Store.pulisciTodo();
+      renderTodo();
+      if (tolte) toast(`${tolte} ${tolte === 1 ? "cosa fatta tolta" : "cose fatte tolte"}.`);
+    });
+
+    // fine sessione
+    $("#btn-festa-chiudi").addEventListener("click", () => { $("#sheet-fine").hidden = true; });
+    $("#btn-festa-pausa").addEventListener("click", () => {
+      $("#sheet-fine").hidden = true;
+      Timer.start();
+    });
+
+    // primo incontro
+    $("#btn-ciao-via").addEventListener("click", () => {
+      Store.setSetting("presentata", true);
+      $("#sheet-ciao").hidden = true;
+      Timer.unlockAudio();
+      Timer.start();
+      entraProfonda();
+    });
+    $("#btn-ciao-dopo").addEventListener("click", () => {
+      Store.setSetting("presentata", true);
+      $("#sheet-ciao").hidden = true;
+    });
     $("#btn-skip").addEventListener("click", () => Timer.skip());
     $("#btn-reset").addEventListener("click", () => Timer.reset());
 
@@ -781,6 +870,7 @@
     bindSwitch("#s-sound", "sound", () => Timer.unlockAudio());
     bindSwitch("#s-wake", "wakeLock");
     bindSwitch("#s-strict", "strict");
+    bindSwitch("#s-profonda", "profonda");
     bindSwitch("#s-notify", "notify", async (el) => {
       if (el.checked && typeof Notification !== "undefined" && Notification.permission === "default") {
         const esito = await Notification.requestPermission();
@@ -977,6 +1067,7 @@
     renderTimer(Timer.snapshot());
     renderStanza();
     renderTasks();
+    renderTodo();
     renderToday();
     renderCasa();
     renderCassetto();
@@ -994,15 +1085,50 @@
       if (!$("#view-statistiche").hidden) renderStats();
     }
     if (event.type === "complete" && event.natural && event.phase === "focus") {
-      const totali = Store.socks().length;
-      const doppio = event.session && event.session.calzini > 1;
-      const paia = Math.floor(totali / Store.CALZINI_PER_PAIO);
-      toast(totali % Store.CALZINI_PER_PAIO === 0
-        ? `${doppio ? "Due calzini in una volta" : "Paio completo"}: ${paia} ${paia === 1 ? "paio" : "paia"} nel cassetto.`
-        : `${doppio ? "Due calzini" : "Calzino finito"}: ne manca uno per il paio.`);
+      esciProfonda();
+      festeggia(event.session);
+      controllaCasa();
     }
-    if (event.type === "complete" && event.natural && event.phase === "focus") controllaCasa();
+    if (event.type === "complete" && event.natural && event.phase !== "focus") esciProfonda();
     if (event.type === "reset" && event.partial) toast(`Registrati ${event.partial} minuti, senza calzino.`);
+  }
+
+  /** La sessione finita si guarda un attimo prima di ripartire: è il momento
+      in cui il lavoro diventa una cosa che si vede. */
+  function festeggia(session) {
+    const quanti = session && session.calzini > 1 ? 2 : 1;
+    const totali = Store.socks().length;
+    const paia = Math.floor(totali / Store.CALZINI_PER_PAIO);
+    const colore = session && session.taskId && Store.getTask(session.taskId)
+      ? Store.getTask(session.taskId).color
+      : Store.FILATI[(totali - 1) % Store.FILATI.length];
+
+    $("#calzino-festa").innerHTML =
+      `<path class="corpo" d="${SAGOMA}" fill="${colore}"/>` +
+      `<g clip-path="url(#clip-sagoma)">${svgFantasia(fantasiaInUso())}</g>` +
+      `<path class="bordo" d="M37 22h26"/>`;
+
+    $("#festa-titolo").textContent = quanti === 2 ? "Due calzini" : "Calzino finito";
+    $("#festa-testo").textContent = `${session ? session.minutes : 0} minuti di lavoro. ` +
+      `Nel cassetto: ${totali} ${totali === 1 ? "calzino" : "calzini"}, ${paia} ${paia === 1 ? "paio" : "paia"}.`;
+
+    const c = Store.casa();
+    $("#festa-casa").textContent = c.finita
+      ? Store.CASA_FINITA
+      : `${c.prossimo.nome}: ${c.mancano === 1 ? "manca un paio" : `mancano ${c.mancano} paia`}.`;
+
+    // Se la pausa è già partita da sola, il bottone non deve promettere di
+    // farla partire: la si sta già facendo.
+    // «Fai la pausa» ha senso solo se una pausa esiste e non è già partita: nel
+    // modo libero non c'è, e con l'avvio automatico è già cominciata.
+    const stato = Timer.snapshot();
+    const pausaAvviata = stato.status === "running" || Store.settings().autoStartBreak;
+    const offriPausa = stato.modo !== "libera" && !pausaAvviata;
+    $("#btn-festa-pausa").hidden = !offriPausa;
+    $("#btn-festa-chiudi").hidden = false;
+    $("#btn-festa-chiudi").textContent = offriPausa ? "Chiudi" : "Va bene";
+
+    $("#sheet-fine").hidden = false;
   }
 
   /** Un pezzo di casa in più merita più del messaggio sul calzino: arriva dopo,
@@ -1031,6 +1157,7 @@
     renderAll();
     showView("timer");
     $("#storage-warning").hidden = Store.isStorageAvailable();
+    if (!Store.settings().presentata) $("#sheet-ciao").hidden = false;
     registerServiceWorker();
   }
 

@@ -126,6 +126,8 @@ const Store = (() => {
     fantasia: "tinta",
     modo: "timer",
     pelle: "mora",
+    profonda: true,
+    presentata: false,
     decorazioni: { ghirlanda: false, gatto: false, tazza: false, tenda: false },
     distractors: ["Instagram", "YouTube", "Chat di gruppo"]
   };
@@ -138,6 +140,10 @@ const Store = (() => {
   let available = true;
   let state = load();
 
+  function isTodo(t) {
+    return t && typeof t === "object" && typeof t.testo === "string";
+  }
+
   function blank() {
     return {
       version: 1,
@@ -146,6 +152,7 @@ const Store = (() => {
       tasks: [],
       currentTaskId: null,
       sessions: [],
+      todos: [],
       running: null
     };
   }
@@ -159,7 +166,8 @@ const Store = (() => {
   function cleanSettings(raw) {
     const s = Object.assign({}, DEFAULT_SETTINGS, raw && typeof raw === "object" ? raw : {});
     for (const [k, range] of Object.entries(LIMITS)) s[k] = clampNum(s[k], range, DEFAULT_SETTINGS[k]);
-    for (const k of ["autoStartBreak", "autoStartFocus", "sound", "notify", "wakeLock", "strict"]) {
+    for (const k of ["autoStartBreak", "autoStartFocus", "sound", "notify", "wakeLock", "strict",
+                     "profonda", "presentata"]) {
       s[k] = Boolean(s[k]);
     }
     if (!["auto", "light", "dark"].includes(s.theme)) s.theme = "auto";
@@ -224,6 +232,13 @@ const Store = (() => {
         tasks,
         currentTaskId: tasks.some((t) => t.id === parsed.currentTaskId) ? parsed.currentTaskId : null,
         sessions,
+        todos: Array.isArray(parsed.todos)
+          ? parsed.todos.filter(isTodo).map((t) => ({
+              id: typeof t.id === "string" ? t.id : newId(),
+              testo: String(t.testo).slice(0, 80),
+              fatto: Boolean(t.fatto)
+            }))
+          : [],
         running: parsed.running && typeof parsed.running === "object" ? parsed.running : null
       };
     } catch (err) {
@@ -412,6 +427,44 @@ const Store = (() => {
     save();
   }
 
+  /* --------------------------------------------------------- cose da fare */
+
+  const todos = () => state.todos;
+
+  function addTodo(testo) {
+    const pulito = String(testo || "").trim().replace(/\s+/g, " ");
+    if (pulito.length < 2) return { ok: false, error: "Scrivi almeno due caratteri." };
+    if (state.todos.length >= 50) return { ok: false, error: "Cinquanta cose da fare bastano." };
+    const todo = { id: newId(), testo: pulito.slice(0, 80), fatto: false };
+    state.todos.push(todo);
+    save();
+    return { ok: true, value: todo };
+  }
+
+  function toggleTodo(id) {
+    const t = state.todos.find((x) => x.id === id);
+    if (!t) return false;
+    t.fatto = !t.fatto;
+    save();
+    return true;
+  }
+
+  function deleteTodo(id) {
+    const i = state.todos.findIndex((x) => x.id === id);
+    if (i === -1) return false;
+    state.todos.splice(i, 1);
+    save();
+    return true;
+  }
+
+  /** Toglie di mezzo le cose fatte: la lista deve restare quella di adesso. */
+  function pulisciTodo() {
+    const prima = state.todos.length;
+    state.todos = state.todos.filter((t) => !t.fatto);
+    save();
+    return prima - state.todos.length;
+  }
+
   /* ------------------------------------------------------ esporta/importa */
 
   function exportAll() {
@@ -421,6 +474,7 @@ const Store = (() => {
       exportedAt: new Date().toISOString(),
       settings: state.settings,
       tasks: state.tasks,
+      todos: state.todos,
       sessions: state.sessions
     };
   }
@@ -457,6 +511,13 @@ const Store = (() => {
       state.sessions.push(s);
       added++;
     }
+    if (Array.isArray(payload.todos)) {
+      const noti = new Set(state.todos.map((t) => t.id));
+      for (const t of payload.todos) {
+        if (!isTodo(t) || (t.id && noti.has(t.id))) continue;
+        state.todos.push({ id: t.id || newId(), testo: String(t.testo).slice(0, 80), fatto: Boolean(t.fatto) });
+      }
+    }
     if (payload.settings) state.settings = cleanSettings(Object.assign({}, state.settings, payload.settings));
     save();
     return { ok: true, added, skipped };
@@ -491,6 +552,11 @@ const Store = (() => {
     setCurrentTask,
     sessions,
     addSession,
+    todos,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+    pulisciTodo,
     socks,
     casa,
     running,

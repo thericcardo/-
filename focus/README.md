@@ -28,16 +28,28 @@ numero.
 Sopra la scena c'è il conto dei calzini; sotto, il timer e un solo bottone
 grande. La navigazione sta in basso, dove arriva il pollice.
 
+## Concentrazione profonda
+
+Premendo **Avvia**, se l'interruttore è acceso (lo è di suo), la pagina passa a
+schermo intero e resta solo la stanza, il tempo e un bottone: spariscono le
+altre schede, le impostazioni, la lista, tutto. Si esce con **Esci dalla
+concentrazione** o con `Esc`.
+
+Non è il blocco delle app — quello serve un'app installata, e questa è una
+pagina web — ma è la cosa più vicina che il browser sappia fare: toglie di mezzo
+anche l'app stessa.
+
 ## Come si usa
 
 1. Apri `index.html` (doppio clic va benissimo) oppure il sito pubblicato.
 2. **Timer** → scegli il modo (**a tempo** o **libera**), l'attività, premi
    **Avvia** e lascia perdere il telefono.
-3. **Casa** → la casa di Mora che cresce, la storia, il cassetto dei calzini e i
+3. **Cose da fare** → la lista di quello che vuoi finire, da spuntare mentre vai.
+4. **Casa** → la casa di Mora che cresce, la storia, il cassetto dei calzini e i
    traguardi.
-4. **Statistiche** → oggi, la striscia di giorni, gli ultimi 14 giorni, il tempo
+5. **Numeri** → oggi, la striscia di giorni, gli ultimi 14 giorni, il tempo
    per attività, il registro delle sessioni.
-5. **Impostazioni** → durate, avvisi, distrattori, aspetto, dati.
+6. **Impostazioni** → durate, avvisi, distrattori, aspetto, dati.
 
 Scorciatoie da tastiera: barra spaziatrice avvia o mette in pausa, `R` azzera,
 `S` salta alla fase dopo.
@@ -64,6 +76,9 @@ Scorciatoie da tastiera: barra spaziatrice avvia o mette in pausa, `R` azzera,
 - **Attività senza limite**, ognuna con il suo colore: il calzino prende il
   colore dell'attività su cui hai lavorato.
 - **Traguardi** che si accendono da soli guardando le sessioni.
+- **Cose da fare**: una lista semplice da spuntare, con «togli le fatte».
+- **La festa di fine sessione**: il calzino appena finito, quanti ne hai, e
+  quanto manca al prossimo pezzo di casa.
 - **Sette tavolozze**, tema chiaro/scuro/automatico, quattro accessori per Mora
   (cappellino, occhiali, grembiule, ditale) e **quattro pelli**: Mora, Neve,
   Cenere, Terra.

@@ -130,10 +130,12 @@ const Licenza = (() => {
 
   const inProva = () => attiva() && !stato.codice;
 
+  /** I giorni che restano, arrotondati al più vicino: i codici scadono a
+      mezzanotte, e con l'arrotondamento per eccesso un mese ne mostrava 32. */
   function giorniRimasti() {
     const s = scadenza();
     if (!s) return 0;
-    return Math.max(0, Math.ceil((s - new Date()) / 86400000));
+    return Math.max(0, Math.round((s - new Date()) / 86400000));
   }
 
   /** L'unica cosa che tocca i dati: quanti calzini vale una sessione finita. */
