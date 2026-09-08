@@ -53,7 +53,8 @@ const style = `<style>\n${css}\n</style>`;
 const script = `<script>\n${js}\n</script>`;
 
 // L'host degli artifact avvolge lui il contenuto in <html>/<head>/<body>.
-const inner = [`<title>${TITLE}</title>`, style, body, script].join("\n\n");
+const fontLink = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Azeret+Mono:wght@300;500&display=swap">';
+const inner = [`<title>${TITLE}</title>`, fontLink, style, body, script].join("\n\n");
 
 const standalone = `<!DOCTYPE html>
 <html lang="it">
@@ -61,7 +62,10 @@ const standalone = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Timer di concentrazione con Mora, la talpa che sferruzza: ogni sessione finita è un calzino, due calzini fanno un paio. Gratis; con il Pro a 1 € al mese i calzini sono due e si aprono le decorazioni.">
-<meta name="theme-color" content="#1E2438">
+<meta name="theme-color" content="#3B3128">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Azeret+Mono:wght@300;500&display=swap">
 <link rel="icon" href="${iconDataUri}" type="image/svg+xml">
 <title>${TITLE}</title>
 ${style}

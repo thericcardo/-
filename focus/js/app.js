@@ -150,12 +150,23 @@
     $("#mora").dataset.pelle = sbloccato(pelle) ? pelle.id : "mora";
 
     const calzini = Store.socks().length;
-    $("#conta-calzini").textContent = `${calzini} ${calzini === 1 ? "calzino" : "calzini"}`;
+    $("#conta-calzini").innerHTML =
+      `<svg viewBox="0 0 100 110" aria-hidden="true" style="width:11px;height:12px">` +
+      `<path d="${SAGOMA}" fill="var(--accent)"/></svg>` +
+      `<span>${calzini}</span>`;
+    $("#conta-calzini").setAttribute("aria-label", `${calzini} calzini`);
   }
 
   /* ------------------------------------------------------------- sezioni */
 
   function showView(name) {
+    // La schermata del timer ha una pelle sua: scura, senza cornici, con la
+    // stanza che sfuma nel fondo. Le altre restano chiare come prima.
+    for (const v of ["timer", "casa", "statistiche", "impostazioni"]) {
+      document.body.classList.toggle("vista-" + v, v === name);
+    }
+    document.body.classList.toggle("schermo-timer", name === "timer" && Store.settings().notte);
+
     $$(".tab").forEach((t) => {
       const on = t.dataset.view === name;
       t.classList.toggle("is-active", on);
@@ -193,19 +204,19 @@
     const minuti = Math.round(snap.totalMs / 60000);
     if (libera) {
       $("#clock-note").textContent = snap.status === "idle"
-        ? `Il conto sale: minimo ${Math.round(snap.minimoMs / 60000)} minuti, tetto ${ore} ore`
+        ? `Libera · minimo ${Math.round(snap.minimoMs / 60000)} min, tetto ${ore} ore`
         : (assicurato
-          ? `Calzino assicurato · si chiude da sé a ${ore} ore`
-          : `Ancora ${mmss(snap.minimoMs - trascorso)} perché il calzino conti`) +
+          ? `Libera · calzino assicurato, tetto ${ore} ore`
+          : `Libera · ancora ${mmss(snap.minimoMs - trascorso)} perché conti`) +
           (snap.escapes ? ` · ${snap.escapes} uscite` : "");
     } else {
-      $("#clock-note").textContent = snap.phase === "focus"
-        ? `Sessione da ${minuti} minuti` + (snap.escapes ? ` · ${snap.escapes} uscite` : "")
-        : `${PHASE_LABEL[snap.phase]} da ${minuti} minuti`;
+      $("#clock-note").textContent = `${PHASE_LABEL[snap.phase]} · ${minuti} min` +
+        (snap.escapes && snap.phase === "focus" ? ` · ${snap.escapes} uscite` : "");
     }
 
     $$("#modo-seg .seg-btn").forEach((b) => b.classList.toggle("is-active", (b.dataset.modo === "libera") === libera));
     $(".phase-switch").hidden = libera;
+    $("#btn-profonda").setAttribute("aria-pressed", String(Store.settings().profonda));
     $("#cycles").hidden = libera;
     $("#btn-skip").hidden = libera;
     $("#btn-chiudi").hidden = !libera;
@@ -562,6 +573,7 @@
     $("#s-wake").checked = s.wakeLock;
     $("#s-strict").checked = s.strict;
     $("#s-profonda").checked = s.profonda;
+    $("#s-notte").checked = s.notte;
 
     $("#notify-note").textContent = typeof Notification === "undefined"
       ? "Questo browser non offre le notifiche di sistema."
@@ -738,12 +750,34 @@
 
   function bind() {
     bindPro();
+    bindInstalla();
     $$(".tab").forEach((t) => t.addEventListener("click", () => showView(t.dataset.view)));
 
-    $$(".phase").forEach((b) => b.addEventListener("click", () => Timer.setPhase(b.dataset.phase)));
+    $$(".phase").forEach((b) => b.addEventListener("click", () => {
+      Timer.setPhase(b.dataset.phase);
+      $("#sheet-sessione").hidden = true;
+    }));
+
+    $("#btn-sessione").addEventListener("click", () => {
+      const snap = Timer.snapshot();
+      $("#sessione-nota").textContent = snap.modo === "libera"
+        ? `Il conto sale finché non chiudi tu: sotto i ${Math.round(snap.minimoMs / 60000)} minuti non fa calzino, sopra le ${Math.round(snap.totalMs / 3600000)} ore si chiude da sé.`
+        : `Durate: ${Store.settings().focusMin} minuti di lavoro, ${Store.settings().shortMin} di pausa breve, ${Store.settings().longMin} di pausa lunga. Si cambiano in Impostazioni.`;
+      $("#sheet-sessione").hidden = false;
+    });
+    $("#btn-sessione-close").addEventListener("click", () => { $("#sheet-sessione").hidden = true; });
+
+    $("#btn-profonda").addEventListener("click", () => {
+      const acceso = !Store.settings().profonda;
+      Store.setSetting("profonda", acceso);
+      renderTimer(Timer.snapshot());
+      renderSettings();
+      toast(acceso ? "Avviando, solo Mora a schermo intero." : "Schermo intero spento.");
+    });
 
     $$("#modo-seg .seg-btn").forEach((b) => b.addEventListener("click", () => {
       Timer.setModo(b.dataset.modo);
+      $("#sheet-sessione").hidden = true;
       const ore = Math.round(Timer.limiteLibera() / 3600000);
       if (b.dataset.modo === "libera") {
         toast(`Sessione libera: il conto sale, minimo ${Math.round(Timer.MINIMO_LIBERA / 60000)} minuti, tetto ${ore} ore.`);
@@ -870,7 +904,11 @@
     bindSwitch("#s-sound", "sound", () => Timer.unlockAudio());
     bindSwitch("#s-wake", "wakeLock");
     bindSwitch("#s-strict", "strict");
-    bindSwitch("#s-profonda", "profonda");
+    bindSwitch("#s-profonda", "profonda", () => renderTimer(Timer.snapshot()));
+    bindSwitch("#s-notte", "notte", () => {
+      document.body.classList.toggle("schermo-timer",
+        !$("#view-timer").hidden && Store.settings().notte);
+    });
     bindSwitch("#s-notify", "notify", async (el) => {
       if (el.checked && typeof Notification !== "undefined" && Notification.permission === "default") {
         const esito = await Notification.requestPermission();
@@ -1140,6 +1178,53 @@
       toast(c.finita ? "La casa è finita." : `${pezzo.nome}: fatto. La casa cresce.`);
     }
     faseCasa = c.fase;
+  }
+
+  /* ------------------------------------------------------------ installare */
+
+  /**
+   * Su Android il browser offre l'installazione e noi ce ne impossessiamo con
+   * un bottone; su iPhone quel gancio non esiste — lì si passa dal menù
+   * Condividi, e l'unica cosa onesta è dirlo.
+   */
+  let promptInstalla = null;
+
+  function bindInstalla() {
+    const bottone = $("#btn-installa");
+    const nota = $("#installa-nota");
+    const iOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+    const giaInstallata = window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+
+    if (giaInstallata) {
+      nota.textContent = "È già installata: la stai usando come app.";
+      return;
+    }
+    if (iOS) {
+      nota.textContent = "Su iPhone e iPad: premi Condividi (il quadrato con la freccia) " +
+        "e poi «Aggiungi a Home». Da lì parte a tutto schermo e funziona senza rete.";
+      return;
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      promptInstalla = e;
+      bottone.hidden = false;
+    });
+
+    bottone.addEventListener("click", async () => {
+      if (!promptInstalla) return;
+      promptInstalla.prompt();
+      const esito = await promptInstalla.userChoice;
+      promptInstalla = null;
+      bottone.hidden = true;
+      if (esito.outcome === "accepted") toast("Installata: la trovi fra le app.");
+    });
+
+    window.addEventListener("appinstalled", () => {
+      bottone.hidden = true;
+      nota.textContent = "Installata: la trovi fra le app.";
+    });
   }
 
   /* -------------------------------------------------------- service worker */

@@ -166,6 +166,16 @@ conto resta giusto anche quando il browser rallenta i timer in sottofondo o il
 telefono si blocca. Lo stato viene salvato a ogni cambio, mai a ogni tick,
 quindi ricaricare la pagina riprende la sessione dove era.
 
+## Installarla e pubblicarla
+
+Da **Impostazioni → Installala sul telefono**: su Android il bottone chiede
+l'installazione al browser, su iPhone l'app spiega la via del menù Condividi →
+«Aggiungi a Home» (lì il gancio dell'installazione non esiste). L'icona per iOS
+è un PNG a parte, `icona-apple-180.png`: iOS ignora l'SVG e la trasparenza.
+
+Per gli store — che cosa cambia davvero, quanto costa, e perché il blocco delle
+app resta impossibile anche impacchettata — c'è [PUBBLICARE.md](PUBBLICARE.md).
+
 ## Pubblicarla online
 
 È un sito statico senza build: basta caricare la cartella così com'è. Con

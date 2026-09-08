@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Calzino">
-  <rect width="512" height="512" rx="112" fill="#1E2438"/>
+  <rect width="512" height="512" rx="112" fill="#3B3128"/>
   <path d="M214 96h72a40 40 0 0 1 40 40v238a40 40 0 0 1-40 40H150a66 66 0 0 1 0-132h32V136a40 40 0 0 1 32-40z"
-        fill="#F2A65A"/>
-  <path d="M196 160h108" stroke="#1E2438" stroke-width="22" stroke-linecap="round"/>
-  <path d="M196 210h108M196 258h108" stroke="#7FD1B9" stroke-width="14" stroke-linecap="round" stroke-dasharray="26 22"/>
+        fill="#E8A87C"/>
+  <path d="M196 160h108" stroke="#3B3128" stroke-width="22" stroke-linecap="round"/>
+  <path d="M196 210h108M196 258h108" stroke="#8FB996" stroke-width="14" stroke-linecap="round" stroke-dasharray="26 22"/>
 </svg>

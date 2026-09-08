@@ -5,9 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Calzino</title>
 <meta name="description" content="Timer di concentrazione con Mora, la talpa che sferruzza: ogni sessione finita è un calzino, due calzini fanno un paio. Gratis; con il Pro a 1 € al mese i calzini sono due e si aprono le decorazioni.">
-<meta name="theme-color" content="#1E2438">
+<meta name="theme-color" content="#3B3128">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="icona-192.png" sizes="192x192" type="image/png">
+<!-- iOS ignora l'SVG e la trasparenza: per «Aggiungi a Home» vuole questo. -->
+<link rel="apple-touch-icon" href="icona-apple-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Calzino">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Azeret+Mono:wght@300;500&display=swap">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -57,15 +67,15 @@
     <!-- ================================================== CONCENTRAZIONE -->
     <section id="view-timer" class="view" role="tabpanel" tabindex="-1">
 
-      <div class="seg modo-seg" id="modo-seg" role="group" aria-label="Modo del timer">
-        <button type="button" class="seg-btn is-active" data-modo="timer">A tempo</button>
-        <button type="button" class="seg-btn" data-modo="libera">Libera</button>
-      </div>
-
-      <div class="phase-switch" role="group" aria-label="Tipo di sessione">
-        <button type="button" class="phase is-active" data-phase="focus">Concentrazione</button>
-        <button type="button" class="phase" data-phase="short">Pausa breve</button>
-        <button type="button" class="phase" data-phase="long">Pausa lunga</button>
+      <div class="timer-testa">
+        <span class="marchio">Calzino</span>
+        <div class="testa-destra">
+          <span class="conta-calzini" id="conta-calzini"></span>
+          <button type="button" class="icona" id="btn-profonda" aria-pressed="true"
+                  aria-label="Concentrazione profonda" title="Concentrazione profonda">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="card scene-card">
@@ -243,23 +253,25 @@
         </div>
 
         <p class="clock" id="clock" aria-live="off">25:00</p>
-        <p class="clock-note" id="clock-note">Sessione da 25 minuti</p>
+
+        <button type="button" class="riga-sessione" id="btn-sessione">
+          <span id="clock-note">Sessione da 25 minuti</span>
+          <span class="cambia">cambia</span>
+        </button>
 
         <div class="cycles" id="cycles" aria-label="Sessioni prima della pausa lunga"></div>
 
-        <label class="switch profonda-switch" id="profonda-riga">
-          <input type="checkbox" id="s-profonda">
-          <span>Concentrazione profonda: solo Mora, a schermo intero</span>
-        </label>
-
         <div class="controls">
           <button type="button" class="btn primary big" id="btn-start">Avvia</button>
-          <button type="button" class="btn ghost" id="btn-skip">Salta</button>
-          <button type="button" class="btn ghost" id="btn-chiudi" hidden>Chiudi il calzino</button>
-          <button type="button" class="btn ghost" id="btn-reset">Azzera</button>
         </div>
-        <p class="hint kbd-hint" id="kbd-hint"></p>
+
+        <div class="controls-min">
+          <button type="button" class="link" id="btn-skip">Salta</button>
+          <button type="button" class="link" id="btn-chiudi" hidden>Chiudi il calzino</button>
+          <button type="button" class="link" id="btn-reset">Azzera</button>
+        </div>
         <button type="button" class="btn ghost small btn-esci" id="btn-esci">Esci dalla concentrazione</button>
+        <p class="hint kbd-hint" id="kbd-hint"></p>
       </div>
 
       <div class="card">
@@ -457,6 +469,8 @@
           <label class="switch"><input type="checkbox" id="s-sound"><span>Suono a fine sessione</span></label>
           <label class="switch"><input type="checkbox" id="s-notify"><span>Notifica di sistema</span></label>
           <label class="switch"><input type="checkbox" id="s-wake"><span>Tieni acceso lo schermo mentre il timer va</span></label>
+          <label class="switch"><input type="checkbox" id="s-profonda"><span>Concentrazione profonda: avviando, solo Mora a schermo intero</span></label>
+          <label class="switch"><input type="checkbox" id="s-notte"><span>Schermata del timer scura</span></label>
         </div>
         <p class="hint" id="notify-note"></p>
       </div>
@@ -494,6 +508,15 @@
         <h3>Decorazioni della stanza</h3>
         <p class="hint">I mobili arrivano da soli con i pezzi della casa. Queste si accendono a mano.</p>
         <div class="outfit-row" id="decorazioni"></div>
+      </div>
+
+      <div class="card">
+        <h2>Installala sul telefono</h2>
+        <p class="lede" id="installa-nota">Calzino è un sito che si comporta da app: aggiunto alla
+          schermata Home parte a tutto schermo, funziona senza rete e non passa da nessuno store.</p>
+        <div class="btn-row">
+          <button type="button" class="btn primary" id="btn-installa" hidden>Installa</button>
+        </div>
       </div>
 
       <div class="card">
@@ -548,6 +571,29 @@
     <p id="escape-text"></p>
     <div class="btn-row">
       <button type="button" class="btn primary" id="btn-escape-ok">Riprendo</button>
+    </div>
+  </div>
+</div>
+
+<!-- che sessione: modo e fase, fuori dalla schermata -->
+<div class="sheet" id="sheet-sessione" hidden>
+  <div class="sheet-box">
+    <h2>Che sessione</h2>
+
+    <div class="seg modo-seg" id="modo-seg" role="group" aria-label="Modo del timer">
+      <button type="button" class="seg-btn is-active" data-modo="timer">A tempo</button>
+      <button type="button" class="seg-btn" data-modo="libera">Libera</button>
+    </div>
+
+    <div class="phase-switch" role="group" aria-label="Tipo di sessione">
+      <button type="button" class="phase is-active" data-phase="focus">Concentrazione</button>
+      <button type="button" class="phase" data-phase="short">Pausa breve</button>
+      <button type="button" class="phase" data-phase="long">Pausa lunga</button>
+    </div>
+
+    <p class="hint" id="sessione-nota"></p>
+    <div class="btn-row">
+      <button type="button" class="btn ghost" id="btn-sessione-close">Chiudi</button>
     </div>
   </div>
 </div>

@@ -127,6 +127,7 @@ const Store = (() => {
     modo: "timer",
     pelle: "mora",
     profonda: true,
+    notte: true,
     presentata: false,
     decorazioni: { ghirlanda: false, gatto: false, tazza: false, tenda: false },
     distractors: ["Instagram", "YouTube", "Chat di gruppo"]
@@ -167,7 +168,7 @@ const Store = (() => {
     const s = Object.assign({}, DEFAULT_SETTINGS, raw && typeof raw === "object" ? raw : {});
     for (const [k, range] of Object.entries(LIMITS)) s[k] = clampNum(s[k], range, DEFAULT_SETTINGS[k]);
     for (const k of ["autoStartBreak", "autoStartFocus", "sound", "notify", "wakeLock", "strict",
-                     "profonda", "presentata"]) {
+                     "profonda", "notte", "presentata"]) {
       s[k] = Boolean(s[k]);
     }
     if (!["auto", "light", "dark"].includes(s.theme)) s.theme = "auto";

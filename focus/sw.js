@@ -2,7 +2,7 @@
  * Service worker: mette in cache i file dell'app così funziona anche offline.
  * Le sessioni non passano da qui — stanno in localStorage.
  */
-const CACHE = "calzino-v1";
+const CACHE = "calzino-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -12,6 +12,10 @@ const ASSETS = [
   "./js/timer.js",
   "./js/app.js",
   "./icon.svg",
+  "./icona-192.png",
+  "./icona-512.png",
+  "./icona-apple-180.png",
+  "./icona-maskable-512.png",
   "./manifest.webmanifest"
 ];
 

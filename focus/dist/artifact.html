@@ -1,5 +1,7 @@
 <title>Calzino</title>
 
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Azeret+Mono:wght@300;500&display=swap">
+
 <style>
 /* =========================================================================
    Calzino — foglio di stile
@@ -18,8 +20,8 @@
   --bg:          #F4F2EC;
   --surface:     #FFFFFF;
   --surface-alt: #FAF8F3;
-  --ink:         #1E2438;
-  --muted:       #5F6577;
+  --ink:         #2A2118;
+  --muted:       #6E6152;
   --line:        #E2DED4;
   --danger:      #A03024;
 
@@ -55,8 +57,8 @@
   --shadow:      0 1px 2px rgba(30, 36, 56, .06), 0 10px 28px rgba(30, 36, 56, .07);
   --shadow-soft: 0 1px 2px rgba(30, 36, 56, .05);
 
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "Azeret Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 /* --- tavolozze: cambiano solo i due accenti e il fondo profondo ---------- */
@@ -892,6 +894,160 @@ body.profonda .cycles span.done { background: var(--accent); }
 .ciao-icona { border-radius: 16px; margin: 0 auto .6rem; display: block; }
 .festa h2 { font-size: 1.25rem; }
 
+/* ====================================================================
+   Schermata del timer — direzione «Notte calda»
+   La stanza è lo schermo, il tempo ci sta sopra, i comandi si riducono
+   a un bottone e due parole. Modo e fase vivono in un foglio a parte.
+   ==================================================================== */
+
+/* Solo i token: tutto il resto è già scritto in termini di token e segue. */
+body.schermo-timer {
+  --bg:          #171210;
+  --surface:     #241C16;
+  --surface-alt: #2C231C;
+  --ink:         #F5EBE2;
+  --muted:       rgba(245, 235, 226, .62);
+  --line:        rgba(245, 235, 226, .13);
+  --bar-bg:      rgba(245, 235, 226, .14);
+  --scene-bg:    #171210;
+  --btn-primary-bg:       var(--accent);
+  --btn-primary-ink:      #17120E;
+  --btn-primary-bg-hover: color-mix(in srgb, var(--accent) 84%, #FFF);
+  --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 14px 34px rgba(0, 0, 0, .34);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, .35);
+}
+
+/* Sulla schermata del timer la testa dell'app è quella scura qui sotto. */
+body.vista-timer .topbar { display: none; }
+.timer-testa { display: none; }
+body.vista-timer .timer-testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .4rem 0 .7rem;
+}
+
+.timer-testa .marchio {
+  font-size: .82rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.testa-destra { display: flex; align-items: center; gap: .45rem; }
+
+.icona {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.icona svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.icona[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #17120E; }
+
+/* Il contatore dei calzini è sceso dalla scena alla testa. */
+.conta-calzini {
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  background: var(--bar-bg);
+  border: 0;
+  border-radius: 999px;
+  padding: .2rem .65rem;
+  font-size: .84rem;
+  color: var(--ink);
+}
+
+/* La stanza sfuma nel fondo invece di finire con un taglio netto. */
+body.schermo-timer .scene-card {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  /* La stanza arriva ai bordi dello schermo: è lei la schermata. */
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding: 0;
+}
+body.schermo-timer .scene-card .scene { margin: 0; }
+body.schermo-timer .scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(23, 18, 16, .5) 0%,
+    rgba(23, 18, 16, 0) 26%,
+    rgba(23, 18, 16, 0) 52%,
+    var(--bg) 97%);
+}
+
+/* L'orologio sale dentro la sfumatura della stanza. Serve `position`:
+   la scena è posizionata e senza questo le coprirebbe le cifre. */
+body.schermo-timer .clock {
+  position: relative;
+  z-index: 1;
+  font-weight: 300;
+  font-size: clamp(3.4rem, 19vw, 5.2rem);
+  letter-spacing: -.045em;
+  margin-top: -1.4rem;
+}
+
+/* Una riga sola al posto dell'interruttore di modo e dei tre chip di fase. */
+.riga-sessione {
+  font: inherit;
+  font-size: .92rem;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: baseline;
+  gap: .5rem;
+  padding: .55rem .4rem;
+  margin: .5rem auto 0;
+}
+.riga-sessione .cambia {
+  border-bottom: 1px dashed color-mix(in srgb, var(--ink) 40%, transparent);
+  padding-bottom: 1px;
+}
+.riga-sessione:hover { color: var(--ink); }
+
+/* I pallini del giro diventano trattini: si leggono da lontano. */
+.cycles span { width: 26px; height: 3px; border-radius: 2px; }
+
+.controls-min {
+  display: flex;
+  justify-content: center;
+  gap: 1.6rem;
+  margin-top: 1rem;
+}
+.link {
+  font: inherit;
+  font-size: .92rem;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  padding: 0 0 2px;
+  cursor: pointer;
+}
+.link:hover { color: var(--ink); }
+
+body.schermo-timer .btn.primary { box-shadow: 0 14px 34px color-mix(in srgb, var(--accent) 24%, transparent); }
+body.schermo-timer .btn.ghost { background: rgba(245, 235, 226, .1); border-color: rgba(245, 235, 226, .22); }
+body.schermo-timer .kbd-hint { display: none; }
+
+/* Nel foglio della sessione, modo e fasi tornano quelli di prima. */
+#sheet-sessione .modo-seg { margin-bottom: .7rem; }
+#sheet-sessione .phase-switch { margin-bottom: .2rem; }
+
 </style>
 
 <!-- La sagoma del calzino, definita una volta sola: i calzini del cassetto la
@@ -906,7 +1062,7 @@ body.profonda .cycles span.done { background: var(--accent); }
 
   <header class="topbar">
     <div class="brand">
-      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNhbHppbm8iPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTEyIiBmaWxsPSIjMUUyNDM4Ii8+CiAgPHBhdGggZD0iTTIxNCA5Nmg3MmE0MCA0MCAwIDAgMSA0MCA0MHYyMzhhNDAgNDAgMCAwIDEtNDAgNDBIMTUwYTY2IDY2IDAgMCAxIDAtMTMyaDMyVjEzNmE0MCA0MCAwIDAgMSAzMi00MHoiCiAgICAgICAgZmlsbD0iI0YyQTY1QSIvPgogIDxwYXRoIGQ9Ik0xOTYgMTYwaDEwOCIgc3Ryb2tlPSIjMUUyNDM4IiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMTk2IDIxMGgxMDhNMTk2IDI1OGgxMDgiIHN0cm9rZT0iIzdGRDFCOSIgc3Ryb2tlLXdpZHRoPSIxNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtZGFzaGFycmF5PSIyNiAyMiIvPgo8L3N2Zz4K" alt="" width="34" height="34">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNhbHppbm8iPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTEyIiBmaWxsPSIjM0IzMTI4Ii8+CiAgPHBhdGggZD0iTTIxNCA5Nmg3MmE0MCA0MCAwIDAgMSA0MCA0MHYyMzhhNDAgNDAgMCAwIDEtNDAgNDBIMTUwYTY2IDY2IDAgMCAxIDAtMTMyaDMyVjEzNmE0MCA0MCAwIDAgMSAzMi00MHoiCiAgICAgICAgZmlsbD0iI0U4QTg3QyIvPgogIDxwYXRoIGQ9Ik0xOTYgMTYwaDEwOCIgc3Ryb2tlPSIjM0IzMTI4IiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMTk2IDIxMGgxMDhNMTk2IDI1OGgxMDgiIHN0cm9rZT0iIzhGQjk5NiIgc3Ryb2tlLXdpZHRoPSIxNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtZGFzaGFycmF5PSIyNiAyMiIvPgo8L3N2Zz4K" alt="" width="34" height="34">
       <div class="brand-text">
         <strong>Calzino</strong>
         <span class="sub" id="top-sub">Mora è pronta a sferruzzare.</span>
@@ -939,15 +1095,15 @@ body.profonda .cycles span.done { background: var(--accent); }
     <!-- ================================================== CONCENTRAZIONE -->
     <section id="view-timer" class="view" role="tabpanel" tabindex="-1">
 
-      <div class="seg modo-seg" id="modo-seg" role="group" aria-label="Modo del timer">
-        <button type="button" class="seg-btn is-active" data-modo="timer">A tempo</button>
-        <button type="button" class="seg-btn" data-modo="libera">Libera</button>
-      </div>
-
-      <div class="phase-switch" role="group" aria-label="Tipo di sessione">
-        <button type="button" class="phase is-active" data-phase="focus">Concentrazione</button>
-        <button type="button" class="phase" data-phase="short">Pausa breve</button>
-        <button type="button" class="phase" data-phase="long">Pausa lunga</button>
+      <div class="timer-testa">
+        <span class="marchio">Calzino</span>
+        <div class="testa-destra">
+          <span class="conta-calzini" id="conta-calzini"></span>
+          <button type="button" class="icona" id="btn-profonda" aria-pressed="true"
+                  aria-label="Concentrazione profonda" title="Concentrazione profonda">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="card scene-card">
@@ -1125,23 +1281,25 @@ body.profonda .cycles span.done { background: var(--accent); }
         </div>
 
         <p class="clock" id="clock" aria-live="off">25:00</p>
-        <p class="clock-note" id="clock-note">Sessione da 25 minuti</p>
+
+        <button type="button" class="riga-sessione" id="btn-sessione">
+          <span id="clock-note">Sessione da 25 minuti</span>
+          <span class="cambia">cambia</span>
+        </button>
 
         <div class="cycles" id="cycles" aria-label="Sessioni prima della pausa lunga"></div>
 
-        <label class="switch profonda-switch" id="profonda-riga">
-          <input type="checkbox" id="s-profonda">
-          <span>Concentrazione profonda: solo Mora, a schermo intero</span>
-        </label>
-
         <div class="controls">
           <button type="button" class="btn primary big" id="btn-start">Avvia</button>
-          <button type="button" class="btn ghost" id="btn-skip">Salta</button>
-          <button type="button" class="btn ghost" id="btn-chiudi" hidden>Chiudi il calzino</button>
-          <button type="button" class="btn ghost" id="btn-reset">Azzera</button>
         </div>
-        <p class="hint kbd-hint" id="kbd-hint"></p>
+
+        <div class="controls-min">
+          <button type="button" class="link" id="btn-skip">Salta</button>
+          <button type="button" class="link" id="btn-chiudi" hidden>Chiudi il calzino</button>
+          <button type="button" class="link" id="btn-reset">Azzera</button>
+        </div>
         <button type="button" class="btn ghost small btn-esci" id="btn-esci">Esci dalla concentrazione</button>
+        <p class="hint kbd-hint" id="kbd-hint"></p>
       </div>
 
       <div class="card">
@@ -1339,6 +1497,8 @@ body.profonda .cycles span.done { background: var(--accent); }
           <label class="switch"><input type="checkbox" id="s-sound"><span>Suono a fine sessione</span></label>
           <label class="switch"><input type="checkbox" id="s-notify"><span>Notifica di sistema</span></label>
           <label class="switch"><input type="checkbox" id="s-wake"><span>Tieni acceso lo schermo mentre il timer va</span></label>
+          <label class="switch"><input type="checkbox" id="s-profonda"><span>Concentrazione profonda: avviando, solo Mora a schermo intero</span></label>
+          <label class="switch"><input type="checkbox" id="s-notte"><span>Schermata del timer scura</span></label>
         </div>
         <p class="hint" id="notify-note"></p>
       </div>
@@ -1376,6 +1536,15 @@ body.profonda .cycles span.done { background: var(--accent); }
         <h3>Decorazioni della stanza</h3>
         <p class="hint">I mobili arrivano da soli con i pezzi della casa. Queste si accendono a mano.</p>
         <div class="outfit-row" id="decorazioni"></div>
+      </div>
+
+      <div class="card">
+        <h2>Installala sul telefono</h2>
+        <p class="lede" id="installa-nota">Calzino è un sito che si comporta da app: aggiunto alla
+          schermata Home parte a tutto schermo, funziona senza rete e non passa da nessuno store.</p>
+        <div class="btn-row">
+          <button type="button" class="btn primary" id="btn-installa" hidden>Installa</button>
+        </div>
       </div>
 
       <div class="card">
@@ -1434,6 +1603,29 @@ body.profonda .cycles span.done { background: var(--accent); }
   </div>
 </div>
 
+<!-- che sessione: modo e fase, fuori dalla schermata -->
+<div class="sheet" id="sheet-sessione" hidden>
+  <div class="sheet-box">
+    <h2>Che sessione</h2>
+
+    <div class="seg modo-seg" id="modo-seg" role="group" aria-label="Modo del timer">
+      <button type="button" class="seg-btn is-active" data-modo="timer">A tempo</button>
+      <button type="button" class="seg-btn" data-modo="libera">Libera</button>
+    </div>
+
+    <div class="phase-switch" role="group" aria-label="Tipo di sessione">
+      <button type="button" class="phase is-active" data-phase="focus">Concentrazione</button>
+      <button type="button" class="phase" data-phase="short">Pausa breve</button>
+      <button type="button" class="phase" data-phase="long">Pausa lunga</button>
+    </div>
+
+    <p class="hint" id="sessione-nota"></p>
+    <div class="btn-row">
+      <button type="button" class="btn ghost" id="btn-sessione-close">Chiudi</button>
+    </div>
+  </div>
+</div>
+
 <!-- fine sessione: il calzino appena finito -->
 <div class="sheet" id="sheet-fine" hidden>
   <div class="sheet-box festa">
@@ -1451,7 +1643,7 @@ body.profonda .cycles span.done { background: var(--accent); }
 <!-- il primo incontro con Mora -->
 <div class="sheet" id="sheet-ciao" hidden>
   <div class="sheet-box festa">
-    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNhbHppbm8iPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTEyIiBmaWxsPSIjMUUyNDM4Ii8+CiAgPHBhdGggZD0iTTIxNCA5Nmg3MmE0MCA0MCAwIDAgMSA0MCA0MHYyMzhhNDAgNDAgMCAwIDEtNDAgNDBIMTUwYTY2IDY2IDAgMCAxIDAtMTMyaDMyVjEzNmE0MCA0MCAwIDAgMSAzMi00MHoiCiAgICAgICAgZmlsbD0iI0YyQTY1QSIvPgogIDxwYXRoIGQ9Ik0xOTYgMTYwaDEwOCIgc3Ryb2tlPSIjMUUyNDM4IiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMTk2IDIxMGgxMDhNMTk2IDI1OGgxMDgiIHN0cm9rZT0iIzdGRDFCOSIgc3Ryb2tlLXdpZHRoPSIxNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtZGFzaGFycmF5PSIyNiAyMiIvPgo8L3N2Zz4K" alt="" width="64" height="64" class="ciao-icona">
+    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNhbHppbm8iPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTEyIiBmaWxsPSIjM0IzMTI4Ii8+CiAgPHBhdGggZD0iTTIxNCA5Nmg3MmE0MCA0MCAwIDAgMSA0MCA0MHYyMzhhNDAgNDAgMCAwIDEtNDAgNDBIMTUwYTY2IDY2IDAgMCAxIDAtMTMyaDMyVjEzNmE0MCA0MCAwIDAgMSAzMi00MHoiCiAgICAgICAgZmlsbD0iI0U4QTg3QyIvPgogIDxwYXRoIGQ9Ik0xOTYgMTYwaDEwOCIgc3Ryb2tlPSIjM0IzMTI4IiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMTk2IDIxMGgxMDhNMTk2IDI1OGgxMDgiIHN0cm9rZT0iIzhGQjk5NiIgc3Ryb2tlLXdpZHRoPSIxNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtZGFzaGFycmF5PSIyNiAyMiIvPgo8L3N2Zz4K" alt="" width="64" height="64" class="ciao-icona">
     <h2>Lei è Mora</h2>
     <p>È una talpa e sferruzza. Quando parte il timer, prende i ferri; quando la sessione
       arriva in fondo, nel cassetto c'è un calzino. Due calzini fanno un paio, e i paia
@@ -1645,6 +1837,7 @@ const Store = (() => {
     modo: "timer",
     pelle: "mora",
     profonda: true,
+    notte: true,
     presentata: false,
     decorazioni: { ghirlanda: false, gatto: false, tazza: false, tenda: false },
     distractors: ["Instagram", "YouTube", "Chat di gruppo"]
@@ -1685,7 +1878,7 @@ const Store = (() => {
     const s = Object.assign({}, DEFAULT_SETTINGS, raw && typeof raw === "object" ? raw : {});
     for (const [k, range] of Object.entries(LIMITS)) s[k] = clampNum(s[k], range, DEFAULT_SETTINGS[k]);
     for (const k of ["autoStartBreak", "autoStartFocus", "sound", "notify", "wakeLock", "strict",
-                     "profonda", "presentata"]) {
+                     "profonda", "notte", "presentata"]) {
       s[k] = Boolean(s[k]);
     }
     if (!["auto", "light", "dark"].includes(s.theme)) s.theme = "auto";
@@ -2646,7 +2839,7 @@ const Timer = (() => {
       ? "Calzino finito. Adesso stacca davvero."
       : "Pausa finita: Mora ha ripreso i ferri.";
     try {
-      new Notification("Calzino", { body: testo, icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNhbHppbm8iPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTEyIiBmaWxsPSIjMUUyNDM4Ii8+CiAgPHBhdGggZD0iTTIxNCA5Nmg3MmE0MCA0MCAwIDAgMSA0MCA0MHYyMzhhNDAgNDAgMCAwIDEtNDAgNDBIMTUwYTY2IDY2IDAgMCAxIDAtMTMyaDMyVjEzNmE0MCA0MCAwIDAgMSAzMi00MHoiCiAgICAgICAgZmlsbD0iI0YyQTY1QSIvPgogIDxwYXRoIGQ9Ik0xOTYgMTYwaDEwOCIgc3Ryb2tlPSIjMUUyNDM4IiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMTk2IDIxMGgxMDhNMTk2IDI1OGgxMDgiIHN0cm9rZT0iIzdGRDFCOSIgc3Ryb2tlLXdpZHRoPSIxNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtZGFzaGFycmF5PSIyNiAyMiIvPgo8L3N2Zz4K", tag: "calzino" });
+      new Notification("Calzino", { body: testo, icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNhbHppbm8iPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTEyIiBmaWxsPSIjM0IzMTI4Ii8+CiAgPHBhdGggZD0iTTIxNCA5Nmg3MmE0MCA0MCAwIDAgMSA0MCA0MHYyMzhhNDAgNDAgMCAwIDEtNDAgNDBIMTUwYTY2IDY2IDAgMCAxIDAtMTMyaDMyVjEzNmE0MCA0MCAwIDAgMSAzMi00MHoiCiAgICAgICAgZmlsbD0iI0U4QTg3QyIvPgogIDxwYXRoIGQ9Ik0xOTYgMTYwaDEwOCIgc3Ryb2tlPSIjM0IzMTI4IiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMTk2IDIxMGgxMDhNMTk2IDI1OGgxMDgiIHN0cm9rZT0iIzhGQjk5NiIgc3Ryb2tlLXdpZHRoPSIxNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtZGFzaGFycmF5PSIyNiAyMiIvPgo8L3N2Zz4K", tag: "calzino" });
     } catch (err) {
       /* alcuni browser vietano le notifiche fuori dai service worker: pazienza */
     }
@@ -2843,12 +3036,23 @@ const Timer = (() => {
     $("#mora").dataset.pelle = sbloccato(pelle) ? pelle.id : "mora";
 
     const calzini = Store.socks().length;
-    $("#conta-calzini").textContent = `${calzini} ${calzini === 1 ? "calzino" : "calzini"}`;
+    $("#conta-calzini").innerHTML =
+      `<svg viewBox="0 0 100 110" aria-hidden="true" style="width:11px;height:12px">` +
+      `<path d="${SAGOMA}" fill="var(--accent)"/></svg>` +
+      `<span>${calzini}</span>`;
+    $("#conta-calzini").setAttribute("aria-label", `${calzini} calzini`);
   }
 
   /* ------------------------------------------------------------- sezioni */
 
   function showView(name) {
+    // La schermata del timer ha una pelle sua: scura, senza cornici, con la
+    // stanza che sfuma nel fondo. Le altre restano chiare come prima.
+    for (const v of ["timer", "casa", "statistiche", "impostazioni"]) {
+      document.body.classList.toggle("vista-" + v, v === name);
+    }
+    document.body.classList.toggle("schermo-timer", name === "timer" && Store.settings().notte);
+
     $$(".tab").forEach((t) => {
       const on = t.dataset.view === name;
       t.classList.toggle("is-active", on);
@@ -2886,19 +3090,19 @@ const Timer = (() => {
     const minuti = Math.round(snap.totalMs / 60000);
     if (libera) {
       $("#clock-note").textContent = snap.status === "idle"
-        ? `Il conto sale: minimo ${Math.round(snap.minimoMs / 60000)} minuti, tetto ${ore} ore`
+        ? `Libera · minimo ${Math.round(snap.minimoMs / 60000)} min, tetto ${ore} ore`
         : (assicurato
-          ? `Calzino assicurato · si chiude da sé a ${ore} ore`
-          : `Ancora ${mmss(snap.minimoMs - trascorso)} perché il calzino conti`) +
+          ? `Libera · calzino assicurato, tetto ${ore} ore`
+          : `Libera · ancora ${mmss(snap.minimoMs - trascorso)} perché conti`) +
           (snap.escapes ? ` · ${snap.escapes} uscite` : "");
     } else {
-      $("#clock-note").textContent = snap.phase === "focus"
-        ? `Sessione da ${minuti} minuti` + (snap.escapes ? ` · ${snap.escapes} uscite` : "")
-        : `${PHASE_LABEL[snap.phase]} da ${minuti} minuti`;
+      $("#clock-note").textContent = `${PHASE_LABEL[snap.phase]} · ${minuti} min` +
+        (snap.escapes && snap.phase === "focus" ? ` · ${snap.escapes} uscite` : "");
     }
 
     $$("#modo-seg .seg-btn").forEach((b) => b.classList.toggle("is-active", (b.dataset.modo === "libera") === libera));
     $(".phase-switch").hidden = libera;
+    $("#btn-profonda").setAttribute("aria-pressed", String(Store.settings().profonda));
     $("#cycles").hidden = libera;
     $("#btn-skip").hidden = libera;
     $("#btn-chiudi").hidden = !libera;
@@ -3255,6 +3459,7 @@ const Timer = (() => {
     $("#s-wake").checked = s.wakeLock;
     $("#s-strict").checked = s.strict;
     $("#s-profonda").checked = s.profonda;
+    $("#s-notte").checked = s.notte;
 
     $("#notify-note").textContent = typeof Notification === "undefined"
       ? "Questo browser non offre le notifiche di sistema."
@@ -3431,12 +3636,34 @@ const Timer = (() => {
 
   function bind() {
     bindPro();
+    bindInstalla();
     $$(".tab").forEach((t) => t.addEventListener("click", () => showView(t.dataset.view)));
 
-    $$(".phase").forEach((b) => b.addEventListener("click", () => Timer.setPhase(b.dataset.phase)));
+    $$(".phase").forEach((b) => b.addEventListener("click", () => {
+      Timer.setPhase(b.dataset.phase);
+      $("#sheet-sessione").hidden = true;
+    }));
+
+    $("#btn-sessione").addEventListener("click", () => {
+      const snap = Timer.snapshot();
+      $("#sessione-nota").textContent = snap.modo === "libera"
+        ? `Il conto sale finché non chiudi tu: sotto i ${Math.round(snap.minimoMs / 60000)} minuti non fa calzino, sopra le ${Math.round(snap.totalMs / 3600000)} ore si chiude da sé.`
+        : `Durate: ${Store.settings().focusMin} minuti di lavoro, ${Store.settings().shortMin} di pausa breve, ${Store.settings().longMin} di pausa lunga. Si cambiano in Impostazioni.`;
+      $("#sheet-sessione").hidden = false;
+    });
+    $("#btn-sessione-close").addEventListener("click", () => { $("#sheet-sessione").hidden = true; });
+
+    $("#btn-profonda").addEventListener("click", () => {
+      const acceso = !Store.settings().profonda;
+      Store.setSetting("profonda", acceso);
+      renderTimer(Timer.snapshot());
+      renderSettings();
+      toast(acceso ? "Avviando, solo Mora a schermo intero." : "Schermo intero spento.");
+    });
 
     $$("#modo-seg .seg-btn").forEach((b) => b.addEventListener("click", () => {
       Timer.setModo(b.dataset.modo);
+      $("#sheet-sessione").hidden = true;
       const ore = Math.round(Timer.limiteLibera() / 3600000);
       if (b.dataset.modo === "libera") {
         toast(`Sessione libera: il conto sale, minimo ${Math.round(Timer.MINIMO_LIBERA / 60000)} minuti, tetto ${ore} ore.`);
@@ -3563,7 +3790,11 @@ const Timer = (() => {
     bindSwitch("#s-sound", "sound", () => Timer.unlockAudio());
     bindSwitch("#s-wake", "wakeLock");
     bindSwitch("#s-strict", "strict");
-    bindSwitch("#s-profonda", "profonda");
+    bindSwitch("#s-profonda", "profonda", () => renderTimer(Timer.snapshot()));
+    bindSwitch("#s-notte", "notte", () => {
+      document.body.classList.toggle("schermo-timer",
+        !$("#view-timer").hidden && Store.settings().notte);
+    });
     bindSwitch("#s-notify", "notify", async (el) => {
       if (el.checked && typeof Notification !== "undefined" && Notification.permission === "default") {
         const esito = await Notification.requestPermission();
@@ -3833,6 +4064,53 @@ const Timer = (() => {
       toast(c.finita ? "La casa è finita." : `${pezzo.nome}: fatto. La casa cresce.`);
     }
     faseCasa = c.fase;
+  }
+
+  /* ------------------------------------------------------------ installare */
+
+  /**
+   * Su Android il browser offre l'installazione e noi ce ne impossessiamo con
+   * un bottone; su iPhone quel gancio non esiste — lì si passa dal menù
+   * Condividi, e l'unica cosa onesta è dirlo.
+   */
+  let promptInstalla = null;
+
+  function bindInstalla() {
+    const bottone = $("#btn-installa");
+    const nota = $("#installa-nota");
+    const iOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+    const giaInstallata = window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+
+    if (giaInstallata) {
+      nota.textContent = "È già installata: la stai usando come app.";
+      return;
+    }
+    if (iOS) {
+      nota.textContent = "Su iPhone e iPad: premi Condividi (il quadrato con la freccia) " +
+        "e poi «Aggiungi a Home». Da lì parte a tutto schermo e funziona senza rete.";
+      return;
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      promptInstalla = e;
+      bottone.hidden = false;
+    });
+
+    bottone.addEventListener("click", async () => {
+      if (!promptInstalla) return;
+      promptInstalla.prompt();
+      const esito = await promptInstalla.userChoice;
+      promptInstalla = null;
+      bottone.hidden = true;
+      if (esito.outcome === "accepted") toast("Installata: la trovi fra le app.");
+    });
+
+    window.addEventListener("appinstalled", () => {
+      bottone.hidden = true;
+      nota.textContent = "Installata: la trovi fra le app.";
+    });
   }
 
   /* -------------------------------------------------------- service worker */
