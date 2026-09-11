@@ -1,0 +1,55 @@
+/**
+ * Service worker: mette in cache i file dell'app così funziona anche offline.
+ * Le sessioni non passano da qui — stanno in localStorage.
+ */
+const CACHE = "calzino-v2";
+const ASSETS = [
+  "./",
+  "./index.html",
+  "./css/styles.css",
+  "./js/storage.js",
+  "./js/licenza.js",
+  "./js/timer.js",
+  "./js/app.js",
+  "./icon.svg",
+  "./icona-192.png",
+  "./icona-512.png",
+  "./icona-apple-180.png",
+  "./icona-maskable-512.png",
+  "./manifest.webmanifest"
+];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+  if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
+
+  event.respondWith(
+    caches.match(request).then((cached) => {
+      // Rete in sottofondo: la cache si aggiorna per la volta dopo.
+      const network = fetch(request)
+        .then((response) => {
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => cached || caches.match("./index.html"));
+      return cached || network;
+    })
+  );
+});

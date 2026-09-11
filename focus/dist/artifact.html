@@ -1,0 +1,4139 @@
+<title>Calzino</title>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Azeret+Mono:wght@300;500&display=swap">
+
+<style>
+/* =========================================================================
+   Calzino — foglio di stile
+   Base scura #1E2438; l'accento lo sceglie la tavolozza in Impostazioni.
+   Regola: nessun colore scritto a mano dentro una media query — solo token,
+   altrimenti in tema scuro resterebbe chiaro.
+   ========================================================================= */
+
+:root {
+  color-scheme: light dark;
+
+  --deep:        #1E2438;
+  --accent:      #F2A65A;
+  --accent-2:    #7FD1B9;
+
+  --bg:          #F4F2EC;
+  --surface:     #FFFFFF;
+  --surface-alt: #FAF8F3;
+  --ink:         #2A2118;
+  --muted:       #6E6152;
+  --line:        #E2DED4;
+  --danger:      #A03024;
+
+  --btn-primary-bg:       var(--deep);
+  --btn-primary-ink:      #FFFFFF;
+  --btn-primary-bg-hover: #2C3450;
+  --focus-ring:           color-mix(in srgb, var(--accent) 55%, transparent);
+  --chip-hover-bg:        color-mix(in srgb, var(--accent) 16%, transparent);
+  --scene-bg:             color-mix(in srgb, var(--accent) 12%, var(--surface-alt));
+  --bar-bg:               color-mix(in srgb, var(--deep) 12%, transparent);
+
+  --mora-corpo:  #4A4459;
+  --mora-pancia: #6E6580;
+  --mora-muso:   #E7C7C0;
+  --mora-naso:   #35304A;
+  --mora-tratto: #F6F1F8;
+
+  --casa-muro:   #EFE3D0;
+  --casa-ombra:  #D8C7AC;
+  --casa-legno:  #A5754A;
+  --casa-vetro:  #C3DAE8;
+  --casa-luce:   #FFD97A;
+  --casa-pietra: #9A8F81;
+
+  --stanza-parete:  #F3E3CE;
+  --stanza-batti:   #D9BF9E;
+  --stanza-pav:     #C9975C;
+  --stanza-cielo:   #CFE7F0;
+  --stanza-erba:    #A8CB92;
+
+  --radius:      16px;
+  --radius-sm:   10px;
+  --shadow:      0 1px 2px rgba(30, 36, 56, .06), 0 10px 28px rgba(30, 36, 56, .07);
+  --shadow-soft: 0 1px 2px rgba(30, 36, 56, .05);
+
+  --sans: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "Azeret Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* --- tavolozze: cambiano solo i due accenti e il fondo profondo ---------- */
+:root[data-palette="bosco"]   { --deep: #1B2A22; --accent: #8FBF6A; --accent-2: #E7C46B; }
+:root[data-palette="prugna"]  { --deep: #2A1E30; --accent: #D98BB0; --accent-2: #9AB6E8; }
+:root[data-palette="argilla"] { --deep: #2E211C; --accent: #E0785C; --accent-2: #E8C79A; }
+:root[data-palette="oceano"]  { --deep: #12242E; --accent: #5FB6D9; --accent-2: #A8E0C6; }
+:root[data-palette="panna"]   { --deep: #3B3128; --accent: #E8A87C; --accent-2: #8FB996; }
+:root[data-palette="carbone"] { --deep: #212121; --accent: #C9C4BC; --accent-2: #8FA0A6; }
+:root[data-palette="tramonto"] { --deep: #2B1B2E; --accent: #FF8A5B; --accent-2: #FFC9A0; }
+:root[data-palette="menta"]    { --deep: #12291F; --accent: #4FD1A5; --accent-2: #BDF0DA; }
+:root[data-palette="lavanda"]  { --deep: #241F3A; --accent: #A88CF0; --accent-2: #D9CBFF; }
+:root[data-palette="rame"]     { --deep: #2A1E18; --accent: #C9713A; --accent-2: #E6B98F; }
+
+/* --- tema scuro: le due regole vanno tenute allineate -------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:          #14182A;
+    --surface:     #1D2338;
+    --surface-alt: #232A42;
+    --ink:         #ECEDF3;
+    --muted:       #9AA0B5;
+    --line:        #2E3550;
+    --danger:      #E88C7D;
+    --shadow:      0 1px 2px rgba(0, 0, 0, .32), 0 10px 28px rgba(0, 0, 0, .3);
+    --shadow-soft: 0 1px 2px rgba(0, 0, 0, .3);
+    --btn-primary-bg:       var(--accent);
+    --btn-primary-ink:      #16192A;
+    --btn-primary-bg-hover: color-mix(in srgb, var(--accent) 82%, #FFFFFF);
+    --scene-bg:             color-mix(in srgb, var(--accent) 10%, var(--surface-alt));
+    --bar-bg:               rgba(255, 255, 255, .10);
+    --mora-corpo:  #6A6480;
+    --mora-pancia: #8B84A0;
+    --mora-muso:   #E7C7C0;
+    --mora-naso:   #33304A;
+    --mora-tratto: #FFFFFF;
+    --casa-muro:   #55506B;
+    --casa-ombra:  #3E3A52;
+    --casa-legno:  #8A6140;
+    --casa-vetro:  #46617A;
+    --casa-luce:   #FFD97A;
+    --casa-pietra: #6B6478;
+    --stanza-parete:  #3A3348;
+    --stanza-batti:   #4C4460;
+    --stanza-pav:     #6B4F33;
+    --stanza-cielo:   #26364A;
+    --stanza-erba:    #3E5540;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg:          #14182A;
+  --surface:     #1D2338;
+  --surface-alt: #232A42;
+  --ink:         #ECEDF3;
+  --muted:       #9AA0B5;
+  --line:        #2E3550;
+  --danger:      #E88C7D;
+  --shadow:      0 1px 2px rgba(0, 0, 0, .32), 0 10px 28px rgba(0, 0, 0, .3);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, .3);
+  --btn-primary-bg:       var(--accent);
+  --btn-primary-ink:      #16192A;
+  --btn-primary-bg-hover: color-mix(in srgb, var(--accent) 82%, #FFFFFF);
+  --scene-bg:             color-mix(in srgb, var(--accent) 10%, var(--surface-alt));
+  --bar-bg:               rgba(255, 255, 255, .10);
+  --mora-corpo:  #6A6480;
+  --mora-pancia: #8B84A0;
+  --mora-muso:   #E7C7C0;
+  --mora-naso:   #33304A;
+  --mora-tratto: #FFFFFF;
+  --casa-muro:   #55506B;
+  --casa-ombra:  #3E3A52;
+  --casa-legno:  #8A6140;
+  --casa-vetro:  #46617A;
+  --casa-luce:   #FFD97A;
+  --casa-pietra: #6B6478;
+  --stanza-parete:  #3A3348;
+  --stanza-batti:   #4C4460;
+  --stanza-pav:     #6B4F33;
+  --stanza-cielo:   #26364A;
+  --stanza-erba:    #3E5540;
+}
+
+* { box-sizing: border-box; }
+
+/* `hidden` deve vincere sempre: qui dentro mezza interfaccia è flex, e senza
+   questa riga un elemento nascosto con l'attributo resterebbe in pagina. */
+[hidden] { display: none !important; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+h1, h2, h3 { line-height: 1.25; margin: 0 0 .5rem; }
+h2 { font-size: 1.05rem; letter-spacing: .01em; }
+h3 { font-size: .95rem; margin-top: 1.2rem; }
+p { margin: 0 0 .6rem; }
+code { font-family: var(--mono); font-size: .9em; }
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem 1rem 5.5rem;
+}
+
+/* ------------------------------------------------------------------ testa */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .4rem 0 1rem;
+}
+
+.brand { display: flex; align-items: center; gap: .7rem; min-width: 0; }
+.brand img { border-radius: 9px; flex: none; }
+.brand-text { display: flex; flex-direction: column; min-width: 0; }
+.brand strong { font-size: 1.15rem; letter-spacing: .01em; }
+.sub { color: var(--muted); font-size: .84rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ------------------------------------------------------------------ tabs */
+
+/* La navigazione sta in basso, dove arriva il pollice. */
+.tabs {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  gap: .2rem;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+  padding: .3rem .4rem calc(.3rem + env(safe-area-inset-bottom));
+}
+
+.tab {
+  flex: 1;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: .68rem;
+  padding: .35rem .2rem .3rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .12rem;
+}
+.tab svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tab:hover { color: var(--ink); }
+.tab.is-active { color: var(--accent-ink, var(--ink)); }
+.tab.is-active svg { stroke: var(--accent); }
+.tab.is-active span { font-weight: 600; }
+
+/* ----------------------------------------------------------------- schede */
+
+.view { animation: enter .18s ease-out; }
+@keyframes enter { from { opacity: 0; transform: translateY(4px); } }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-bottom: .6rem; }
+.card-head h2 { margin: 0; }
+
+.lede { color: var(--muted); font-size: .9rem; }
+.hint { color: var(--muted); font-size: .82rem; margin: .4rem 0 0; }
+.empty { color: var(--muted); font-size: .88rem; font-style: italic; margin: .2rem 0 0; }
+.error { color: var(--danger); font-size: .86rem; }
+.block-warning { border: 1px solid var(--danger); border-radius: var(--radius-sm); padding: .6rem .8rem; }
+
+.pill {
+  background: var(--bar-bg);
+  border-radius: 999px;
+  padding: .12rem .6rem;
+  font-size: .8rem;
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------- pulsanti */
+
+.btn {
+  font: inherit;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: .55rem 1.1rem;
+  cursor: pointer;
+  background: none;
+  color: var(--ink);
+  transition: background-color .15s, border-color .15s, transform .05s;
+}
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--btn-primary-bg); color: var(--btn-primary-ink); }
+.btn.primary:hover { background: var(--btn-primary-bg-hover); }
+.btn.ghost { border-color: var(--line); background: var(--surface); }
+.btn.ghost:hover { background: var(--chip-hover-bg); }
+.btn.danger { color: var(--danger); border-color: var(--danger); }
+.btn.small { padding: .32rem .7rem; font-size: .84rem; }
+.btn.big { padding: .7rem 2.2rem; font-size: 1.05rem; font-weight: 600; min-width: 9.5rem; }
+.btn.block { width: 100%; }
+.btn-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .6rem; }
+.file-btn { display: inline-flex; align-items: center; }
+
+:where(button, input, select, a):focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+kbd {
+  font-family: var(--mono);
+  font-size: .78em;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 0 .3em;
+}
+
+/* ------------------------------------------------------------ fasi e scena */
+
+.phase-switch {
+  display: flex;
+  gap: .35rem;
+  margin-bottom: 1rem;
+}
+.phase {
+  flex: 1;
+  font: inherit;
+  font-size: .85rem;
+  padding: .45rem .4rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+}
+.phase.is-active {
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface));
+  border-color: var(--accent);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* La stanza tocca i bordi della scheda: è lei la protagonista, non la cornice. */
+.scene-card { text-align: center; padding: 0 1rem 1rem; overflow: hidden; }
+.scene-card .scene { margin: 0 -1rem; border-radius: 0; }
+
+.scene {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  line-height: 0;
+}
+
+.stanza { display: block; width: 100%; height: auto; }
+
+/* Il contatore dei calzini, appoggiato sulla scena come nelle app di gioco. */
+.conta-calzini {
+  position: absolute;
+  top: .55rem;
+  right: .6rem;
+  margin: 0;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .18rem .6rem;
+  font-size: .82rem;
+  line-height: 1.4;
+  color: var(--ink);
+  backdrop-filter: blur(3px);
+}
+
+/* --- la stanza --- */
+.cielo      { fill: var(--stanza-cielo); }
+.sole       { fill: color-mix(in srgb, var(--accent) 75%, #FFF); }
+.collina    { fill: color-mix(in srgb, var(--stanza-erba) 80%, #000 12%); }
+.collina.lontana { fill: color-mix(in srgb, var(--stanza-erba) 92%, #FFF 10%); }
+.erba       { fill: var(--stanza-erba); }
+.parete     { fill: var(--stanza-parete); }
+.battiscopa { fill: var(--stanza-batti); }
+.assito     { fill: var(--stanza-pav); }
+.fughe      { stroke: rgba(0, 0, 0, .13); stroke-width: 2; }
+.trave      { fill: var(--casa-legno); }
+.vetro      { fill: var(--stanza-cielo); stroke: var(--casa-legno); stroke-width: 4; }
+.telaio     { stroke: var(--casa-legno); stroke-width: 4; }
+.davanzale  { fill: var(--casa-legno); }
+.tenda      { fill: color-mix(in srgb, var(--accent) 55%, var(--surface)); }
+.porta-s    { fill: var(--casa-legno); stroke: rgba(0, 0, 0, .18); stroke-width: 3; }
+.pomo       { fill: var(--accent-2); }
+.stufa      { fill: var(--casa-pietra); }
+.tubo       { fill: var(--casa-pietra); }
+.fuoco      { fill: var(--accent); }
+.cornice    { fill: var(--surface); stroke: var(--casa-legno); stroke-width: 4; }
+.quadro-dentro { fill: color-mix(in srgb, var(--accent-2) 70%, transparent); }
+.filo-lampada  { stroke: var(--casa-legno); stroke-width: 2.5; }
+.paralume   { fill: var(--accent); }
+.alone      { fill: var(--casa-luce); opacity: .45; }
+.corda      { fill: none; stroke: var(--muted); stroke-width: 2; opacity: .6; }
+.lucine circle { fill: var(--casa-luce); }
+.palo-s     { stroke: var(--casa-legno); stroke-width: 5; stroke-linecap: round; }
+.cartello-s { fill: var(--casa-legno); }
+.gradino    { fill: var(--casa-pietra); }
+.tappeto    { fill: color-mix(in srgb, var(--accent) 45%, transparent); }
+.vaso       { fill: var(--casa-legno); }
+.foglie     { fill: color-mix(in srgb, var(--accent-2) 85%, #2E5A3E); }
+.gatto-corpo { fill: color-mix(in srgb, var(--deep) 70%, var(--surface)); }
+.gatto-tratto { fill: none; stroke: color-mix(in srgb, var(--deep) 70%, var(--surface)); stroke-width: 2.5; stroke-linecap: round; }
+.tazza      { fill: var(--surface); stroke: var(--accent); stroke-width: 2.5; }
+.manico     { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+.vapore     { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; opacity: .7; }
+
+/* --- le pelli di Mora: cambiano solo i suoi colori --- */
+.mora[data-pelle="neve"]     { --mora-corpo: #E3DEE8; --mora-pancia: #FFFFFF; --mora-tratto: #5A5470; --mora-naso: #6E6580; }
+.mora[data-pelle="cenere"]   { --mora-corpo: #7C7C86; --mora-pancia: #A3A3AD; --mora-tratto: #FFFFFF; }
+.mora[data-pelle="terra"]    { --mora-corpo: #6B4A34; --mora-pancia: #8F6A4C; --mora-tratto: #FFF3E4; --mora-muso: #E9C9B4; }
+.mora[data-pelle="oro"]      { --mora-corpo: #C79A3C; --mora-pancia: #E4C169; --mora-tratto: #4A3A12; --mora-naso: #4A3A12; }
+.mora[data-pelle="notturna"] { --mora-corpo: #2C2A44; --mora-pancia: #423F63; --mora-tratto: #C9C4F0; --mora-naso: #C9C4F0; }
+.mora-ombra { fill: rgba(0, 0, 0, .12); }
+.mora-corpo { fill: var(--mora-corpo); }
+.mora-pancia { fill: var(--mora-pancia); }
+.mora-muso { fill: var(--mora-muso); }
+.mora-naso { fill: var(--mora-naso); }
+.mora-occhi .occhio, .mora-baffi path {
+  fill: none;
+  stroke: var(--mora-tratto);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+}
+.mora-baffi path { opacity: .45; stroke-width: 2.2; }
+.mora-zampa { fill: var(--mora-corpo); stroke: var(--mora-pancia); stroke-width: 2; }
+.ferri path { fill: none; stroke: var(--ink); stroke-width: 2.6; stroke-linecap: round; opacity: .6; }
+.gomitolo circle { fill: var(--accent); }
+.gomitolo path { fill: none; stroke: color-mix(in srgb, var(--deep) 45%, transparent); stroke-width: 2.5; stroke-linecap: round; }
+.gomitolo .filo { stroke: var(--accent); stroke-width: 3.5; }
+
+.mora-braccio { transform-origin: 118px 146px; }
+.scene[data-state="running"] .mora-braccio { animation: cuce 1.1s ease-in-out infinite; }
+.scene[data-state="running"] .mora-corpo { animation: respira 3.4s ease-in-out infinite; transform-origin: 110px 160px; }
+@keyframes cuce {
+  0%, 100% { transform: rotate(0deg) translate(0, 0); }
+  45%      { transform: rotate(-13deg) translate(-3px, 4px); }
+}
+@keyframes respira {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.015); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene[data-state="running"] .mora-braccio,
+  .scene[data-state="running"] .mora-corpo { animation: none; }
+  .view { animation: none; }
+}
+
+/* pausa: Mora posa l'ago e chiude gli occhi */
+.scene[data-state="paused"] .mora-braccio { transform: rotate(9deg) translate(2px, 5px); opacity: .9; }
+.scene[data-state="break"] .ferri { display: none; }
+.scene[data-state="break"] .mora-braccio { transform: rotate(16deg) translate(0, 7px); }
+
+/* accessori */
+.acc { display: none; fill: none; stroke: var(--accent); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.acc-cappello path:first-child { fill: var(--accent); stroke: var(--accent); }
+.acc-cappello circle { fill: var(--accent-2); stroke: none; }
+.acc-grembiule { stroke: var(--accent-2); stroke-width: 3.4; }
+.acc-grembiule path:first-child { fill: color-mix(in srgb, var(--accent-2) 45%, transparent); }
+.acc-ditale { stroke: var(--accent-2); }
+.acc-coroncina path { fill: var(--accent); stroke: var(--accent); stroke-width: 2; }
+.acc-fiore circle { fill: var(--accent-2); stroke: none; }
+.acc-fiore .cuore { fill: var(--accent); }
+.acc-papillon path { fill: var(--accent); stroke: none; }
+.acc-papillon .cuore { fill: var(--accent-2); stroke: none; }
+.scene.has-cappello .acc-cappello,
+.scene.has-occhiali .acc-occhiali,
+.scene.has-grembiule .acc-grembiule,
+.scene.has-ditale .acc-ditale,
+.scene.has-coroncina .acc-coroncina,
+.scene.has-fiore .acc-fiore,
+.scene.has-papillon .acc-papillon { display: block; }
+
+/* il calzino in lavorazione: la lana sale dal fondo */
+.calzino-vuoto { fill: color-mix(in srgb, var(--accent) 14%, var(--surface)); }
+.calzino-lana { fill: var(--accent); transition: y .4s linear; }
+.calzino-bordo rect, .calzino-bordo path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+.calzino-bordo path { stroke-dasharray: 5 4; opacity: .8; }
+
+.clock {
+  font-family: var(--mono);
+  font-size: clamp(2.6rem, 13vw, 3.6rem);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+  margin: .8rem 0 0;
+  line-height: 1;
+}
+.clock-note { color: var(--muted); font-size: .85rem; margin: .3rem 0 .2rem; }
+
+.cycles { display: flex; justify-content: center; gap: .35rem; margin: .5rem 0 .8rem; }
+.cycles span {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--bar-bg);
+}
+.cycles span.done { background: var(--accent); }
+
+.controls { display: flex; justify-content: center; flex-wrap: wrap; gap: .5rem; }
+.kbd-hint { text-align: center; }
+
+/* -------------------------------------------------------------- attività */
+
+.task-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+.chip {
+  font: inherit;
+  font-size: .86rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: .3rem .75rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+.chip:hover { background: var(--chip-hover-bg); }
+.chip.is-active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, var(--surface)); font-weight: 600; }
+.chip .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.chip .x { color: var(--muted); font-size: 1rem; line-height: 1; }
+
+.inline-form { display: flex; gap: .4rem; margin-top: .6rem; flex-wrap: wrap; }
+.inline-form input { flex: 1 1 12rem; }
+
+input[type="text"], input[type="number"], select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: .5rem .7rem;
+  min-width: 0;
+}
+
+.field { display: flex; flex-direction: column; gap: .25rem; font-size: .86rem; }
+.field > span { color: var(--muted); }
+.grid { display: grid; gap: .7rem; }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
+
+.switches { display: flex; flex-direction: column; gap: .5rem; margin-top: .8rem; }
+.switch { display: flex; align-items: center; gap: .55rem; font-size: .88rem; cursor: pointer; }
+.switch input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+
+.preset-row { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem; margin-top: .8rem; }
+.preset-row .hint { margin: 0; }
+
+/* ----------------------------------------------------------------- oggi */
+
+.stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr)); gap: .6rem; }
+.stat {
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: .6rem .7rem;
+}
+.stat b { display: block; font-size: 1.35rem; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat span { color: var(--muted); font-size: .78rem; }
+
+.goal { margin-top: .8rem; }
+.goal-bar { height: 10px; background: var(--bar-bg); border-radius: 999px; overflow: hidden; }
+.goal-bar span { display: block; height: 100%; background: var(--accent); width: 0; transition: width .3s ease; }
+
+/* ------------------------------------------------------------- cassetto */
+
+.sagoma-condivisa { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.cassetto {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: .6rem;
+  margin: .6rem 0 .2rem;
+}
+.paio {
+  display: flex;
+  gap: .3rem;
+  justify-content: center;
+  padding: .5rem .4rem .35rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  position: relative;
+}
+.paio.is-full {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+}
+.paio small {
+  position: absolute;
+  bottom: -.1rem;
+  right: .45rem;
+  font-size: .64rem;
+  color: var(--muted);
+}
+.calzino {
+  border: 0;
+  background: none;
+  padding: 0;
+  width: 46px;
+  cursor: pointer;
+  transition: transform .12s ease;
+}
+.calzino:hover { transform: translateY(-2px) rotate(-3deg); }
+.calzino svg { display: block; width: 100%; height: auto; }
+.calzino .corpo { stroke: rgba(0, 0, 0, .18); stroke-width: 3; }
+.calzino .bordo { stroke: rgba(255, 255, 255, .75); stroke-width: 4; stroke-linecap: round; fill: none; }
+.calzino.vuoto { cursor: default; opacity: .45; }
+.calzino .fantasia, .calzino-festa .fantasia { fill: rgba(255, 255, 255, .42); stroke: none; }
+.calzino-festa .corpo { stroke: rgba(0, 0, 0, .18); stroke-width: 3; }
+.calzino-festa .bordo { stroke: rgba(255, 255, 255, .8); stroke-width: 4; stroke-linecap: round; fill: none; }
+.calzino-festa .fantasia-scura { fill: rgba(0, 0, 0, .16); stroke: none; }
+.calzino .fantasia-scura { fill: rgba(0, 0, 0, .16); stroke: none; }
+.calzino .doppio {
+  fill: none;
+  stroke: rgba(255, 255, 255, .9);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.calzino.vuoto .corpo { fill: none; stroke: var(--line); stroke-dasharray: 6 5; }
+
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .6rem; margin-top: .4rem; }
+.badge {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: .55rem .7rem;
+  background: var(--surface-alt);
+  opacity: .5;
+}
+.badge.on { opacity: 1; border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+.badge b { display: block; font-size: .88rem; }
+.badge span { color: var(--muted); font-size: .78rem; }
+
+/* ----------------------------------------------------------- statistiche */
+
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 130px;
+  margin-top: .6rem;
+}
+.chart .col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; gap: 4px; }
+.chart .bar { background: var(--bar-bg); border-radius: 4px 4px 0 0; min-height: 3px; }
+.chart .bar.has { background: var(--accent); }
+.chart .lab { font-size: .62rem; color: var(--muted); text-align: center; }
+
+.breakdown { display: flex; flex-direction: column; gap: .5rem; margin-top: .4rem; }
+.bd-row { display: grid; grid-template-columns: 1fr auto; gap: .2rem .6rem; font-size: .88rem; }
+.bd-bar { grid-column: 1 / -1; height: 8px; border-radius: 999px; background: var(--bar-bg); overflow: hidden; }
+.bd-bar i { display: block; height: 100%; }
+
+.log { list-style: none; margin: .4rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .35rem; }
+.log li {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  font-size: .88rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: .35rem;
+}
+.log li:last-child { border-bottom: 0; }
+.log .dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.log .when { color: var(--muted); margin-left: auto; font-size: .8rem; white-space: nowrap; }
+.log .torn { color: var(--danger); font-size: .78rem; }
+
+/* --------------------------------------------------------------- aspetto */
+
+.palette-row { display: flex; flex-wrap: wrap; gap: .5rem; margin: .6rem 0 1rem; }
+.pal {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.pal.is-active { border-color: var(--ink); box-shadow: 0 0 0 3px var(--focus-ring); }
+.pal i { flex: 1; display: block; }
+
+.seg { display: flex; gap: .3rem; }
+.seg-btn {
+  flex: 1; font: inherit; font-size: .85rem;
+  padding: .4rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.seg-btn.is-active { background: var(--deep); color: #FFF; border-color: var(--deep); }
+
+.outfit-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .5rem; }
+
+.chips-edit { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .6rem; }
+
+/* ------------------------------------------------------ fogli e messaggi */
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 18, 30, .55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 30;
+}
+.sheet-box {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  max-width: 26rem;
+  width: 100%;
+  box-shadow: var(--shadow);
+}
+.detail { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: .3rem .8rem; font-size: .9rem; }
+.detail dt { color: var(--muted); }
+.detail dd { margin: 0; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.2rem;
+  transform: translateX(-50%);
+  background: var(--deep);
+  color: #FFF;
+  padding: .6rem 1rem;
+  border-radius: 999px;
+  font-size: .88rem;
+  box-shadow: var(--shadow);
+  z-index: 40;
+  max-width: calc(100% - 2rem);
+  text-align: center;
+}
+
+.about p { color: var(--muted); font-size: .9rem; }
+
+/* Bottoni annidati dentro una chip (scegli / togli): niente stile di sistema. */
+.chip .as-text,
+.chip .x {
+  font: inherit;
+  border: 0;
+  background: none;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+.chip .as-text { font-size: inherit; }
+.chip .x:hover { color: var(--danger); }
+.patch { transition: transform .12s ease; }
+
+/* ------------------------------------------------------------------- Pro */
+
+.chip.bloccata { opacity: .6; }
+.chip.bloccata::after {
+  content: "1 €";
+  font-size: .68rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 .32rem;
+  color: var(--muted);
+}
+.pal.bloccata { opacity: .55; }
+.pal.bloccata::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(45deg, rgba(0, 0, 0, .12) 0 4px, transparent 4px 8px);
+}
+.pal { position: relative; }
+
+.pro-card {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 10%, var(--surface)), var(--surface));
+}
+.pro-card.is-attivo .pill { background: var(--accent); color: #1A1A1A; }
+
+.pro-lista { margin: .6rem 0; padding-left: 1.1rem; font-size: .9rem; }
+.pro-lista li { margin-bottom: .35rem; }
+.pro-attivo {
+  background: color-mix(in srgb, var(--accent) 20%, var(--surface));
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: .5rem .7rem;
+  font-size: .9rem;
+}
+.sheet-box { max-height: 88vh; overflow-y: auto; }
+
+/* ------------------------------------------------------------------ casa */
+
+.modo-seg { margin-bottom: .6rem; }
+.modo-seg .seg-btn { font-weight: 600; }
+
+.casa-scena {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-2) 18%, var(--surface-alt)), var(--surface-alt));
+  border-radius: var(--radius);
+  padding: .4rem;
+  margin-bottom: .8rem;
+}
+#casa { display: block; width: 100%; height: auto; }
+#casa g { transition: opacity .4s ease; }
+
+.prato       { fill: color-mix(in srgb, var(--accent-2) 55%, transparent); }
+.palo        { stroke: var(--casa-legno); stroke-width: 5; stroke-linecap: round; }
+.cartello    { fill: var(--casa-legno); }
+.fondamenta  { fill: var(--casa-pietra); }
+.pavimento   { fill: var(--casa-legno); }
+.assi        { stroke: rgba(0, 0, 0, .18); stroke-width: 2; }
+.muri        { fill: var(--casa-muro); stroke: var(--casa-ombra); stroke-width: 3; }
+.finestra    { fill: var(--casa-vetro); stroke: var(--casa-ombra); stroke-width: 3; }
+.croce       { stroke: var(--casa-ombra); stroke-width: 2.5; }
+.porta       { fill: var(--casa-legno); stroke: var(--casa-ombra); stroke-width: 2.5; }
+.maniglia    { fill: var(--accent-2); }
+.tetto       { fill: var(--accent); stroke: color-mix(in srgb, var(--accent) 70%, #000); stroke-width: 3; stroke-linejoin: round; }
+.camino      { fill: var(--casa-pietra); }
+.fumo        { fill: none; stroke: var(--muted); stroke-width: 4; stroke-linecap: round; opacity: .6; }
+.luce        { fill: var(--casa-luce); }
+.tronco      { fill: var(--casa-legno); }
+.chioma      { fill: color-mix(in srgb, var(--accent-2) 75%, #2E5A3E); }
+.mela        { fill: var(--accent); }
+.ravanelli   { stroke: color-mix(in srgb, var(--accent-2) 70%, transparent); stroke-width: 4; stroke-linecap: round; }
+.staccionata, .staccionata-corr {
+  stroke: var(--casa-legno);
+  stroke-width: 6;
+  stroke-linecap: round;
+  fill: none;
+}
+.staccionata-corr { stroke-width: 4; }
+
+.storia { margin: .4rem 0 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: .5rem; }
+.storia li { font-size: .9rem; }
+.storia li.futuro { color: var(--muted); }
+.storia li.futuro b::after { content: " — da fare"; font-weight: 400; font-size: .82em; }
+.storia li.prossimo { color: var(--ink); }
+.storia li.prossimo b::after { content: " — ci stai lavorando"; font-weight: 400; font-size: .82em; color: var(--accent); }
+.storia b { display: block; }
+.storia .segreto { filter: blur(3.5px); user-select: none; }
+
+/* --------------------------------------------------- concentrazione profonda */
+
+.profonda-switch { justify-content: center; margin: .2rem 0 .8rem; font-size: .84rem; color: var(--muted); }
+.btn-esci { display: none; margin-top: .6rem; }
+
+/* A schermo intero resta solo quello che serve: la stanza, il conto, un bottone. */
+body.profonda { overflow: hidden; background: var(--deep); }
+body.profonda .topbar,
+body.profonda .tabs,
+body.profonda .modo-seg,
+body.profonda .phase-switch,
+body.profonda .profonda-switch,
+body.profonda .kbd-hint,
+body.profonda .card:not(.scene-card),
+body.profonda #btn-skip,
+body.profonda #btn-reset,
+body.profonda .block-warning { display: none !important; }
+body.profonda .btn-esci { display: inline-flex; }
+body.profonda .app {
+  max-width: 640px;
+  padding: 0 0 1rem;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+}
+body.profonda .views, body.profonda .view { width: 100%; }
+body.profonda .scene-card {
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 0 0 1rem;
+}
+body.profonda .scene { border-radius: 0; margin: 0; }
+body.profonda .clock { font-size: clamp(3.2rem, 17vw, 5.4rem); color: #FFF; }
+body.profonda .clock-note, body.profonda .conta-calzini { color: rgba(255, 255, 255, .8); }
+body.profonda .conta-calzini { background: rgba(255, 255, 255, .14); border-color: transparent; }
+body.profonda .btn.ghost { background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .28); color: #FFF; }
+/* Sul fondo scuro il bottone scuro sparisce: qui comanda l'accento. */
+body.profonda .btn.primary { background: var(--accent); color: #17120E; }
+body.profonda .cycles span { background: rgba(255, 255, 255, .22); }
+body.profonda .cycles span.done { background: var(--accent); }
+
+/* ---------------------------------------------------------- cose da fare */
+
+.todo { list-style: none; margin: .2rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .1rem; }
+.todo li { display: flex; align-items: center; gap: .55rem; padding: .35rem 0; border-bottom: 1px solid var(--line); }
+.todo li:last-child { border-bottom: 0; }
+.todo input[type="checkbox"] { width: 19px; height: 19px; accent-color: var(--accent); flex: none; }
+.todo span { flex: 1; font-size: .92rem; }
+.todo li.fatto span { text-decoration: line-through; color: var(--muted); }
+.todo .via { border: 0; background: none; color: var(--muted); font-size: 1.1rem; line-height: 1; cursor: pointer; padding: 0 .2rem; }
+.todo .via:hover { color: var(--danger); }
+
+/* ------------------------------------------------------- fine e benvenuto */
+
+.festa { text-align: center; }
+.festa .btn-row { justify-content: center; }
+.calzino-festa { width: 92px; height: auto; margin: 0 auto .4rem; display: block; }
+.ciao-icona { border-radius: 16px; margin: 0 auto .6rem; display: block; }
+.festa h2 { font-size: 1.25rem; }
+
+/* ====================================================================
+   Schermata del timer — direzione «Notte calda»
+   La stanza è lo schermo, il tempo ci sta sopra, i comandi si riducono
+   a un bottone e due parole. Modo e fase vivono in un foglio a parte.
+   ==================================================================== */
+
+/* Solo i token: tutto il resto è già scritto in termini di token e segue. */
+body.schermo-timer {
+  --bg:          #171210;
+  --surface:     #241C16;
+  --surface-alt: #2C231C;
+  --ink:         #F5EBE2;
+  --muted:       rgba(245, 235, 226, .62);
+  --line:        rgba(245, 235, 226, .13);
+  --bar-bg:      rgba(245, 235, 226, .14);
+  --scene-bg:    #171210;
+  --btn-primary-bg:       var(--accent);
+  --btn-primary-ink:      #17120E;
+  --btn-primary-bg-hover: color-mix(in srgb, var(--accent) 84%, #FFF);
+  --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 14px 34px rgba(0, 0, 0, .34);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, .35);
+}
+
+/* Sulla schermata del timer la testa dell'app è quella scura qui sotto. */
+body.vista-timer .topbar { display: none; }
+.timer-testa { display: none; }
+body.vista-timer .timer-testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .4rem 0 .7rem;
+}
+
+.timer-testa .marchio {
+  font-size: .82rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.testa-destra { display: flex; align-items: center; gap: .45rem; }
+
+.icona {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.icona svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.icona[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #17120E; }
+
+/* Il contatore dei calzini è sceso dalla scena alla testa. */
+.conta-calzini {
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  background: var(--bar-bg);
+  border: 0;
+  border-radius: 999px;
+  padding: .2rem .65rem;
+  font-size: .84rem;
+  color: var(--ink);
+}
+
+/* La stanza sfuma nel fondo invece di finire con un taglio netto. */
+body.schermo-timer .scene-card {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  /* La stanza arriva ai bordi dello schermo: è lei la schermata. */
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding: 0;
+}
+body.schermo-timer .scene-card .scene { margin: 0; }
+body.schermo-timer .scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(23, 18, 16, .5) 0%,
+    rgba(23, 18, 16, 0) 26%,
+    rgba(23, 18, 16, 0) 52%,
+    var(--bg) 97%);
+}
+
+/* L'orologio sale dentro la sfumatura della stanza. Serve `position`:
+   la scena è posizionata e senza questo le coprirebbe le cifre. */
+body.schermo-timer .clock {
+  position: relative;
+  z-index: 1;
+  font-weight: 300;
+  font-size: clamp(3.4rem, 19vw, 5.2rem);
+  letter-spacing: -.045em;
+  margin-top: -1.4rem;
+}
+
+/* Una riga sola al posto dell'interruttore di modo e dei tre chip di fase. */
+.riga-sessione {
+  font: inherit;
+  font-size: .92rem;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: baseline;
+  gap: .5rem;
+  padding: .55rem .4rem;
+  margin: .5rem auto 0;
+}
+.riga-sessione .cambia {
+  border-bottom: 1px dashed color-mix(in srgb, var(--ink) 40%, transparent);
+  padding-bottom: 1px;
+}
+.riga-sessione:hover { color: var(--ink); }
+
+/* I pallini del giro diventano trattini: si leggono da lontano. */
+.cycles span { width: 26px; height: 3px; border-radius: 2px; }
+
+.controls-min {
+  display: flex;
+  justify-content: center;
+  gap: 1.6rem;
+  margin-top: 1rem;
+}
+.link {
+  font: inherit;
+  font-size: .92rem;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  padding: 0 0 2px;
+  cursor: pointer;
+}
+.link:hover { color: var(--ink); }
+
+body.schermo-timer .btn.primary { box-shadow: 0 14px 34px color-mix(in srgb, var(--accent) 24%, transparent); }
+body.schermo-timer .btn.ghost { background: rgba(245, 235, 226, .1); border-color: rgba(245, 235, 226, .22); }
+body.schermo-timer .kbd-hint { display: none; }
+
+/* Nel foglio della sessione, modo e fasi tornano quelli di prima. */
+#sheet-sessione .modo-seg { margin-bottom: .7rem; }
+#sheet-sessione .phase-switch { margin-bottom: .2rem; }
+
+</style>
+
+<!-- La sagoma del calzino, definita una volta sola: i calzini del cassetto la
+     usano per ritagliare dentro il contorno le fantasie. -->
+<svg class="sagoma-condivisa" aria-hidden="true" focusable="false">
+  <clipPath id="clip-sagoma" clipPathUnits="userSpaceOnUse">
+    <path d="M43 8h14a9 9 0 0 1 9 9v56a9 9 0 0 1-9 9h-30a15 15 0 0 1 0-30h7v-35a9 9 0 0 1 9-9z"/>
+  </clipPath>
+</svg>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNhbHppbm8iPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTEyIiBmaWxsPSIjM0IzMTI4Ii8+CiAgPHBhdGggZD0iTTIxNCA5Nmg3MmE0MCA0MCAwIDAgMSA0MCA0MHYyMzhhNDAgNDAgMCAwIDEtNDAgNDBIMTUwYTY2IDY2IDAgMCAxIDAtMTMyaDMyVjEzNmE0MCA0MCAwIDAgMSAzMi00MHoiCiAgICAgICAgZmlsbD0iI0U4QTg3QyIvPgogIDxwYXRoIGQ9Ik0xOTYgMTYwaDEwOCIgc3Ryb2tlPSIjM0IzMTI4IiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMTk2IDIxMGgxMDhNMTk2IDI1OGgxMDgiIHN0cm9rZT0iIzhGQjk5NiIgc3Ryb2tlLXdpZHRoPSIxNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtZGFzaGFycmF5PSIyNiAyMiIvPgo8L3N2Zz4K" alt="" width="34" height="34">
+      <div class="brand-text">
+        <strong>Calzino</strong>
+        <span class="sub" id="top-sub">Mora è pronta a sferruzzare.</span>
+      </div>
+    </div>
+    <button type="button" class="btn ghost small" id="btn-theme" aria-label="Cambia tema">Tema</button>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sezioni">
+    <button type="button" class="tab is-active" role="tab" data-view="timer" aria-selected="true" aria-controls="view-timer">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>
+      <span>Timer</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-view="casa" aria-selected="false" aria-controls="view-casa">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+      <span>Casa</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-view="statistiche" aria-selected="false" aria-controls="view-statistiche">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      <span>Numeri</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-view="impostazioni" aria-selected="false" aria-controls="view-impostazioni">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+      <span>Impostazioni</span>
+    </button>
+  </nav>
+
+  <main class="views">
+
+    <!-- ================================================== CONCENTRAZIONE -->
+    <section id="view-timer" class="view" role="tabpanel" tabindex="-1">
+
+      <div class="timer-testa">
+        <span class="marchio">Calzino</span>
+        <div class="testa-destra">
+          <span class="conta-calzini" id="conta-calzini"></span>
+          <button type="button" class="icona" id="btn-profonda" aria-pressed="true"
+                  aria-label="Concentrazione profonda" title="Concentrazione profonda">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="card scene-card">
+        <div class="scene" id="scene" data-state="idle">
+          <svg class="stanza" id="stanza" viewBox="0 0 340 192" role="img" aria-labelledby="stanza-title">
+            <title id="stanza-title">La stanza di Mora</title>
+            <defs>
+              <clipPath id="clip-calzino" clipPathUnits="userSpaceOnUse">
+                <rect x="42" y="12" width="34" height="62" rx="10"/>
+                <rect x="18" y="58" width="58" height="32" rx="16"/>
+              </clipPath>
+            </defs>
+
+            <!-- Finché la casa non ha i muri, Mora lavora fuori, sul prato. -->
+            <g id="fuori">
+              <rect class="cielo" x="0" y="0" width="340" height="152"/>
+              <circle class="sole" cx="46" cy="34" r="17"/>
+              <ellipse class="collina" cx="50" cy="168" rx="110" ry="34"/>
+              <ellipse class="collina lontana" cx="290" cy="172" rx="120" ry="38"/>
+              <rect class="erba" x="0" y="152" width="340" height="68"/>
+            </g>
+
+            <!-- Dai muri in poi, la stessa scena è un interno. -->
+            <g id="dentro">
+              <rect class="parete" x="0" y="0" width="340" height="146"/>
+              <rect class="battiscopa" x="0" y="140" width="340" height="10"/>
+              <rect class="assito" x="0" y="150" width="340" height="70"/>
+              <path class="fughe" d="M46 150v70M108 150v70M170 150v70M232 150v70M294 150v70"/>
+            </g>
+
+            <g class="arredo" data-fase="7"><rect class="trave" x="0" y="0" width="340" height="13"/></g>
+
+            <g class="arredo" data-fase="5">
+              <rect class="vetro" x="256" y="18" width="80" height="60" rx="4"/>
+              <path class="telaio" d="M296 18v60M256 48h80"/>
+              <rect class="davanzale" x="250" y="78" width="92" height="8" rx="3"/>
+            </g>
+
+            <g class="arredo" data-deco="tenda">
+              <path class="tenda" d="M250 12q13 36 4 68h-15q9-34-2-68z"/>
+              <path class="tenda" d="M336 12q-13 36-4 68h-15q9-34 2-68z"/>
+            </g>
+
+            <g class="arredo" data-fase="6">
+              <rect class="porta-s" x="-10" y="40" width="46" height="112" rx="5"/>
+              <circle class="pomo" cx="27" cy="100" r="3.6"/>
+            </g>
+
+            <g class="arredo" data-fase="8">
+              <rect class="stufa" x="50" y="104" width="40" height="48" rx="5"/>
+              <rect class="tubo" x="65" y="72" width="10" height="34" rx="3"/>
+              <path class="fuoco" d="M70 142q-10-11 0-23 10 12 0 23z"/>
+            </g>
+
+            <g class="arredo" data-fase="11">
+              <rect class="cornice" x="46" y="34" width="46" height="36" rx="3"/>
+              <path class="quadro-dentro" d="M52 64l12-16 10 12 8-8 10 12z"/>
+            </g>
+
+            <g class="arredo" data-fase="9">
+              <path class="filo-lampada" d="M170 13v22"/>
+              <path class="paralume" d="M150 56l20-22 20 22z"/>
+              <circle class="alone" cx="170" cy="62" r="14"/>
+            </g>
+
+            <g class="arredo" data-deco="ghirlanda">
+              <path class="corda" d="M6 22q84 26 164 0t164 0"/>
+              <g class="lucine">
+                <circle cx="48" cy="30" r="4"/><circle cx="90" cy="34" r="4"/><circle cx="132" cy="34" r="4"/>
+                <circle cx="174" cy="30" r="4"/><circle cx="216" cy="26" r="4"/><circle cx="258" cy="24" r="4"/>
+                <circle cx="300" cy="24" r="4"/>
+              </g>
+            </g>
+
+            <g class="arredo fuori-solo" data-fase="1">
+              <path class="palo-s" d="M300 176v-30"/>
+              <rect class="cartello-s" x="284" y="136" width="32" height="14" rx="3"/>
+            </g>
+            <g class="arredo fuori-solo" data-fase="2">
+              <rect class="gradino" x="94" y="150" width="150" height="12" rx="4"/>
+            </g>
+
+            <g class="arredo" data-fase="3"><ellipse class="tappeto" cx="166" cy="160" rx="90" ry="14"/></g>
+
+            <g class="arredo" data-fase="10">
+              <rect class="vaso" x="300" y="128" width="30" height="24" rx="4"/>
+              <path class="foglie" d="M315 128q-16-8-14-26 14 4 14 26zM315 128q16-10 15-30-16 6-15 30z"/>
+            </g>
+
+            <g class="arredo" data-deco="gatto">
+              <ellipse class="gatto-corpo" cx="72" cy="146" rx="26" ry="12"/>
+              <circle class="gatto-corpo" cx="52" cy="140" r="10"/>
+              <path class="gatto-tratto" d="M46 133l-3-6 6 2M58 133l3-6-6 2M44 140h-6M44 144h-6"/>
+            </g>
+
+            <g class="arredo" data-deco="tazza">
+              <path class="tazza" d="M8 140h18v9a5 5 0 0 1-5 5h-8a5 5 0 0 1-5-5z"/>
+              <path class="manico" d="M26 143q6 0 6 4t-6 4"/>
+              <path class="vapore" d="M14 136q4-5 0-9M21 136q4-5 0-9"/>
+            </g>
+
+            <!-- Mora, dentro la scena: la pelle cambia solo i suoi colori. -->
+            <g class="mora" id="mora" data-pelle="mora" transform="translate(92 27) scale(0.72)">
+              <ellipse class="mora-ombra" cx="110" cy="173" rx="58" ry="8"/>
+              <path class="mora-corpo" d="M110 40c-30 0-52 24-52 58 0 40 22 66 52 66s52-26 52-66c0-34-22-58-52-58z"/>
+              <ellipse class="mora-pancia" cx="110" cy="124" rx="34" ry="30"/>
+
+              <g class="acc acc-grembiule">
+                <path d="M92 104q18 8 36 0l7 38q-25 10-50 0z"/>
+                <path d="M99 104l-5-10M121 104l5-10"/>
+              </g>
+
+              <path class="mora-muso" d="M110 60c-16 0-27 10-27 22s11 20 27 20 27-8 27-20-11-22-27-22z"/>
+              <circle class="mora-naso" cx="110" cy="70" r="6"/>
+              <g class="mora-occhi">
+                <path class="occhio" d="M84 54q7 7 14 0"/>
+                <path class="occhio" d="M122 54q7 7 14 0"/>
+              </g>
+              <g class="mora-baffi">
+                <path d="M82 82h-14M82 88h-12M138 82h14M138 88h12"/>
+              </g>
+
+              <g class="acc acc-occhiali">
+                <circle cx="91" cy="55" r="13"/>
+                <circle cx="129" cy="55" r="13"/>
+                <path d="M104 55h12"/>
+              </g>
+              <g class="acc acc-cappello">
+                <path d="M78 45q32-26 64 0z"/>
+                <path d="M70 47h80"/>
+                <circle cx="110" cy="21" r="7"/>
+              </g>
+              <g class="acc acc-coroncina">
+                <path d="M80 46l5-22 11 13 14-18 14 18 11-13 5 22z"/>
+              </g>
+              <g class="acc acc-fiore">
+                <circle cx="148" cy="46" r="6"/><circle cx="160" cy="46" r="6"/>
+                <circle cx="154" cy="36" r="6"/><circle cx="154" cy="56" r="6"/>
+                <circle class="cuore" cx="154" cy="46" r="4.5"/>
+              </g>
+              <g class="acc acc-papillon">
+                <path d="M110 106l-17-10v20zM110 106l17-10v20z"/>
+                <circle class="cuore" cx="110" cy="106" r="4.5"/>
+              </g>
+
+              <g class="gomitolo">
+                <circle cx="34" cy="156" r="15"/>
+                <path d="M23 150q11 10 22 3M25 162q9-12 20-7"/>
+                <path class="filo" d="M47 150q22-12 42-6"/>
+              </g>
+
+              <ellipse class="mora-zampa" cx="86" cy="142" rx="13" ry="10"/>
+              <g class="mora-braccio" id="mora-braccio">
+                <g class="ferri"><path d="M84 150l54-35M88 158l54-35"/></g>
+                <ellipse class="mora-zampa" cx="134" cy="132" rx="13" ry="10"/>
+                <g class="acc acc-ditale"><path d="M142 124q9-5 13 4t-8 9"/></g>
+              </g>
+            </g>
+
+            <!-- il calzino in lavorazione, per terra davanti a lei -->
+            <g id="calzino-live" transform="translate(196 92) scale(0.52)">
+              <g clip-path="url(#clip-calzino)">
+                <rect class="calzino-vuoto" x="0" y="0" width="120" height="120"/>
+                <rect class="calzino-lana" id="calzino-lana" x="0" y="120" width="120" height="120"/>
+              </g>
+              <g class="calzino-bordo">
+                <rect x="42" y="12" width="34" height="62" rx="10"/>
+                <rect x="18" y="58" width="58" height="32" rx="16"/>
+                <path d="M42 26h34"/>
+              </g>
+            </g>
+          </svg>
+
+          <p class="conta-calzini" id="conta-calzini"></p>
+        </div>
+
+        <p class="clock" id="clock" aria-live="off">25:00</p>
+
+        <button type="button" class="riga-sessione" id="btn-sessione">
+          <span id="clock-note">Sessione da 25 minuti</span>
+          <span class="cambia">cambia</span>
+        </button>
+
+        <div class="cycles" id="cycles" aria-label="Sessioni prima della pausa lunga"></div>
+
+        <div class="controls">
+          <button type="button" class="btn primary big" id="btn-start">Avvia</button>
+        </div>
+
+        <div class="controls-min">
+          <button type="button" class="link" id="btn-skip">Salta</button>
+          <button type="button" class="link" id="btn-chiudi" hidden>Chiudi il calzino</button>
+          <button type="button" class="link" id="btn-reset">Azzera</button>
+        </div>
+        <button type="button" class="btn ghost small btn-esci" id="btn-esci">Esci dalla concentrazione</button>
+        <p class="hint kbd-hint" id="kbd-hint"></p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Su che cosa stai lavorando</h2>
+          <button type="button" class="btn ghost small" id="btn-task-new">+ Attività</button>
+        </div>
+        <div class="task-chips" id="task-chips"></div>
+        <form id="form-task" class="inline-form" autocomplete="off" hidden>
+          <input id="task-name" type="text" maxlength="40" placeholder="es. Matematica, Tesi, Correzioni">
+          <button type="submit" class="btn primary small">Aggiungi</button>
+          <button type="button" class="btn ghost small" id="btn-task-cancel">Annulla</button>
+        </form>
+        <p class="error" id="task-error" role="alert" hidden></p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Cose da fare</h2>
+          <button type="button" class="btn ghost small" id="btn-todo-pulisci">Togli le fatte</button>
+        </div>
+        <ul class="todo" id="todo"></ul>
+        <p class="empty" id="todo-empty">Niente in lista. Scrivi qui sotto che cosa vuoi finire oggi.</p>
+        <form id="form-todo" class="inline-form" autocomplete="off">
+          <input id="todo-testo" type="text" maxlength="80" placeholder="es. finire il capitolo 3">
+          <button type="submit" class="btn primary small">Aggiungi</button>
+        </form>
+      </div>
+
+      <div class="card today-card">
+        <h2>Oggi</h2>
+        <div class="stat-row" id="today-stats"></div>
+        <div class="goal">
+          <div class="goal-bar"><span id="goal-fill"></span></div>
+          <p class="hint" id="goal-note"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================= CASA -->
+    <section id="view-casa" class="view" role="tabpanel" tabindex="-1" hidden>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>La casa di Mora</h2>
+          <span class="pill" id="casa-fase">0 pezzi su 11</span>
+        </div>
+
+        <div class="casa-scena">
+          <svg id="casa" viewBox="0 0 320 210" role="img" aria-labelledby="casa-title">
+            <title id="casa-title">La casa che Mora sta costruendo</title>
+
+            <g data-fase="1">
+              <ellipse class="prato" cx="160" cy="188" rx="150" ry="17"/>
+              <path class="palo" d="M42 188v-30"/>
+              <rect class="cartello" x="24" y="146" width="40" height="16" rx="3"/>
+            </g>
+
+            <g data-fase="2"><rect class="fondamenta" x="86" y="168" width="150" height="18" rx="3"/></g>
+
+            <g data-fase="3">
+              <rect class="pavimento" x="90" y="156" width="142" height="14" rx="2"/>
+              <path class="assi" d="M112 156v14M140 156v14M168 156v14M196 156v14"/>
+            </g>
+
+            <g data-fase="4"><rect class="muri" x="94" y="96" width="134" height="62" rx="4"/></g>
+
+            <g data-fase="5">
+              <rect class="finestra" x="108" y="110" width="32" height="30" rx="3"/>
+              <rect class="finestra" x="182" y="110" width="32" height="30" rx="3"/>
+              <path class="croce" d="M124 110v30M108 125h32M198 110v30M182 125h32"/>
+            </g>
+
+            <g data-fase="6">
+              <rect class="porta" x="148" y="116" width="28" height="42" rx="4"/>
+              <circle class="maniglia" cx="169" cy="138" r="2.6"/>
+            </g>
+
+            <g data-fase="7"><path class="tetto" d="M82 100l79-50 79 50z"/></g>
+
+            <g data-fase="8">
+              <rect class="camino" x="198" y="60" width="18" height="32" rx="2"/>
+              <path class="fumo" d="M207 56q11-7 3-15t5-13"/>
+            </g>
+
+            <g data-fase="9">
+              <rect class="luce" x="110" y="112" width="28" height="26" rx="2"/>
+              <rect class="luce" x="184" y="112" width="28" height="26" rx="2"/>
+            </g>
+
+            <g data-fase="10">
+              <rect class="tronco" x="266" y="148" width="11" height="38" rx="4"/>
+              <circle class="chioma" cx="271" cy="138" r="27"/>
+              <circle class="mela" cx="260" cy="132" r="4"/>
+              <circle class="mela" cx="282" cy="146" r="4"/>
+              <path class="ravanelli" d="M40 176h34M40 182h34M40 188h34"/>
+            </g>
+
+            <g data-fase="11">
+              <path class="staccionata" d="M10 172v28M32 172v28M54 172v28M244 172v28M266 172v28M288 172v28M310 172v28"/>
+              <path class="staccionata-corr" d="M6 180h56M240 180h74M6 192h56M240 192h74"/>
+            </g>
+          </svg>
+        </div>
+
+        <p class="lede" id="casa-racconto"></p>
+        <div class="goal">
+          <div class="goal-bar"><span id="casa-fill"></span></div>
+          <p class="hint" id="casa-nota"></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>La storia</h2>
+        <ol class="storia" id="storia"></ol>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Il cassetto</h2>
+          <span class="pill" id="paia-count">0 paia</span>
+        </div>
+        <p class="lede" id="cassetto-lede"></p>
+        <div class="cassetto" id="cassetto"></div>
+        <p class="empty" id="cassetto-empty">Il cassetto è vuoto: la prima sessione finita è il primo calzino.</p>
+      </div>
+
+      <div class="card">
+        <h2>Traguardi</h2>
+        <div class="badges" id="badges"></div>
+      </div>
+    </section>
+
+    <!-- ===================================================== STATISTICHE -->
+    <section id="view-statistiche" class="view" role="tabpanel" tabindex="-1" hidden>
+      <div class="card">
+        <h2>In breve</h2>
+        <div class="stat-row" id="stats-row"></div>
+      </div>
+
+      <div class="card">
+        <h2>Ultimi 14 giorni</h2>
+        <div class="chart" id="chart" role="img" aria-label="Minuti di concentrazione degli ultimi 14 giorni"></div>
+      </div>
+
+      <div class="card">
+        <h2>Per attività</h2>
+        <div class="breakdown" id="breakdown"></div>
+        <p class="empty" id="breakdown-empty">Nessuna sessione registrata.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Ultime sessioni</h2>
+          <span class="pill" id="sessions-count">0</span>
+        </div>
+        <ul class="log" id="log"></ul>
+        <p class="empty" id="log-empty">Il registro è vuoto.</p>
+      </div>
+    </section>
+
+    <!-- ==================================================== IMPOSTAZIONI -->
+    <section id="view-impostazioni" class="view" role="tabpanel" tabindex="-1" hidden>
+
+      <div class="card">
+        <h2>Durate</h2>
+        <div class="grid grid-2">
+          <label class="field"><span>Concentrazione (min)</span>
+            <input id="s-focus" type="number" min="1" max="180" step="1" inputmode="numeric"></label>
+          <label class="field"><span>Pausa breve (min)</span>
+            <input id="s-short" type="number" min="1" max="60" step="1" inputmode="numeric"></label>
+          <label class="field"><span>Pausa lunga (min)</span>
+            <input id="s-long" type="number" min="1" max="90" step="1" inputmode="numeric"></label>
+          <label class="field"><span>Sessioni prima della pausa lunga</span>
+            <input id="s-cycles" type="number" min="2" max="12" step="1" inputmode="numeric"></label>
+          <label class="field"><span>Obiettivo giornaliero (min)</span>
+            <input id="s-goal" type="number" min="10" max="960" step="5" inputmode="numeric"></label>
+        </div>
+        <div class="preset-row">
+          <span class="hint">Preimpostati:</span>
+          <button type="button" class="chip" data-preset="25-5-15-4">25 / 5 / 15</button>
+          <button type="button" class="chip" data-preset="50-10-30-2">50 / 10 / 30</button>
+          <button type="button" class="chip" data-preset="90-20-30-2">90 / 20 / 30</button>
+          <button type="button" class="chip" data-preset="15-3-10-4">15 / 3 / 10</button>
+        </div>
+        <div class="switches">
+          <label class="switch"><input type="checkbox" id="s-auto-break"><span>Avvia da sola la pausa</span></label>
+          <label class="switch"><input type="checkbox" id="s-auto-focus"><span>Avvia da sola la sessione dopo la pausa</span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Avvisi</h2>
+        <div class="switches">
+          <label class="switch"><input type="checkbox" id="s-sound"><span>Suono a fine sessione</span></label>
+          <label class="switch"><input type="checkbox" id="s-notify"><span>Notifica di sistema</span></label>
+          <label class="switch"><input type="checkbox" id="s-wake"><span>Tieni acceso lo schermo mentre il timer va</span></label>
+          <label class="switch"><input type="checkbox" id="s-profonda"><span>Concentrazione profonda: avviando, solo Mora a schermo intero</span></label>
+          <label class="switch"><input type="checkbox" id="s-notte"><span>Schermata del timer scura</span></label>
+        </div>
+        <p class="hint" id="notify-note"></p>
+      </div>
+
+      <div class="card">
+        <h2>Distrattori</h2>
+        <p class="lede">Una pagina web non può spegnere le altre app del telefono: quello lo può fare
+          solo un'app installata con i permessi di sistema. Qui il patto è diverso — scrivi che cosa
+          ti ruba il tempo, e se esci dalla scheda mentre lavori Mora se ne accorge.</p>
+        <div class="chips-edit" id="distractors"></div>
+        <form id="form-distractor" class="inline-form" autocomplete="off">
+          <input id="distractor-name" type="text" maxlength="30" placeholder="es. Instagram, YouTube, chat di gruppo">
+          <button type="submit" class="btn primary small">Aggiungi</button>
+        </form>
+        <div class="switches">
+          <label class="switch"><input type="checkbox" id="s-strict"><span>Modalità severa: uscire dalla scheda disfa il calzino</span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Aspetto</h2>
+        <p class="hint">Tutti i colori e tutti gli accessori sono qui, senza nulla da sbloccare.</p>
+        <div class="palette-row" id="palettes"></div>
+        <div class="seg" id="tema-seg" role="group" aria-label="Tema chiaro o scuro">
+          <button type="button" class="seg-btn" data-theme="auto">Automatico</button>
+          <button type="button" class="seg-btn" data-theme="light">Chiaro</button>
+          <button type="button" class="seg-btn" data-theme="dark">Scuro</button>
+        </div>
+        <h3>Accessori di Mora</h3>
+        <div class="outfit-row" id="outfit"></div>
+        <h3>Fantasia dei calzini</h3>
+        <div class="outfit-row" id="fantasie"></div>
+        <h3>Come è fatta Mora</h3>
+        <div class="outfit-row" id="pelli"></div>
+        <h3>Decorazioni della stanza</h3>
+        <p class="hint">I mobili arrivano da soli con i pezzi della casa. Queste si accendono a mano.</p>
+        <div class="outfit-row" id="decorazioni"></div>
+      </div>
+
+      <div class="card">
+        <h2>Installala sul telefono</h2>
+        <p class="lede" id="installa-nota">Calzino è un sito che si comporta da app: aggiunto alla
+          schermata Home parte a tutto schermo, funziona senza rete e non passa da nessuno store.</p>
+        <div class="btn-row">
+          <button type="button" class="btn primary" id="btn-installa" hidden>Installa</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>I tuoi dati</h2>
+        <p class="lede">Tutto sta nel <code>localStorage</code> di questo browser: niente account,
+          niente server. Svuotare i dati del browser cancella anche il cassetto.</p>
+        <div class="btn-row">
+          <button type="button" class="btn ghost" id="btn-export">Esporta</button>
+          <label class="btn ghost file-btn">Importa<input type="file" id="file-import" accept="application/json,.json" hidden></label>
+          <button type="button" class="btn danger ghost" id="btn-wipe">Cancella tutto</button>
+        </div>
+        <p class="hint" id="data-note"></p>
+      </div>
+
+      <div class="card pro-card" id="pro-card">
+        <div class="card-head">
+          <h2>Calzino Pro</h2>
+          <span class="pill" id="pro-stato">non attivo</span>
+        </div>
+        <p class="lede">Un euro al mese. Cambia due cose: ogni sessione finita mette
+          <b>due calzini</b> nel cassetto invece di uno — e la casa di Mora cresce il doppio
+          più in fretta. In più: sessioni libere fino a sei ore invece di due, quattro
+          tavolozze, tre accessori per Mora, quattro fantasie per i calzini.</p>
+        <p class="hint">Timer, casa, cassetto, statistiche, esportazione e tutto il resto restano
+          gratis e completi: la casa si costruisce tutta anche senza pagare, ci vuole il doppio
+          del lavoro. Il Pro non toglie niente a chi non paga.</p>
+        <div class="btn-row">
+          <button type="button" class="btn primary" id="btn-pro">Vedi il Pro</button>
+        </div>
+      </div>
+
+      <div class="card about">
+        <h2>Il blocco delle app</h2>
+        <p>Non c'è, né gratis né a pagamento: questa è una pagina web e quel permesso
+          non ce l'ha. Per spegnere davvero le altre app servirebbe un'app Android
+          installata. Qui restano l'elenco dei distrattori e il conteggio delle uscite.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <p class="error block-warning" id="storage-warning" role="alert" hidden>
+    Questo browser non permette di salvare i dati (navigazione privata?). Il timer funziona,
+    ma i calzini non verranno conservati.
+  </p>
+</div>
+
+<!-- rientro da una fuga: compare quando torni sulla scheda -->
+<div class="sheet" id="sheet-escape" hidden>
+  <div class="sheet-box">
+    <h2 id="escape-title">Bentornato</h2>
+    <p id="escape-text"></p>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-escape-ok">Riprendo</button>
+    </div>
+  </div>
+</div>
+
+<!-- che sessione: modo e fase, fuori dalla schermata -->
+<div class="sheet" id="sheet-sessione" hidden>
+  <div class="sheet-box">
+    <h2>Che sessione</h2>
+
+    <div class="seg modo-seg" id="modo-seg" role="group" aria-label="Modo del timer">
+      <button type="button" class="seg-btn is-active" data-modo="timer">A tempo</button>
+      <button type="button" class="seg-btn" data-modo="libera">Libera</button>
+    </div>
+
+    <div class="phase-switch" role="group" aria-label="Tipo di sessione">
+      <button type="button" class="phase is-active" data-phase="focus">Concentrazione</button>
+      <button type="button" class="phase" data-phase="short">Pausa breve</button>
+      <button type="button" class="phase" data-phase="long">Pausa lunga</button>
+    </div>
+
+    <p class="hint" id="sessione-nota"></p>
+    <div class="btn-row">
+      <button type="button" class="btn ghost" id="btn-sessione-close">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- fine sessione: il calzino appena finito -->
+<div class="sheet" id="sheet-fine" hidden>
+  <div class="sheet-box festa">
+    <svg class="calzino-festa" id="calzino-festa" viewBox="0 0 100 110" aria-hidden="true"></svg>
+    <h2 id="festa-titolo">Calzino finito</h2>
+    <p id="festa-testo"></p>
+    <p class="hint" id="festa-casa"></p>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-festa-pausa">Fai la pausa</button>
+      <button type="button" class="btn ghost" id="btn-festa-chiudi">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- il primo incontro con Mora -->
+<div class="sheet" id="sheet-ciao" hidden>
+  <div class="sheet-box festa">
+    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNhbHppbm8iPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTEyIiBmaWxsPSIjM0IzMTI4Ii8+CiAgPHBhdGggZD0iTTIxNCA5Nmg3MmE0MCA0MCAwIDAgMSA0MCA0MHYyMzhhNDAgNDAgMCAwIDEtNDAgNDBIMTUwYTY2IDY2IDAgMCAxIDAtMTMyaDMyVjEzNmE0MCA0MCAwIDAgMSAzMi00MHoiCiAgICAgICAgZmlsbD0iI0U4QTg3QyIvPgogIDxwYXRoIGQ9Ik0xOTYgMTYwaDEwOCIgc3Ryb2tlPSIjM0IzMTI4IiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMTk2IDIxMGgxMDhNMTk2IDI1OGgxMDgiIHN0cm9rZT0iIzhGQjk5NiIgc3Ryb2tlLXdpZHRoPSIxNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtZGFzaGFycmF5PSIyNiAyMiIvPgo8L3N2Zz4K" alt="" width="64" height="64" class="ciao-icona">
+    <h2>Lei è Mora</h2>
+    <p>È una talpa e sferruzza. Quando parte il timer, prende i ferri; quando la sessione
+      arriva in fondo, nel cassetto c'è un calzino. Due calzini fanno un paio, e i paia
+      pagano la casa che si sta costruendo — un pezzo alla volta, dal terreno alla staccionata.</p>
+    <p class="hint">Tu devi solo lasciar stare il telefono finché il timer scende.</p>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-ciao-via">Comincia: 25 minuti</button>
+      <button type="button" class="btn ghost" id="btn-ciao-dopo">Guardo prima in giro</button>
+    </div>
+  </div>
+</div>
+
+<!-- il Pro: prova, pagamento, codice -->
+<div class="sheet" id="sheet-pro" hidden>
+  <div class="sheet-box">
+    <h2>Calzino Pro — <span id="pro-prezzo">1 € al mese</span></h2>
+    <p class="pro-attivo" id="pro-attivo" hidden></p>
+    <ul class="pro-lista">
+      <li><b>Calzini ×2</b> — ogni sessione finita ne mette due nel cassetto, segnati come doppi: la casa cresce il doppio più in fretta.</li>
+      <li><b>Sessioni libere fino a sei ore</b> invece di due.</li>
+      <li><b>Quattro tavolozze in più</b> — Tramonto, Menta, Lavanda, Rame.</li>
+      <li><b>Tre accessori per Mora</b> — coroncina, papillon, fiorellino.</li>
+      <li><b>Quattro fantasie</b> per i calzini del cassetto.</li>
+    </ul>
+
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-prova">Prova 7 giorni</button>
+      <button type="button" class="btn ghost" id="btn-paga">Abbonati</button>
+    </div>
+    <p class="hint" id="pro-pagamento-nota"></p>
+
+    <h3>Hai un codice?</h3>
+    <form id="form-codice" class="inline-form" autocomplete="off">
+      <input id="pro-codice" type="text" maxlength="19" placeholder="CALZ-0000-0000-0000"
+             autocapitalize="characters" spellcheck="false">
+      <button type="submit" class="btn primary small">Sblocca</button>
+    </form>
+    <p class="error" id="pro-errore" role="alert" hidden></p>
+
+    <p class="hint">Il codice viene controllato qui dentro, nel browser: è una porta
+      chiusa, non una cassaforte. Chi apre il sorgente può aggirarla — se paghi, paghi
+      perché ti va che questa cosa esista.</p>
+
+    <div class="btn-row">
+      <button type="button" class="btn ghost small" id="btn-pro-rimuovi" hidden>Togli la licenza da qui</button>
+      <button type="button" class="btn ghost" id="btn-pro-close">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- dettaglio di un calzino -->
+<div class="sheet" id="sheet-calzino" hidden>
+  <div class="sheet-box">
+    <h2>Calzino</h2>
+    <dl class="detail" id="calzino-detail"></dl>
+    <div class="btn-row">
+      <button type="button" class="btn ghost" id="btn-calzino-close">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<p class="toast" id="toast" role="status" aria-live="polite" hidden></p>
+
+<script>
+/**
+ * Calzino — persistenza locale.
+ *
+ * Un'unica chiave in localStorage: impostazioni, attività, sessioni e lo stato
+ * del timer in corso. Nessun account e nessun server, come nell'app di lettura
+ * accanto: chi apre la pagina è già dentro.
+ *
+ * I calzini non vengono salvati: si ricavano dalle sessioni di concentrazione
+ * portate a termine, così non esistono due verità da tenere allineate.
+ * Uno per sessione, sempre: nessun moltiplicatore, nessun premio a parte.
+ */
+const Store = (() => {
+  "use strict";
+
+  const KEY = "calzino.v1";
+  const CALZINI_PER_PAIO = 2;
+
+  const PALETTES = [
+    { id: "panna",    nome: "Panna",     accento: "#E8A87C", secondo: "#8FB996", scuro: "#3B3128" },
+    { id: "notte",    nome: "Notte",     accento: "#F2A65A", secondo: "#7FD1B9", scuro: "#1E2438" },
+    { id: "bosco",    nome: "Bosco",     accento: "#8FBF6A", secondo: "#E7C46B", scuro: "#1B2A22" },
+    { id: "prugna",   nome: "Prugna",    accento: "#D98BB0", secondo: "#9AB6E8", scuro: "#2A1E30" },
+    { id: "argilla",  nome: "Argilla",   accento: "#E0785C", secondo: "#E8C79A", scuro: "#2E211C" },
+    { id: "oceano",   nome: "Oceano",    accento: "#5FB6D9", secondo: "#A8E0C6", scuro: "#12242E" },
+    { id: "carbone",  nome: "Carbone",   accento: "#C9C4BC", secondo: "#8FA0A6", scuro: "#212121" },
+    { id: "tramonto", nome: "Tramonto",  accento: "#FF8A5B", secondo: "#FFC9A0", scuro: "#2B1B2E", pro: true },
+    { id: "menta",    nome: "Menta",     accento: "#4FD1A5", secondo: "#BDF0DA", scuro: "#12291F", pro: true },
+    { id: "lavanda",  nome: "Lavanda",   accento: "#A88CF0", secondo: "#D9CBFF", scuro: "#241F3A", pro: true },
+    { id: "rame",     nome: "Rame",      accento: "#C9713A", secondo: "#E6B98F", scuro: "#2A1E18", pro: true }
+  ];
+
+  /** Accessori di Mora e fantasie dei calzini: quelli con `pro` stanno dietro
+      l'abbonamento, gli altri no. L'elenco vive qui perché lo guardano sia
+      l'interfaccia sia il controllo di quello che è davvero sbloccato. */
+  /** Le pelli di Mora: cambiano solo i colori del personaggio. */
+  const PELLI = [
+    { id: "mora",     nome: "Mora" },
+    { id: "neve",     nome: "Neve" },
+    { id: "cenere",   nome: "Cenere" },
+    { id: "terra",    nome: "Terra" },
+    { id: "oro",      nome: "Oro",      pro: true },
+    { id: "notturna", nome: "Notturna", pro: true }
+  ];
+
+  /** Le decorazioni che si accendono a mano. Quelle della casa arrivano da
+      sole con i pezzi costruiti: queste sono in più, e stanno dietro il Pro. */
+  const DECORAZIONI = [
+    { id: "ghirlanda", nome: "Lucine",  pro: true },
+    { id: "gatto",     nome: "Gatto",   pro: true },
+    { id: "tazza",     nome: "Tazza",   pro: true },
+    { id: "tenda",     nome: "Tende",   pro: true }
+  ];
+
+  const ACCESSORI = [
+    { id: "cappello",  nome: "Cappellino" },
+    { id: "occhiali",  nome: "Occhiali" },
+    { id: "grembiule", nome: "Grembiule" },
+    { id: "ditale",    nome: "Ditale" },
+    { id: "coroncina", nome: "Coroncina", pro: true },
+    { id: "papillon",  nome: "Papillon",  pro: true },
+    { id: "fiore",     nome: "Fiorellino", pro: true }
+  ];
+
+  const FANTASIE = [
+    { id: "tinta",  nome: "Tinta unita" },
+    { id: "righe",  nome: "A righe",   pro: true },
+    { id: "pois",   nome: "A pois",    pro: true },
+    { id: "rombi",  nome: "A rombi",   pro: true },
+    { id: "punta",  nome: "Punta a contrasto", pro: true }
+  ];
+
+  /** Colori della lana: il cassetto deve restare leggibile anche pieno. */
+  const FILATI = ["#E0785C", "#F2A65A", "#E7C46B", "#8FBF6A", "#7FD1B9", "#5FB6D9", "#9AB6E8", "#D98BB0"];
+
+  /**
+   * La casa di Mora: undici pezzi, pagati in paia di calzini. È il filo lungo
+   * dell'app — il cassetto dice quanto hai lavorato oggi, la casa dice dove sta
+   * andando a finire tutto quel lavoro.
+   *
+   * `paia` è il totale che serve per avere quel pezzo, non il costo del singolo
+   * passo: così spostare una soglia non obbliga a ricalcolare le altre.
+   */
+  const CASA = [
+    { id: "terreno",     nome: "Il terreno",     paia: 1,
+      racconto: "Con il primo paio Mora ha pagato la caparra: un quadrato di terra buona, in fondo al prato." },
+    { id: "fondamenta",  nome: "Le fondamenta",  paia: 3,
+      racconto: "Tre paia, e lo scavo è fatto. Adesso c'è dove appoggiare i muri, anche se i muri non ci sono ancora." },
+    { id: "pavimento",   nome: "Il pavimento",   paia: 6,
+      racconto: "Sei paia diventate assi di legno chiaro. Mora ci cammina sopra scalza, per sentire quali scricchiolano." },
+    { id: "muri",        nome: "I muri",         paia: 10,
+      racconto: "Dieci paia: quattro muri dritti. Per la prima volta esiste un dentro, e quindi anche un fuori." },
+    { id: "finestre",    nome: "Le finestre",    paia: 15,
+      racconto: "Quindici paia comprano due finestre. Da lì si vede il prato — e il prato vede lei." },
+    { id: "porta",       nome: "La porta",       paia: 21,
+      racconto: "Ventuno paia per una porta con la maniglia d'ottone. Adesso si può bussare, e si può non aprire." },
+    { id: "tetto",       nome: "Il tetto",       paia: 28,
+      racconto: "Ventotto paia di tegole rosse. La prima notte di pioggia Mora è rimasta sveglia apposta, per sentirla cadere di sopra." },
+    { id: "camino",      nome: "Il camino",      paia: 36,
+      racconto: "Trentasei paia: un camino che tira. Il fumo esce storto, ma esce." },
+    { id: "luce",        nome: "La luce",        paia: 45,
+      racconto: "Quarantacinque paia per l'impianto. La sera, alla finestra, adesso c'è una luce gialla che prima non c'era." },
+    { id: "giardino",    nome: "Il giardino",    paia: 55,
+      racconto: "Cinquantacinque paia, e davanti alla porta crescono un melo e tre file di ravanelli." },
+    { id: "staccionata", nome: "La staccionata", paia: 66,
+      racconto: "Sessantasei paia. La staccionata non serve a tenere fuori nessuno: serve a dire che quella casa è finita, ed è sua." }
+  ];
+
+  const CASA_FINITA = "La casa è finita. Mora continua a sferruzzare, ma adesso lo fa per il gusto di farlo.";
+
+  const DEFAULT_SETTINGS = {
+    focusMin: 25,
+    shortMin: 5,
+    longMin: 15,
+    cycles: 4,
+    goalMin: 100,
+    autoStartBreak: true,
+    autoStartFocus: false,
+    sound: true,
+    notify: false,
+    wakeLock: true,
+    strict: false,
+    theme: "auto",
+    palette: "panna",
+    outfit: { cappello: false, occhiali: false, grembiule: true, ditale: false,
+              coroncina: false, papillon: false, fiore: false },
+    fantasia: "tinta",
+    modo: "timer",
+    pelle: "mora",
+    profonda: true,
+    notte: true,
+    presentata: false,
+    decorazioni: { ghirlanda: false, gatto: false, tazza: false, tenda: false },
+    distractors: ["Instagram", "YouTube", "Chat di gruppo"]
+  };
+
+  const LIMITS = {
+    focusMin: [1, 180], shortMin: [1, 60], longMin: [1, 90],
+    cycles: [2, 12], goalMin: [10, 960]
+  };
+
+  let available = true;
+  let state = load();
+
+  function isTodo(t) {
+    return t && typeof t === "object" && typeof t.testo === "string";
+  }
+
+  function blank() {
+    return {
+      version: 1,
+      createdAt: new Date().toISOString(),
+      settings: Object.assign({}, DEFAULT_SETTINGS, { outfit: Object.assign({}, DEFAULT_SETTINGS.outfit) }),
+      tasks: [],
+      currentTaskId: null,
+      sessions: [],
+      todos: [],
+      running: null
+    };
+  }
+
+  function clampNum(value, [min, max], fallback) {
+    const n = Math.round(Number(value));
+    if (!Number.isFinite(n)) return fallback;
+    return Math.min(max, Math.max(min, n));
+  }
+
+  function cleanSettings(raw) {
+    const s = Object.assign({}, DEFAULT_SETTINGS, raw && typeof raw === "object" ? raw : {});
+    for (const [k, range] of Object.entries(LIMITS)) s[k] = clampNum(s[k], range, DEFAULT_SETTINGS[k]);
+    for (const k of ["autoStartBreak", "autoStartFocus", "sound", "notify", "wakeLock", "strict",
+                     "profonda", "notte", "presentata"]) {
+      s[k] = Boolean(s[k]);
+    }
+    if (!["auto", "light", "dark"].includes(s.theme)) s.theme = "auto";
+    if (!PALETTES.some((p) => p.id === s.palette)) s.palette = "panna";
+    if (!FANTASIE.some((f) => f.id === s.fantasia)) s.fantasia = "tinta";
+    if (s.modo !== "libera") s.modo = "timer";
+    if (!PELLI.some((x) => x.id === s.pelle)) s.pelle = "mora";
+    const deco = Object.assign({}, DEFAULT_SETTINGS.decorazioni,
+      s.decorazioni && typeof s.decorazioni === "object" ? s.decorazioni : {});
+    for (const k of Object.keys(deco)) deco[k] = Boolean(deco[k]);
+    s.decorazioni = deco;
+    const outfit = Object.assign({}, DEFAULT_SETTINGS.outfit, s.outfit && typeof s.outfit === "object" ? s.outfit : {});
+    for (const k of Object.keys(outfit)) outfit[k] = Boolean(outfit[k]);
+    s.outfit = outfit;
+    s.distractors = Array.isArray(s.distractors)
+      ? s.distractors.map((d) => String(d).trim().slice(0, 30)).filter(Boolean).slice(0, 40)
+      : DEFAULT_SETTINGS.distractors.slice();
+    return s;
+  }
+
+  function isTask(t) {
+    return t && typeof t === "object" && typeof t.id === "string" && typeof t.name === "string";
+  }
+
+  /** Quanti calzini ha fruttato una sessione: uno di suo, due con il Pro.
+      Resta scritto nella sessione, non ricalcolato: se l'abbonamento scade, i
+      calzini già cuciti restano quelli che erano. */
+  function clampCalzini(v) {
+    const n = Math.round(Number(v));
+    return Number.isFinite(n) && n >= 1 && n <= 4 ? n : 1;
+  }
+
+  function isSession(s) {
+    return s && typeof s === "object" && typeof s.startedAt === "string" && Number.isFinite(Number(s.minutes));
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return blank();
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return blank();
+      const base = blank();
+      const tasks = Array.isArray(parsed.tasks) ? parsed.tasks.filter(isTask) : [];
+      const sessions = Array.isArray(parsed.sessions)
+        ? parsed.sessions.filter(isSession).map((s) => ({
+            id: typeof s.id === "string" ? s.id : newId(),
+            startedAt: s.startedAt,
+            endedAt: typeof s.endedAt === "string" ? s.endedAt : s.startedAt,
+            minutes: Math.max(0, Math.round(Number(s.minutes) || 0)),
+            kind: s.kind === "short" || s.kind === "long" ? s.kind : "focus",
+            completed: Boolean(s.completed),
+            taskId: typeof s.taskId === "string" ? s.taskId : null,
+            escapes: Math.max(0, Math.round(Number(s.escapes) || 0)),
+            calzini: clampCalzini(s.calzini)
+          }))
+        : [];
+      return {
+        version: 1,
+        createdAt: typeof parsed.createdAt === "string" ? parsed.createdAt : base.createdAt,
+        settings: cleanSettings(parsed.settings),
+        tasks,
+        currentTaskId: tasks.some((t) => t.id === parsed.currentTaskId) ? parsed.currentTaskId : null,
+        sessions,
+        todos: Array.isArray(parsed.todos)
+          ? parsed.todos.filter(isTodo).map((t) => ({
+              id: typeof t.id === "string" ? t.id : newId(),
+              testo: String(t.testo).slice(0, 80),
+              fatto: Boolean(t.fatto)
+            }))
+          : [],
+        running: parsed.running && typeof parsed.running === "object" ? parsed.running : null
+      };
+    } catch (err) {
+      console.warn("Dati salvati illeggibili: riparto da zero.", err);
+      return blank();
+    }
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+      available = true;
+      return true;
+    } catch (err) {
+      available = false;
+      console.error("Impossibile salvare:", err);
+      return false;
+    }
+  }
+
+  function probe() {
+    try {
+      const t = KEY + ".probe";
+      localStorage.setItem(t, "1");
+      localStorage.removeItem(t);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function newId() {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+    return "s" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  /* ---------------------------------------------------------- impostazioni */
+
+  const settings = () => state.settings;
+
+  function setSetting(key, value) {
+    if (!(key in DEFAULT_SETTINGS)) return false;
+    if (key in LIMITS) state.settings[key] = clampNum(value, LIMITS[key], DEFAULT_SETTINGS[key]);
+    else if (key === "outfit") state.settings.outfit = cleanSettings({ outfit: value }).outfit;
+    else if (key === "decorazioni") state.settings.decorazioni = cleanSettings({ decorazioni: value }).decorazioni;
+    else if (key === "distractors") state.settings.distractors = cleanSettings({ distractors: value }).distractors;
+    else if (typeof DEFAULT_SETTINGS[key] === "boolean") state.settings[key] = Boolean(value);
+    else state.settings[key] = cleanSettings(Object.assign({}, state.settings, { [key]: value }))[key];
+    save();
+    return true;
+  }
+
+  function durationFor(phase) {
+    const s = state.settings;
+    if (phase === "short") return s.shortMin;
+    if (phase === "long") return s.longMin;
+    return s.focusMin;
+  }
+
+  /* -------------------------------------------------------------- attività */
+
+  const tasks = () => state.tasks.filter((t) => !t.archived);
+
+  function addTask(name) {
+    const clean = String(name || "").trim().replace(/\s+/g, " ");
+    if (clean.length < 2) return { ok: false, error: "Il nome dell'attività deve avere almeno 2 caratteri." };
+    if (clean.length > 40) return { ok: false, error: "Massimo 40 caratteri." };
+    if (state.tasks.some((t) => !t.archived && t.name.toLowerCase() === clean.toLowerCase())) {
+      return { ok: false, error: "Questa attività c'è già." };
+    }
+    const task = {
+      id: newId(),
+      name: clean,
+      color: FILATI[state.tasks.length % FILATI.length],
+      archived: false,
+      createdAt: new Date().toISOString()
+    };
+    state.tasks.push(task);
+    state.currentTaskId = task.id;
+    save();
+    return { ok: true, value: task };
+  }
+
+  function archiveTask(id) {
+    const t = state.tasks.find((x) => x.id === id);
+    if (!t) return false;
+    t.archived = true;
+    if (state.currentTaskId === id) state.currentTaskId = null;
+    save();
+    return true;
+  }
+
+  function getTask(id) {
+    return state.tasks.find((t) => t.id === id) || null;
+  }
+
+  function currentTaskId() {
+    return state.currentTaskId;
+  }
+
+  function setCurrentTask(id) {
+    state.currentTaskId = id && state.tasks.some((t) => t.id === id) ? id : null;
+    save();
+  }
+
+  /* -------------------------------------------------------------- sessioni */
+
+  const sessions = () => state.sessions;
+
+  function addSession(data) {
+    const session = {
+      id: newId(),
+      startedAt: data.startedAt,
+      endedAt: data.endedAt || new Date().toISOString(),
+      minutes: Math.max(0, Math.round(Number(data.minutes) || 0)),
+      kind: data.kind || "focus",
+      completed: Boolean(data.completed),
+      taskId: data.taskId || null,
+      escapes: Math.max(0, Math.round(Number(data.escapes) || 0)),
+      calzini: clampCalzini(data.calzini)
+    };
+    state.sessions.push(session);
+    save();
+    return session;
+  }
+
+  /**
+   * I calzini sono le sessioni di concentrazione finite, dalla più vecchia.
+   * Una sessione ne vale uno; con il Pro attivo al momento in cui è finita ne
+   * vale due, e il secondo resta segnato come doppio — il cassetto deve poter
+   * dire quanto lavoro c'è dietro, non solo quanti calzini ci sono.
+   */
+  function socks() {
+    const out = [];
+    const complete = state.sessions
+      .filter((s) => s.kind === "focus" && s.completed)
+      .sort((a, b) => String(a.endedAt).localeCompare(String(b.endedAt)));
+    for (const s of complete) {
+      const quanti = clampCalzini(s.calzini);
+      for (let k = 0; k < quanti; k++) {
+        out.push({
+          index: out.length,
+          id: k === 0 ? s.id : `${s.id}#${k + 1}`,
+          session: s,
+          doppio: k > 0,
+          color: colorOf(s, out.length),
+          paio: Math.floor(out.length / CALZINI_PER_PAIO)
+        });
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Lo stato della casa, ricavato dalle paia: `fatte` sono i pezzi già pagati,
+   * `prossimo` quello a cui si sta lavorando (null se la casa è finita).
+   */
+  function casa() {
+    const paia = Math.floor(socks().length / CALZINI_PER_PAIO);
+    const fatte = CASA.filter((f) => paia >= f.paia);
+    const prossimo = CASA.find((f) => paia < f.paia) || null;
+    const precedente = fatte.length ? fatte[fatte.length - 1].paia : 0;
+    return {
+      paia,
+      fase: fatte.length,
+      fatte,
+      prossimo,
+      mancano: prossimo ? prossimo.paia - paia : 0,
+      // quanto manca al pezzo dopo, da 0 a 1, per la barra
+      avanzamento: prossimo ? (paia - precedente) / (prossimo.paia - precedente) : 1,
+      finita: !prossimo
+    };
+  }
+
+  function colorOf(session, i) {
+    const task = session.taskId ? getTask(session.taskId) : null;
+    return task ? task.color : FILATI[i % FILATI.length];
+  }
+
+  /* ---------------------------------------------------- timer in sospeso */
+
+  const running = () => state.running;
+
+  function setRunning(value) {
+    state.running = value || null;
+    save();
+  }
+
+  /* --------------------------------------------------------- cose da fare */
+
+  const todos = () => state.todos;
+
+  function addTodo(testo) {
+    const pulito = String(testo || "").trim().replace(/\s+/g, " ");
+    if (pulito.length < 2) return { ok: false, error: "Scrivi almeno due caratteri." };
+    if (state.todos.length >= 50) return { ok: false, error: "Cinquanta cose da fare bastano." };
+    const todo = { id: newId(), testo: pulito.slice(0, 80), fatto: false };
+    state.todos.push(todo);
+    save();
+    return { ok: true, value: todo };
+  }
+
+  function toggleTodo(id) {
+    const t = state.todos.find((x) => x.id === id);
+    if (!t) return false;
+    t.fatto = !t.fatto;
+    save();
+    return true;
+  }
+
+  function deleteTodo(id) {
+    const i = state.todos.findIndex((x) => x.id === id);
+    if (i === -1) return false;
+    state.todos.splice(i, 1);
+    save();
+    return true;
+  }
+
+  /** Toglie di mezzo le cose fatte: la lista deve restare quella di adesso. */
+  function pulisciTodo() {
+    const prima = state.todos.length;
+    state.todos = state.todos.filter((t) => !t.fatto);
+    save();
+    return prima - state.todos.length;
+  }
+
+  /* ------------------------------------------------------ esporta/importa */
+
+  function exportAll() {
+    return {
+      app: "calzino",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      settings: state.settings,
+      tasks: state.tasks,
+      todos: state.todos,
+      sessions: state.sessions
+    };
+  }
+
+  /**
+   * Aggiunge sessioni e attività di un file esportato. Quelle già presenti
+   * (stesso id) vengono saltate: reimportare due volte non crea doppioni.
+   */
+  function importAll(payload) {
+    if (!payload || typeof payload !== "object" || !Array.isArray(payload.sessions)) {
+      return { ok: false, error: "Il file non sembra un export di Calzino." };
+    }
+    const knownTasks = new Set(state.tasks.map((t) => t.id));
+    if (Array.isArray(payload.tasks)) {
+      for (const t of payload.tasks) {
+        if (!isTask(t) || knownTasks.has(t.id)) continue;
+        knownTasks.add(t.id);
+        state.tasks.push({
+          id: t.id,
+          name: String(t.name).slice(0, 40),
+          color: typeof t.color === "string" ? t.color : FILATI[state.tasks.length % FILATI.length],
+          archived: Boolean(t.archived),
+          createdAt: t.createdAt || new Date().toISOString()
+        });
+      }
+    }
+    const known = new Set(state.sessions.map((s) => s.id));
+    let added = 0;
+    let skipped = 0;
+    for (const raw of payload.sessions) {
+      if (!isSession(raw) || (raw.id && known.has(raw.id))) { skipped++; continue; }
+      const s = Object.assign({}, raw, { id: raw.id || newId() });
+      known.add(s.id);
+      state.sessions.push(s);
+      added++;
+    }
+    if (Array.isArray(payload.todos)) {
+      const noti = new Set(state.todos.map((t) => t.id));
+      for (const t of payload.todos) {
+        if (!isTodo(t) || (t.id && noti.has(t.id))) continue;
+        state.todos.push({ id: t.id || newId(), testo: String(t.testo).slice(0, 80), fatto: Boolean(t.fatto) });
+      }
+    }
+    if (payload.settings) state.settings = cleanSettings(Object.assign({}, state.settings, payload.settings));
+    save();
+    return { ok: true, added, skipped };
+  }
+
+  function wipe() {
+    state = blank();
+    save();
+  }
+
+  return {
+    PALETTES,
+    PELLI,
+    DECORAZIONI,
+    CASA,
+    CASA_FINITA,
+    ACCESSORI,
+    FANTASIE,
+    FILATI,
+    CALZINI_PER_PAIO,
+    DEFAULT_SETTINGS,
+    isStorageAvailable: () => available && probe(),
+    settings,
+    setSetting,
+    durationFor,
+    tasks,
+    allTasks: () => state.tasks,
+    addTask,
+    archiveTask,
+    getTask,
+    currentTaskId,
+    setCurrentTask,
+    sessions,
+    addSession,
+    todos,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+    pulisciTodo,
+    socks,
+    casa,
+    running,
+    setRunning,
+    exportAll,
+    importAll,
+    wipe
+  };
+})();
+
+
+/**
+ * Calzino — la licenza Pro.
+ *
+ * Due euro al mese per: calzini ×2, sessioni libere fino a sei ore invece di
+ * due, e le decorazioni in più (tavolozze, accessori di Mora, fantasie dei
+ * calzini). Tutto il resto — timer, casa, cassetto, statistiche, export —
+ * resta gratis e non chiede niente a nessuno.
+ *
+ * ONESTÀ SUL LUCCHETTO. Questo è un sito statico: non c'è un server che possa
+ * dire «questa persona ha pagato». Il controllo del codice avviene qui, nel
+ * browser, con il sale scritto due righe più sotto: chi apre il sorgente può
+ * fabbricarsi un codice in un minuto. È una porta chiusa, non una cassaforte —
+ * tiene fuori la distrazione, non chi ci tiene a entrare.
+ *
+ * Per un lucchetto vero serve un server che verifichi l'abbonamento presso chi
+ * incassa (Stripe e simili). Il punto da sostituire è uno solo: `verifica()`.
+ * Diventa una `fetch` al tuo server, il resto del file non cambia.
+ */
+const Licenza = (() => {
+  "use strict";
+
+  const KEY = "calzino.licenza.v1";
+
+  /** Cambiandolo, i codici già distribuiti smettono di funzionare. */
+  const SALE = "mora-sferruzza-2026";
+
+  const PREZZO = "2 € al mese";
+
+  /** Quanto può durare una sessione libera: due ore, sei con l'abbonamento. */
+  const ORE_LIBERA = 2;
+  const ORE_LIBERA_PRO = 6;
+  const GIORNI_ABBONAMENTO = 31;
+  const GIORNI_PROVA = 7;
+
+  /** Il link del pagamento (Stripe Payment Link, PayPal, quello che usi).
+      Finché resta vuoto, l'app lo dice invece di fingere un bottone che funziona. */
+  const PAGAMENTO_URL = "";
+
+  let stato = carica();
+
+  function vuoto() {
+    return { codice: null, scadenza: null, provaUsata: false, attivataIl: null };
+  }
+
+  function carica() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return vuoto();
+      const p = JSON.parse(raw);
+      if (!p || typeof p !== "object") return vuoto();
+      return {
+        codice: typeof p.codice === "string" ? p.codice : null,
+        scadenza: typeof p.scadenza === "string" ? p.scadenza : null,
+        provaUsata: Boolean(p.provaUsata),
+        attivataIl: typeof p.attivataIl === "string" ? p.attivataIl : null
+      };
+    } catch (err) {
+      return vuoto();
+    }
+  }
+
+  function salva() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(stato));
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  /* ------------------------------------------------------------- il codice */
+
+  /** FNV-1a: corta, senza dipendenze, uguale in tools/genera-codice.mjs. */
+  function impronta(testo) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < testo.length; i++) {
+      h ^= testo.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h >>> 0;
+  }
+
+  const pulisci = (codice) => String(codice || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+  /**
+   * Un codice è `CALZ-AAAA-BBBB-CCCC`: otto caratteri di contenuto (i primi
+   * cinque sono il giorno di scadenza in base 36) più quattro di controllo.
+   */
+  function leggi(codice) {
+    const c = pulisci(codice);
+    if (!c.startsWith("CALZ") || c.length !== 16) return null;
+    const corpo = c.slice(4, 12);
+    const controllo = c.slice(12);
+    const atteso = impronta(corpo + SALE).toString(36).toUpperCase().padStart(7, "0").slice(-4);
+    if (controllo !== atteso) return null;
+    const giorno = parseInt(corpo.slice(0, 5), 36);
+    if (!Number.isFinite(giorno)) return null;
+    const scadenza = new Date(giorno * 86400000);
+    // Un codice buono per dieci anni non è un codice: è un errore di stampa.
+    if (scadenza.getFullYear() > new Date().getFullYear() + 5) return null;
+    return { scadenza, formattato: `CALZ-${corpo.slice(0, 4)}-${corpo.slice(4)}-${controllo}` };
+  }
+
+  /**
+   * QUI si innesta il controllo vero. Oggi guarda solo la forma del codice;
+   * domani può diventare:
+   *
+   *   const r = await fetch("https://tuo-server/licenza", {...});
+   *
+   * La firma resta questa — una promessa che risolve {ok, scadenza} — quindi
+   * l'interfaccia non si accorge del cambio.
+   */
+  async function verifica(codice) {
+    const letto = leggi(codice);
+    if (!letto) return { ok: false, error: "Codice non valido. Controlla di averlo copiato per intero." };
+    if (letto.scadenza <= new Date()) return { ok: false, error: "Questo codice è scaduto." };
+    return { ok: true, scadenza: letto.scadenza, codice: letto.formattato };
+  }
+
+  /* ------------------------------------------------------------- lo stato */
+
+  function scadenza() {
+    return stato.scadenza ? new Date(stato.scadenza) : null;
+  }
+
+  function attiva() {
+    const s = scadenza();
+    return Boolean(s && s > new Date());
+  }
+
+  const inProva = () => attiva() && !stato.codice;
+
+  /** I giorni che restano, arrotondati al più vicino: i codici scadono a
+      mezzanotte, e con l'arrotondamento per eccesso un mese ne mostrava 32. */
+  function giorniRimasti() {
+    const s = scadenza();
+    if (!s) return 0;
+    return Math.max(0, Math.round((s - new Date()) / 86400000));
+  }
+
+  /** L'unica cosa che tocca i dati: quanti calzini vale una sessione finita. */
+  const moltiplicatore = () => (attiva() ? 2 : 1);
+
+  /** Il tetto della sessione libera, in millisecondi. */
+  const limiteLibera = () => (attiva() ? ORE_LIBERA_PRO : ORE_LIBERA) * 3600000;
+
+  const puoiProvare = () => !stato.provaUsata && !attiva();
+
+  function avviaProva() {
+    if (!puoiProvare()) return { ok: false, error: "La prova è già stata usata." };
+    const fine = new Date(Date.now() + GIORNI_PROVA * 86400000);
+    stato.scadenza = fine.toISOString();
+    stato.provaUsata = true;
+    stato.attivataIl = new Date().toISOString();
+    stato.codice = null;
+    salva();
+    return { ok: true, scadenza: fine };
+  }
+
+  async function riscatta(codice) {
+    const esito = await verifica(codice);
+    if (!esito.ok) return esito;
+    stato.codice = esito.codice;
+    stato.scadenza = esito.scadenza.toISOString();
+    stato.attivataIl = new Date().toISOString();
+    salva();
+    return { ok: true, scadenza: esito.scadenza };
+  }
+
+  /** Toglie la licenza da questo dispositivo: il codice resta valido altrove. */
+  function rimuovi() {
+    stato.codice = null;
+    stato.scadenza = null;
+    stato.attivataIl = null;
+    salva();
+  }
+
+  return {
+    PREZZO,
+    PAGAMENTO_URL,
+    ORE_LIBERA,
+    ORE_LIBERA_PRO,
+    limiteLibera,
+    GIORNI_PROVA,
+    GIORNI_ABBONAMENTO,
+    attiva,
+    inProva,
+    scadenza,
+    giorniRimasti,
+    moltiplicatore,
+    puoiProvare,
+    avviaProva,
+    riscatta,
+    rimuovi,
+    codice: () => stato.codice
+  };
+})();
+
+
+/**
+ * Calzino — il motore del timer.
+ *
+ * Due scelte che tengono in piedi tutto il resto:
+ *
+ * 1. il tempo si misura con un istante di fine (`endsAt`), non contando i tick:
+ *    così il conto resta giusto anche se la scheda va in sottofondo, dove i
+ *    browser rallentano i timer, o se il telefono si blocca;
+ * 2. lo stato vive in localStorage a ogni cambio, mai a ogni tick: ricaricando
+ *    la pagina la sessione riprende dal punto in cui era.
+ */
+const Timer = (() => {
+  "use strict";
+
+  const TICK_MS = 250;
+
+  /** Sotto i cinque minuti una sessione libera non fa calzino: è un'occhiata,
+      non del lavoro. Sopra il tetto si chiude da sola. */
+  const MINIMO_LIBERA = 5 * 60000;
+
+  const listeners = new Set();
+  let ticker = null;
+  let audioCtx = null;
+  let wakeLock = null;
+
+  let s = {
+    modo: "timer",         // timer (conto alla rovescia) | libera (cronometro)
+    phase: "focus",        // focus | short | long
+    status: "idle",        // idle | running | paused
+    endsAt: 0,             // epoch ms, valido solo se status === "running"
+    remainingMs: 0,        // valido quando idle o paused
+    startedAt: null,       // ISO, inizio della fase corrente
+    taskId: null,
+    cycle: 0,              // sessioni di concentrazione fatte in questo giro
+    escapes: 0             // volte che si è usciti dalla scheda in questa fase
+  };
+
+  /** Il tetto di una sessione libera: due ore, sei con il Pro. */
+  function limiteLibera() {
+    return typeof Licenza !== "undefined" ? Licenza.limiteLibera() : 2 * 3600000;
+  }
+
+  /** Quanto dura la fase corrente. In libera il conto sale, ma il tetto resta
+      un conto alla rovescia come gli altri: cambia solo come lo si mostra. */
+  function totaleMs() {
+    if (s.modo === "libera" && s.phase === "focus") return limiteLibera();
+    return Store.durationFor(s.phase) * 60000;
+  }
+
+  /* ------------------------------------------------------------ ripristino */
+
+  function boot() {
+    s.modo = Store.settings().modo === "libera" ? "libera" : "timer";
+    const saved = Store.running();
+    if (saved && typeof saved === "object" && ["focus", "short", "long"].includes(saved.phase)) {
+      s = Object.assign({}, s, saved);
+      if (s.status === "running") {
+        // Il tempo passato a pagina chiusa conta: è tempo vero.
+        if (Date.now() >= s.endsAt) {
+          complete(true);
+          return;
+        }
+        startTicker();
+      }
+    } else {
+      s.remainingMs = totaleMs();
+    }
+    emit();
+  }
+
+  function persist() {
+    Store.setRunning(s.status === "idle" && s.escapes === 0 && s.cycle === 0 ? null : Object.assign({}, s));
+  }
+
+  /* ------------------------------------------------------------- notifiche */
+
+  function on(fn) {
+    listeners.add(fn);
+    return () => listeners.delete(fn);
+  }
+
+  function emit(event) {
+    const snap = snapshot();
+    for (const fn of listeners) {
+      try { fn(snap, event || null); } catch (err) { console.error(err); }
+    }
+  }
+
+  function snapshot() {
+    return {
+      phase: s.phase,
+      status: s.status,
+      taskId: s.taskId,
+      cycle: s.cycle,
+      escapes: s.escapes,
+      modo: s.modo,
+      totalMs: totaleMs(),
+      minimoMs: MINIMO_LIBERA,
+      remainingMs: s.status === "running" ? Math.max(0, s.endsAt - Date.now()) : Math.max(0, s.remainingMs)
+    };
+  }
+
+  /* ---------------------------------------------------------------- motore */
+
+  function startTicker() {
+    stopTicker();
+    ticker = setInterval(() => {
+      if (s.status !== "running") return stopTicker();
+      if (Date.now() >= s.endsAt) complete(true);
+      else emit();
+    }, TICK_MS);
+  }
+
+  function stopTicker() {
+    if (ticker) clearInterval(ticker);
+    ticker = null;
+  }
+
+  function setPhase(phase, { keepCycle = true } = {}) {
+    if (!["focus", "short", "long"].includes(phase)) return;
+    // Cambiare fase a sessione avviata non deve far sparire i minuti già
+    // fatti: `reset` li mette nel registro come sessione interrotta.
+    if (s.startedAt) reset();
+    stopTicker();
+    releaseWakeLock();
+    // Le pause appartengono al conto alla rovescia: sceglierne una esce dal
+    // modo libero invece di lasciare uno stato a metà.
+    if (phase !== "focus" && s.modo === "libera") setModo("timer", { silenzioso: true });
+    s.phase = phase;
+    s.status = "idle";
+    s.remainingMs = totaleMs();
+    s.startedAt = null;
+    s.escapes = 0;
+    if (!keepCycle) s.cycle = 0;
+    persist();
+    emit({ type: "phase" });
+  }
+
+  /** Passa fra conto alla rovescia e cronometro. Il modo resta scritto nelle
+      impostazioni: riaprendo l'app ci si ritrova dove si era. */
+  function setModo(modo, { silenzioso = false } = {}) {
+    const nuovo = modo === "libera" ? "libera" : "timer";
+    if (nuovo === s.modo) return;
+    if (s.startedAt) reset();
+    stopTicker();
+    releaseWakeLock();
+    s.modo = nuovo;
+    s.phase = "focus";
+    s.status = "idle";
+    s.startedAt = null;
+    s.escapes = 0;
+    s.remainingMs = totaleMs();
+    Store.setSetting("modo", nuovo);
+    persist();
+    if (!silenzioso) emit({ type: "modo" });
+  }
+
+  function start() {
+    if (s.status === "running") return;
+    const total = totaleMs();
+    if (s.status === "idle" || s.remainingMs <= 0) {
+      s.remainingMs = total;
+      s.startedAt = new Date().toISOString();
+      s.escapes = 0;
+      s.taskId = Store.currentTaskId();
+    }
+    s.endsAt = Date.now() + s.remainingMs;
+    s.status = "running";
+    persist();
+    startTicker();
+    requestWakeLock();
+    unlockAudio();
+    emit({ type: "start" });
+  }
+
+  function pause() {
+    if (s.status !== "running") return;
+    s.remainingMs = Math.max(0, s.endsAt - Date.now());
+    s.status = "paused";
+    stopTicker();
+    releaseWakeLock();
+    persist();
+    emit({ type: "pause" });
+  }
+
+  function toggle() {
+    if (s.status === "running") pause();
+    else start();
+  }
+
+  /** Azzera la fase corrente. Se c'era del lavoro fatto, lo registra come sessione mozza. */
+  function reset() {
+    const had = s.startedAt && s.phase === "focus";
+    const done = elapsedMinutes();
+    stopTicker();
+    releaseWakeLock();
+    if (had && done >= 1) {
+      Store.addSession({
+        startedAt: s.startedAt,
+        endedAt: new Date().toISOString(),
+        minutes: done,
+        kind: "focus",
+        completed: false,
+        taskId: s.taskId,
+        escapes: s.escapes
+      });
+    }
+    s.status = "idle";
+    s.startedAt = null;
+    s.escapes = 0;
+    s.remainingMs = totaleMs();
+    persist();
+    emit({ type: "reset", partial: had && done >= 1 ? done : 0 });
+  }
+
+  /** Passa alla fase successiva senza aspettare: niente calzino, ma i minuti fatti restano. */
+  function skip() {
+    complete(false);
+  }
+
+  /** Il Pro raddoppia i calzini; senza licenza (o senza il modulo) resta uno. */
+  function moltiplicatore() {
+    return typeof Licenza !== "undefined" ? Licenza.moltiplicatore() : 1;
+  }
+
+  /** Chiude a mano una sessione libera: il calzino c'è se si è arrivati al
+      minimo, altrimenti restano solo i minuti nel registro. */
+  function chiudiLibera() {
+    if (s.modo !== "libera" || !s.startedAt) return;
+    complete(elapsedMs() >= MINIMO_LIBERA);
+  }
+
+  function elapsedMs() {
+    if (!s.startedAt) return 0;
+    const left = s.status === "running" ? Math.max(0, s.endsAt - Date.now()) : Math.max(0, s.remainingMs);
+    return Math.max(0, totaleMs() - left);
+  }
+
+  function elapsedMinutes() {
+    if (!s.startedAt) return 0;
+    const total = totaleMs();
+    const left = s.status === "running" ? Math.max(0, s.endsAt - Date.now()) : Math.max(0, s.remainingMs);
+    return Math.round((total - left) / 60000);
+  }
+
+  /**
+   * Chiude la fase corrente. `natural` distingue il timer arrivato a zero
+   * (calzino finito) dal salto manuale (minuti registrati, nessun calzino).
+   */
+  function complete(natural) {
+    stopTicker();
+    releaseWakeLock();
+    const wasPhase = s.phase;
+    // In libera contano i minuti davvero passati, anche quando il tetto arriva
+    // da solo: la sessione è lunga quanto è stata, non quanto poteva essere.
+    const minutes = natural && s.modo !== "libera" ? Store.durationFor(wasPhase) : elapsedMinutes();
+    let session = null;
+
+    if (s.startedAt && minutes >= 1) {
+      session = Store.addSession({
+        startedAt: s.startedAt,
+        endedAt: new Date().toISOString(),
+        minutes,
+        kind: wasPhase,
+        completed: Boolean(natural),
+        taskId: s.taskId,
+        escapes: s.escapes,
+        // Il moltiplicatore si legge adesso e resta scritto nella sessione:
+        // un calzino guadagnato col Pro non sparisce quando il Pro scade.
+        calzini: natural && wasPhase === "focus" ? moltiplicatore() : 1
+      });
+    }
+
+    if (wasPhase === "focus" && natural && s.modo !== "libera") s.cycle += 1;
+
+    const next = s.modo === "libera" ? "focus" : nextPhase(wasPhase);
+    s.phase = next;
+    s.status = "idle";
+    s.startedAt = null;
+    s.escapes = 0;
+    s.remainingMs = totaleMs();
+    if (next === "focus" && wasPhase === "long") s.cycle = 0;
+    persist();
+
+    if (natural) {
+      chime(wasPhase === "focus");
+      notify(wasPhase);
+    }
+    emit({ type: "complete", natural: Boolean(natural), phase: wasPhase, session });
+
+    // Nel modo libero non c'è una fase dopo da far partire: si riparte a mano.
+    const settings = Store.settings();
+    const auto = next === "focus" ? settings.autoStartFocus : settings.autoStartBreak;
+    if (natural && auto && s.modo !== "libera") start();
+  }
+
+  function nextPhase(phase) {
+    if (phase !== "focus") return "focus";
+    const settings = Store.settings();
+    return (s.cycle + 1) % settings.cycles === 0 ? "long" : "short";
+  }
+
+  /**
+   * Uscita dalla scheda durante la concentrazione. In modalità severa la fase
+   * salta: il calzino si disfa e i minuti fatti restano registrati come mozzi.
+   */
+  function noteEscape() {
+    if (s.status !== "running" || s.phase !== "focus") return null;
+    s.escapes += 1;
+    const strict = Store.settings().strict;
+    const result = { escapes: s.escapes, strict, minutes: elapsedMinutes() };
+    if (strict) {
+      reset();
+      emit({ type: "disfatto" });
+    } else {
+      persist();
+      emit({ type: "escape" });
+    }
+    return result;
+  }
+
+  /* ------------------------------------------------------- suono e avvisi */
+
+  function unlockAudio() {
+    if (!Store.settings().sound) return;
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      if (!audioCtx) audioCtx = new Ctx();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    } catch (err) {
+      audioCtx = null;
+    }
+  }
+
+  /** Tre note sintetizzate: nessun file audio da scaricare, funziona offline. */
+  function chime(bright) {
+    if (!Store.settings().sound || !audioCtx) return;
+    const notes = bright ? [523.25, 659.25, 783.99] : [440, 349.23];
+    notes.forEach((freq, i) => {
+      const t0 = audioCtx.currentTime + i * 0.16;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.22, t0 + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.55);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(t0);
+      osc.stop(t0 + 0.6);
+    });
+  }
+
+  function notify(phase) {
+    if (!Store.settings().notify) return;
+    if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+    const testo = phase === "focus"
+      ? "Calzino finito. Adesso stacca davvero."
+      : "Pausa finita: Mora ha ripreso i ferri.";
+    try {
+      new Notification("Calzino", { body: testo, icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNhbHppbm8iPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTEyIiBmaWxsPSIjM0IzMTI4Ii8+CiAgPHBhdGggZD0iTTIxNCA5Nmg3MmE0MCA0MCAwIDAgMSA0MCA0MHYyMzhhNDAgNDAgMCAwIDEtNDAgNDBIMTUwYTY2IDY2IDAgMCAxIDAtMTMyaDMyVjEzNmE0MCA0MCAwIDAgMSAzMi00MHoiCiAgICAgICAgZmlsbD0iI0U4QTg3QyIvPgogIDxwYXRoIGQ9Ik0xOTYgMTYwaDEwOCIgc3Ryb2tlPSIjM0IzMTI4IiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMTk2IDIxMGgxMDhNMTk2IDI1OGgxMDgiIHN0cm9rZT0iIzhGQjk5NiIgc3Ryb2tlLXdpZHRoPSIxNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtZGFzaGFycmF5PSIyNiAyMiIvPgo8L3N2Zz4K", tag: "calzino" });
+    } catch (err) {
+      /* alcuni browser vietano le notifiche fuori dai service worker: pazienza */
+    }
+  }
+
+  /* ------------------------------------------------------------- schermo */
+
+  async function requestWakeLock() {
+    if (!Store.settings().wakeLock || !("wakeLock" in navigator)) return;
+    try {
+      wakeLock = await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release", () => { wakeLock = null; });
+    } catch (err) {
+      wakeLock = null;
+    }
+  }
+
+  function releaseWakeLock() {
+    if (wakeLock) {
+      try { wakeLock.release(); } catch (err) { /* già rilasciato */ }
+      wakeLock = null;
+    }
+  }
+
+  /** Rientrando sulla scheda il lock è perso: se il timer va, si richiede. */
+  function refreshWakeLock() {
+    if (s.status === "running" && !wakeLock) requestWakeLock();
+  }
+
+  /** Cambiare le durate da Impostazioni deve aggiornare un timer fermo. */
+  function syncIdleDuration() {
+    if (s.status !== "idle") return;
+    s.remainingMs = totaleMs();
+    emit();
+  }
+
+  return {
+    MINIMO_LIBERA,
+    boot, on, snapshot, setPhase, setModo, start, pause, toggle, reset, skip,
+    chiudiLibera, limiteLibera, noteEscape, refreshWakeLock, syncIdleDuration, unlockAudio
+  };
+})();
+
+
+/**
+ * Calzino — interfaccia.
+ *
+ * Nessuna dipendenza e nessuna compilazione: si modifica il file e si ricarica
+ * la pagina. Il timer sta in timer.js, i dati in storage.js; qui c'è solo il
+ * disegno di quello che i due dicono.
+ */
+(() => {
+  "use strict";
+
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+  const PHASE_LABEL = { focus: "Concentrazione", short: "Pausa breve", long: "Pausa lunga" };
+
+  /* Sagoma del calzino: un solo tracciato, così il contorno non ha cuciture
+     interne quando lo si riempie di colore. */
+  const SAGOMA = "M43 8h14a9 9 0 0 1 9 9v56a9 9 0 0 1-9 9h-30a15 15 0 0 1 0-30h7v-35a9 9 0 0 1 9-9z";
+
+
+  /* Traguardi: si accendono da soli guardando le sessioni. Non c'è nulla da
+     comprare, nulla da riscattare e nessun premio che vada più veloce. */
+  const TRAGUARDI = [
+    { id: "primo",     nome: "Primo calzino",     detto: "Una sessione portata a termine",   test: (d) => d.calzini >= 1 },
+    { id: "paio",      nome: "Primo paio",        detto: "Due calzini uguali nel cassetto",  test: (d) => d.paia >= 1 },
+    { id: "dieci",     nome: "Dieci calzini",     detto: "Dieci sessioni intere",            test: (d) => d.calzini >= 10 },
+    { id: "cassetto",  nome: "Cassetto pieno",    detto: "Sei paia messe via",               test: (d) => d.paia >= 6 },
+    { id: "cinqueore", nome: "Cinque ore",        detto: "300 minuti di concentrazione",     test: (d) => d.minuti >= 300 },
+    { id: "ventiore",  nome: "Venti ore",         detto: "1200 minuti in totale",            test: (d) => d.minuti >= 1200 },
+    { id: "tregiorni", nome: "Tre giorni di fila",detto: "Striscia di 3 giorni",             test: (d) => d.striscia >= 3 },
+    { id: "settimana", nome: "Sette giorni",      detto: "Striscia di 7 giorni",             test: (d) => d.striscia >= 7 },
+    { id: "lunga",     nome: "Fiato lungo",       detto: "Una sessione da almeno 50 minuti", test: (d) => d.piuLunga >= 50 },
+    { id: "alba",      nome: "All'alba",          detto: "Un calzino finito prima delle 9",  test: (d) => d.alba },
+    { id: "notte",     nome: "A notte fonda",     detto: "Un calzino finito dopo le 22",     test: (d) => d.notte },
+    { id: "pulite",    nome: "Cinque puliti",     detto: "5 calzini di fila senza uscire",   test: (d) => d.pulite >= 5 },
+    { id: "varie",     nome: "Tre mestieri",      detto: "Sessioni su tre attività diverse", test: (d) => d.attivita >= 3 }
+  ];
+
+  /** Quanto si aspetta prima di contare un'uscita: sotto, è un rimbalzo. */
+  const ATTESA_FUGA = 500;
+
+  /** L'ultimo pezzo di casa già annunciato: serve a festeggiare una volta sola. */
+  let faseCasa = -1;
+
+  let lastEscapeInfo = null;
+  let escapeTimer = null;
+  let toastTimer = null;
+
+  /* ------------------------------------------------------------- utilità */
+
+  const pad = (n) => String(n).padStart(2, "0");
+
+  /**
+   * Il conto alla rovescia arrotonda per eccesso (a 25:00 esatti si legge
+   * 25:00, e l'ultimo secondo esiste); il cronometro per difetto, altrimenti
+   * segnerebbe 00:01 prima ancora di aver contato un secondo.
+   */
+  function mmss(ms, perDifetto = false) {
+    const total = Math.max(0, perDifetto ? Math.floor(ms / 1000) : Math.ceil(ms / 1000));
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const sec = total % 60;
+    return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
+  }
+
+  function oreMinuti(min) {
+    if (min < 60) return `${min} min`;
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    return m ? `${h} h ${pad(m)}` : `${h} h`;
+  }
+
+  const dayKey = (iso) => {
+    const d = new Date(iso);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+
+  const dataBreve = (d) => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}`;
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function toast(text) {
+    const el = $("#toast");
+    el.textContent = text;
+    el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.hidden = true; }, 3200);
+  }
+
+  /* --------------------------------------------------------- tema e colori */
+
+  /** Vale per tavolozze, accessori e fantasie: quelle segnate `pro` si vedono
+      solo con l'abbonamento attivo. */
+  const sbloccato = (voce) => Boolean(voce) && (!voce.pro || Licenza.attiva());
+
+  /** La tavolozza scelta resta scritta anche se il Pro scade: qui si sceglie
+      solo che cosa mostrare, così quando rinnovi ritrovi le tue cose. */
+  function palettaInUso() {
+    const scelta = Store.PALETTES.find((p) => p.id === Store.settings().palette);
+    return sbloccato(scelta) ? scelta : Store.PALETTES[0];
+  }
+
+  function fantasiaInUso() {
+    const scelta = Store.FANTASIE.find((f) => f.id === Store.settings().fantasia);
+    return sbloccato(scelta) ? scelta.id : "tinta";
+  }
+
+  function applyLook() {
+    const s = Store.settings();
+    const root = document.documentElement;
+    const pal = palettaInUso();
+    root.dataset.palette = pal.id;
+    if (s.theme === "auto") root.removeAttribute("data-theme");
+    else root.dataset.theme = s.theme;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", pal.scuro);
+    const scene = $("#scene");
+    for (const acc of Store.ACCESSORI) {
+      scene.classList.toggle("has-" + acc.id, Boolean(s.outfit[acc.id]) && sbloccato(acc));
+    }
+  }
+
+  /**
+   * La stanza segue la casa: finché non ci sono i muri Mora lavora sul prato,
+   * poi la stessa scena diventa un interno e i mobili compaiono uno alla volta.
+   * Le decorazioni del Pro, invece, si accendono a mano.
+   */
+  function renderStanza() {
+    const fase = Store.casa().fase;
+    const dentro = fase >= 4;
+    const s = Store.settings();
+
+    $("#fuori").style.display = dentro ? "none" : "";
+    $("#dentro").style.display = dentro ? "" : "none";
+
+    for (const g of $$("#stanza .arredo")) {
+      if (g.dataset.fase) {
+        const suo = Number(g.dataset.fase) <= fase;
+        // Cartello e gradino sono roba da prato: sparire una volta dentro.
+        g.style.display = suo && !(dentro && g.classList.contains("fuori-solo")) ? "" : "none";
+      } else if (g.dataset.deco) {
+        const deco = Store.DECORAZIONI.find((d) => d.id === g.dataset.deco);
+        g.style.display = s.decorazioni[g.dataset.deco] && sbloccato(deco) ? "" : "none";
+      }
+    }
+
+    const pelle = Store.PELLI.find((x) => x.id === s.pelle);
+    $("#mora").dataset.pelle = sbloccato(pelle) ? pelle.id : "mora";
+
+    const calzini = Store.socks().length;
+    $("#conta-calzini").innerHTML =
+      `<svg viewBox="0 0 100 110" aria-hidden="true" style="width:11px;height:12px">` +
+      `<path d="${SAGOMA}" fill="var(--accent)"/></svg>` +
+      `<span>${calzini}</span>`;
+    $("#conta-calzini").setAttribute("aria-label", `${calzini} calzini`);
+  }
+
+  /* ------------------------------------------------------------- sezioni */
+
+  function showView(name) {
+    // La schermata del timer ha una pelle sua: scura, senza cornici, con la
+    // stanza che sfuma nel fondo. Le altre restano chiare come prima.
+    for (const v of ["timer", "casa", "statistiche", "impostazioni"]) {
+      document.body.classList.toggle("vista-" + v, v === name);
+    }
+    document.body.classList.toggle("schermo-timer", name === "timer" && Store.settings().notte);
+
+    $$(".tab").forEach((t) => {
+      const on = t.dataset.view === name;
+      t.classList.toggle("is-active", on);
+      t.setAttribute("aria-selected", String(on));
+    });
+    $$(".view").forEach((v) => { v.hidden = v.id !== "view-" + name; });
+    // La casa e il cassetto guardano gli stessi dati: si ridisegnano insieme,
+    // altrimenti la scheda mostra due verità diverse.
+    if (name === "casa") { renderCasa(); renderCassetto(); }
+    if (name === "statistiche") renderStats();
+    if (name === "impostazioni") renderSettings();
+  }
+
+  /* --------------------------------------------------------------- timer */
+
+  function renderTimer(snap) {
+    const libera = snap.modo === "libera";
+    const scene = $("#scene");
+    const isBreak = snap.phase !== "focus";
+    scene.dataset.state = snap.status === "running"
+      ? (isBreak ? "break" : "running")
+      : (snap.status === "paused" ? "paused" : (isBreak ? "break" : "idle"));
+
+    const trascorso = Math.max(0, snap.totalMs - snap.remainingMs);
+    const mostrato = mmss(libera ? trascorso : snap.remainingMs, libera);
+    $("#clock").textContent = mostrato;
+    document.title = snap.status === "running"
+      ? `${mostrato} · ${libera ? "Libera" : PHASE_LABEL[snap.phase]}`
+      : "Calzino";
+
+    // In libera il calzino è "assicurato" appena si superano i cinque minuti:
+    // da lì in poi la sessione vale, per quanto la si voglia tirare avanti.
+    const assicurato = trascorso >= snap.minimoMs;
+    const ore = Math.round(snap.totalMs / 3600000);
+    const minuti = Math.round(snap.totalMs / 60000);
+    if (libera) {
+      $("#clock-note").textContent = snap.status === "idle"
+        ? `Libera · minimo ${Math.round(snap.minimoMs / 60000)} min, tetto ${ore} ore`
+        : (assicurato
+          ? `Libera · calzino assicurato, tetto ${ore} ore`
+          : `Libera · ancora ${mmss(snap.minimoMs - trascorso)} perché conti`) +
+          (snap.escapes ? ` · ${snap.escapes} uscite` : "");
+    } else {
+      $("#clock-note").textContent = `${PHASE_LABEL[snap.phase]} · ${minuti} min` +
+        (snap.escapes && snap.phase === "focus" ? ` · ${snap.escapes} uscite` : "");
+    }
+
+    $$("#modo-seg .seg-btn").forEach((b) => b.classList.toggle("is-active", (b.dataset.modo === "libera") === libera));
+    $(".phase-switch").hidden = libera;
+    $("#btn-profonda").setAttribute("aria-pressed", String(Store.settings().profonda));
+    $("#cycles").hidden = libera;
+    $("#btn-skip").hidden = libera;
+    $("#btn-chiudi").hidden = !libera;
+    $("#btn-chiudi").disabled = snap.status === "idle";
+    $$(".phase").forEach((b) => b.classList.toggle("is-active", b.dataset.phase === snap.phase));
+
+    const start = $("#btn-start");
+    start.textContent = snap.status === "running" ? "Pausa" : (snap.status === "paused" ? "Riprendi" : "Avvia");
+
+    // pallini del giro
+    const cycles = Store.settings().cycles;
+    const done = snap.cycle % cycles;
+    $("#cycles").innerHTML = Array.from({ length: cycles }, (_, i) =>
+      `<span class="${i < done ? "done" : ""}"></span>`).join("");
+
+    // La lana sale dal fondo del calzino man mano che la sessione va avanti.
+    // La sagoma vive fra y=8 e y=90 del suo viewBox: il riempimento si muove
+    // dentro quella fascia, altrimenti il primo quarto di sessione non si vede.
+    // In libera il pieno arriva al minimo: dopo, il calzino c'è comunque.
+    const frazione = libera
+      ? Math.min(1, snap.minimoMs > 0 ? trascorso / snap.minimoMs : 0)
+      : (snap.totalMs > 0 ? 1 - snap.remainingMs / snap.totalMs : 0);
+    $("#calzino-lana").setAttribute("y", String(Math.round(90 - frazione * 82)));
+
+    $("#kbd-hint").innerHTML = "Barra spaziatrice: avvia o metti in pausa. <kbd>R</kbd> azzera, " +
+      (libera ? "<kbd>S</kbd> chiude il calzino." : "<kbd>S</kbd> salta.");
+
+    $("#top-sub").textContent = subtitle(snap);
+  }
+
+  function subtitle(snap) {
+    if (snap.status === "running") {
+      return snap.phase === "focus" ? "Mora sta sferruzzando." : "Pausa: Mora ha posato i ferri.";
+    }
+    if (snap.status === "paused") return "In pausa. I ferri sono fermi a mezz'aria.";
+    const oggi = statsForToday();
+    if (oggi.calzini > 0) return `Oggi: ${oggi.calzini} ${oggi.calzini === 1 ? "calzino" : "calzini"} · ${oreMinuti(oggi.minuti)}`;
+    return "Mora è pronta a sferruzzare.";
+  }
+
+  /* ------------------------------------------------------------ attività */
+
+  function renderTasks() {
+    const box = $("#task-chips");
+    const tasks = Store.tasks();
+    const corrente = Store.currentTaskId();
+    const pezzi = [`<button type="button" class="chip ${corrente ? "" : "is-active"}" data-task="">Senza attività</button>`];
+    for (const t of tasks) {
+      pezzi.push(
+        `<span class="chip ${t.id === corrente ? "is-active" : ""}">` +
+        `<i class="dot" style="background:${t.color}"></i>` +
+        `<button type="button" class="as-text" data-task="${t.id}">${esc(t.name)}</button>` +
+        `<button type="button" class="x" data-archive="${t.id}" aria-label="Togli ${esc(t.name)}">×</button>` +
+        `</span>`
+      );
+    }
+    box.innerHTML = pezzi.join("");
+  }
+
+  /* --------------------------------------------------------- cose da fare */
+
+  function renderTodo() {
+    const lista = Store.todos();
+    $("#todo-empty").hidden = lista.length > 0;
+    $("#btn-todo-pulisci").hidden = !lista.some((t) => t.fatto);
+    $("#todo").innerHTML = lista.map((t) =>
+      `<li class="${t.fatto ? "fatto" : ""}">` +
+      `<input type="checkbox" id="todo-${t.id}" data-todo="${t.id}" ${t.fatto ? "checked" : ""}>` +
+      `<span><label for="todo-${t.id}">${esc(t.testo)}</label></span>` +
+      `<button type="button" class="via" data-todo-via="${t.id}" aria-label="Togli ${esc(t.testo)}">×</button></li>`
+    ).join("");
+  }
+
+  /* ---------------------------------------------------------- statistiche */
+
+  function focusSessions() {
+    return Store.sessions().filter((s) => s.kind === "focus");
+  }
+
+  function statsForToday() {
+    const oggi = dayKey(new Date().toISOString());
+    const dellaGiornata = focusSessions().filter((s) => dayKey(s.endedAt) === oggi);
+    return {
+      minuti: dellaGiornata.reduce((a, s) => a + s.minutes, 0),
+      calzini: dellaGiornata.filter((s) => s.completed).length
+    };
+  }
+
+  function strisciaGiorni() {
+    const giorni = new Set(focusSessions().filter((s) => s.completed).map((s) => dayKey(s.endedAt)));
+    if (!giorni.size) return 0;
+    const cursore = new Date();
+    let n = 0;
+    // Se oggi non c'è ancora nulla, la striscia può reggersi su ieri.
+    if (!giorni.has(dayKey(cursore.toISOString()))) cursore.setDate(cursore.getDate() - 1);
+    while (giorni.has(dayKey(cursore.toISOString()))) {
+      n++;
+      cursore.setDate(cursore.getDate() - 1);
+    }
+    return n;
+  }
+
+  function datiTraguardi() {
+    const complete = focusSessions().filter((s) => s.completed);
+    let diFila = 0;
+    let record = 0;
+    for (const s of complete) {
+      diFila = s.escapes === 0 ? diFila + 1 : 0;
+      record = Math.max(record, diFila);
+    }
+    return {
+      calzini: complete.length,
+      paia: Math.floor(complete.length / Store.CALZINI_PER_PAIO),
+      minuti: focusSessions().reduce((a, s) => a + s.minutes, 0),
+      striscia: strisciaGiorni(),
+      piuLunga: complete.reduce((a, s) => Math.max(a, s.minutes), 0),
+      alba: complete.some((s) => new Date(s.endedAt).getHours() < 9),
+      notte: complete.some((s) => new Date(s.endedAt).getHours() >= 22),
+      pulite: record,
+      attivita: new Set(complete.map((s) => s.taskId).filter(Boolean)).size
+    };
+  }
+
+  const tile = (valore, etichetta) => `<div class="stat"><b>${esc(valore)}</b><span>${esc(etichetta)}</span></div>`;
+
+  function renderToday() {
+    const oggi = statsForToday();
+    const striscia = strisciaGiorni();
+    $("#today-stats").innerHTML = [
+      tile(oggi.calzini, oggi.calzini === 1 ? "calzino oggi" : "calzini oggi"),
+      tile(oreMinuti(oggi.minuti), "concentrazione"),
+      tile(striscia, striscia === 1 ? "giorno di fila" : "giorni di fila")
+    ].join("");
+
+    const goal = Store.settings().goalMin;
+    const perc = Math.min(100, Math.round((oggi.minuti / goal) * 100));
+    $("#goal-fill").style.width = perc + "%";
+    $("#goal-note").textContent = oggi.minuti >= goal
+      ? `Obiettivo di ${goal} minuti raggiunto.`
+      : `${oggi.minuti} di ${goal} minuti — ne mancano ${goal - oggi.minuti}.`;
+  }
+
+  function renderStats() {
+    const d = datiTraguardi();
+    const tutte = focusSessions();
+    $("#stats-row").innerHTML = [
+      tile(d.calzini, "calzini"),
+      tile(d.paia, "paia"),
+      tile(oreMinuti(d.minuti), "in totale"),
+      tile(d.striscia, "giorni di fila"),
+      tile(oreMinuti(d.piuLunga), "sessione più lunga")
+    ].join("");
+
+    // grafico degli ultimi 14 giorni
+    const giorni = [];
+    for (let i = 13; i >= 0; i--) {
+      const dt = new Date();
+      dt.setDate(dt.getDate() - i);
+      const k = dayKey(dt.toISOString());
+      giorni.push({
+        etichetta: dt.getDate(),
+        minuti: tutte.filter((s) => dayKey(s.endedAt) === k).reduce((a, s) => a + s.minutes, 0)
+      });
+    }
+    const max = Math.max(30, ...giorni.map((g) => g.minuti));
+    $("#chart").innerHTML = giorni.map((g) => {
+      const h = Math.round((g.minuti / max) * 100);
+      return `<div class="col" title="${g.minuti} min"><div class="bar ${g.minuti ? "has" : ""}" style="height:${Math.max(3, h)}%"></div><div class="lab">${g.etichetta}</div></div>`;
+    }).join("");
+
+    // ripartizione per attività
+    const perTask = new Map();
+    for (const s of tutte) {
+      const key = s.taskId || "—";
+      perTask.set(key, (perTask.get(key) || 0) + s.minutes);
+    }
+    const righe = Array.from(perTask.entries()).sort((a, b) => b[1] - a[1]);
+    const totale = righe.reduce((a, r) => a + r[1], 0) || 1;
+    $("#breakdown").innerHTML = righe.map(([id, min]) => {
+      const t = id === "—" ? null : Store.getTask(id);
+      const nome = t ? t.name : "Senza attività";
+      const colore = t ? t.color : "var(--muted)";
+      const perc = Math.round((min / totale) * 100);
+      return `<div class="bd-row"><span>${esc(nome)}</span><span>${oreMinuti(min)} · ${perc}%</span>` +
+             `<div class="bd-bar"><i style="width:${perc}%;background:${colore}"></i></div></div>`;
+    }).join("");
+    $("#breakdown-empty").hidden = righe.length > 0;
+
+    // registro
+    const ultime = Store.sessions().slice().sort((a, b) => String(b.endedAt).localeCompare(String(a.endedAt))).slice(0, 30);
+    $("#sessions-count").textContent = String(Store.sessions().length);
+    $("#log").innerHTML = ultime.map((s) => {
+      const t = s.taskId ? Store.getTask(s.taskId) : null;
+      const colore = t ? t.color : "var(--muted)";
+      const nome = s.kind === "focus" ? (t ? t.name : "Concentrazione") : PHASE_LABEL[s.kind];
+      const quando = new Date(s.endedAt);
+      const mozza = s.kind === "focus" && !s.completed ? '<span class="torn">interrotta</span>' : "";
+      return `<li><i class="dot" style="background:${colore}"></i><span>${esc(nome)} · ${s.minutes} min</span>${mozza}` +
+             `<span class="when">${dataBreve(quando)} ${pad(quando.getHours())}:${pad(quando.getMinutes())}</span></li>`;
+    }).join("");
+    $("#log-empty").hidden = ultime.length > 0;
+  }
+
+  /* ------------------------------------------------------------------ casa */
+
+  function renderCasa() {
+    const c = Store.casa();
+    const svg = $("#casa");
+    for (const g of $$("[data-fase]", svg)) {
+      g.style.display = Number(g.dataset.fase) <= c.fase ? "" : "none";
+    }
+
+    $("#casa-fase").textContent = `${c.fase} ${c.fase === 1 ? "pezzo" : "pezzi"} su ${Store.CASA.length}`;
+    $("#casa-racconto").textContent = c.finita
+      ? Store.CASA_FINITA
+      : (c.fase ? Store.CASA[c.fase - 1].racconto : "Il prato è vuoto. Il primo paio di calzini paga la caparra del terreno.");
+
+    $("#casa-fill").style.width = Math.round(Math.max(0, Math.min(1, c.avanzamento)) * 100) + "%";
+    $("#casa-nota").textContent = c.finita
+      ? `${c.paia} paia in tutto: la casa è finita.`
+      : `${c.paia} ${c.paia === 1 ? "paio" : "paia"} — ne ${c.mancano === 1 ? "manca" : "mancano"} ${c.mancano} per ${articolo(c.prossimo.nome)}.`;
+
+    faseCasa = c.fase;
+
+    // Il racconto del pezzo che verrà resta coperto: si legge costruendolo.
+    $("#storia").innerHTML = Store.CASA.map((f, i) => {
+      const fatto = i < c.fase;
+      const prossimo = i === c.fase;
+      const classe = fatto ? "" : (prossimo ? "prossimo" : "futuro");
+      const testo = fatto
+        ? esc(f.racconto)
+        : `<span class="segreto">${esc(f.racconto)}</span>`;
+      return `<li class="${classe}"><b>${esc(f.nome)}</b>${testo}</li>`;
+    }).join("");
+  }
+
+  /** «per il tetto», «per le finestre»: l'articolo sta nel nome del pezzo. */
+  function articolo(nome) {
+    return nome.replace(/^Il /, "il ").replace(/^La /, "la ").replace(/^Le /, "le ").replace(/^I /, "i ");
+  }
+
+  /* -------------------------------------------------------------- cassetto */
+
+  /** Le fantasie stanno dentro la sagoma grazie al clipPath condiviso della
+      pagina: un solo ritaglio per tutti i calzini, che hanno lo stesso viewBox. */
+  function svgFantasia(id) {
+    if (id === "righe") {
+      return [16, 34, 52, 70, 88].map((y) => `<rect class="fantasia" x="0" y="${y}" width="100" height="7"/>`).join("");
+    }
+    if (id === "pois") {
+      const punti = [];
+      for (const y of [22, 44, 66, 88]) {
+        for (const x of [24, 42, 60, 78]) punti.push(`<circle class="fantasia" cx="${x}" cy="${y}" r="4.5"/>`);
+      }
+      return punti.join("");
+    }
+    if (id === "rombi") {
+      const rombi = [];
+      for (const y of [26, 52, 78]) {
+        for (const x of [30, 52, 74]) rombi.push(`<path class="fantasia" d="M${x} ${y - 9}l9 9-9 9-9-9z"/>`);
+      }
+      return rombi.join("");
+    }
+    if (id === "punta") {
+      return `<rect class="fantasia-scura" x="0" y="60" width="44" height="50"/>` +
+             `<rect class="fantasia" x="0" y="8" width="100" height="13"/>`;
+    }
+    return "";
+  }
+
+  function svgCalzino(colore, fantasia, doppio) {
+    const dentro = svgFantasia(fantasia);
+    return `<svg viewBox="0 0 100 110" aria-hidden="true">` +
+      `<path class="corpo" d="${SAGOMA}" fill="${colore}"/>` +
+      (dentro ? `<g clip-path="url(#clip-sagoma)">${dentro}</g>` : "") +
+      `<path class="bordo" d="M37 22h26"/>` +
+      (doppio
+        ? `<g class="marchio"><circle cx="80" cy="90" r="14" fill="${colore}"/>` +
+          `<text x="80" y="97" text-anchor="middle">2</text></g>`
+        : "") +
+      `</svg>`;
+  }
+
+  function renderCassetto() {
+    const calzini = Store.socks();
+    const per = Store.CALZINI_PER_PAIO;
+    const paia = Math.floor(calzini.length / per);
+    const spaiati = calzini.length % per;
+
+    $("#paia-count").textContent = `${paia} ${paia === 1 ? "paio" : "paia"}`;
+    $("#cassetto-lede").textContent = calzini.length
+      ? `${calzini.length} calzini in tutto: ${paia} ${paia === 1 ? "paio" : "paia"}` +
+        (spaiati ? ` e uno spaiato — un'altra sessione e diventa un paio.` : `, tutti appaiati.`)
+      : "Un calzino per sessione finita, sempre uno: due fanno un paio.";
+    $("#cassetto-empty").hidden = calzini.length > 0;
+
+    const fantasia = fantasiaInUso();
+    const gruppi = [];
+    for (let i = 0; i < calzini.length; i += per) gruppi.push(calzini.slice(i, i + per));
+    gruppi.reverse(); // il paio più recente in cima
+
+    $("#cassetto").innerHTML = gruppi.map((gruppo) => {
+      const pieno = gruppo.length === per;
+      const numero = Math.floor(calzini.indexOf(gruppo[0]) / per) + 1;
+      const celle = [];
+      for (let i = 0; i < per; i++) {
+        const c = gruppo[i];
+        celle.push(c
+          ? `<button type="button" class="calzino" data-sock="${c.id}" ` +
+            `aria-label="Calzino del ${dataBreve(new Date(c.session.endedAt))}${c.doppio ? ", doppio" : ""}">` +
+            `${svgCalzino(c.color, fantasia, c.doppio)}</button>`
+          : `<span class="calzino vuoto">${svgCalzino("none", "tinta", false)}</span>`);
+      }
+      return `<div class="paio ${pieno ? "is-full" : ""}">${celle.join("")}<small>${pieno ? "paio " + numero : "in corso"}</small></div>`;
+    }).join("");
+
+    const d = datiTraguardi();
+    $("#badges").innerHTML = TRAGUARDI.map((t) => {
+      const on = t.test(d);
+      return `<div class="badge ${on ? "on" : ""}"><b>${esc(t.nome)}</b><span>${esc(t.detto)}</span></div>`;
+    }).join("");
+  }
+
+  function showCalzino(id) {
+    const doppio = id.includes("#");
+    const s = Store.sessions().find((x) => x.id === id.split("#")[0]);
+    if (!s) return;
+    const t = s.taskId ? Store.getTask(s.taskId) : null;
+    const d = new Date(s.endedAt);
+    const righe = [
+      ["Attività", t ? t.name : "Senza attività"],
+      ["Durata", `${s.minutes} minuti`],
+      ["Finito il", `${dataBreve(d)}/${d.getFullYear()} alle ${pad(d.getHours())}:${pad(d.getMinutes())}`],
+      ["Uscite dalla scheda", String(s.escapes)]
+    ];
+    if (doppio) righe.push(["Da dove viene", "Secondo calzino della stessa sessione, con il Pro attivo"]);
+    $("#calzino-detail").innerHTML = righe.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+    $("#sheet-calzino").hidden = false;
+  }
+
+  /* ----------------------------------------------------------- impostazioni */
+
+  function renderSettings() {
+    const s = Store.settings();
+    $("#s-focus").value = s.focusMin;
+    $("#s-short").value = s.shortMin;
+    $("#s-long").value = s.longMin;
+    $("#s-cycles").value = s.cycles;
+    $("#s-goal").value = s.goalMin;
+    $("#s-auto-break").checked = s.autoStartBreak;
+    $("#s-auto-focus").checked = s.autoStartFocus;
+    $("#s-sound").checked = s.sound;
+    $("#s-notify").checked = s.notify;
+    $("#s-wake").checked = s.wakeLock;
+    $("#s-strict").checked = s.strict;
+    $("#s-profonda").checked = s.profonda;
+    $("#s-notte").checked = s.notte;
+
+    $("#notify-note").textContent = typeof Notification === "undefined"
+      ? "Questo browser non offre le notifiche di sistema."
+      : (Notification.permission === "denied"
+        ? "Le notifiche sono state bloccate nelle impostazioni del browser."
+        : "Il suono funziona sempre; la notifica solo se il browser dà il permesso.");
+
+    $("#palettes").innerHTML = Store.PALETTES.map((p) => {
+      const chiusa = !sbloccato(p);
+      return `<button type="button" class="pal ${p.id === s.palette && !chiusa ? "is-active" : ""} ${chiusa ? "bloccata" : ""}" ` +
+        `data-palette="${p.id}" title="${esc(p.nome)}${chiusa ? " (Pro)" : ""}" aria-label="Tavolozza ${esc(p.nome)}${chiusa ? ", solo con il Pro" : ""}">` +
+        `<i style="background:${p.scuro}"></i><i style="background:${p.accento}"></i><i style="background:${p.secondo}"></i></button>`;
+    }).join("");
+
+    $$("#tema-seg .seg-btn").forEach((b) => b.classList.toggle("is-active", b.dataset.theme === s.theme));
+
+    $("#outfit").innerHTML = Store.ACCESSORI.map((acc) => {
+      const chiusa = !sbloccato(acc);
+      return `<button type="button" class="chip ${s.outfit[acc.id] && !chiusa ? "is-active" : ""} ${chiusa ? "bloccata" : ""}" ` +
+        `data-outfit="${acc.id}">${esc(acc.nome)}</button>`;
+    }).join("");
+
+    $("#pelli").innerHTML = Store.PELLI.map((x) => {
+      const chiusa = !sbloccato(x);
+      return `<button type="button" class="chip ${x.id === s.pelle && !chiusa ? "is-active" : ""} ${chiusa ? "bloccata" : ""}" ` +
+        `data-pelle="${x.id}">${esc(x.nome)}</button>`;
+    }).join("");
+
+    $("#decorazioni").innerHTML = Store.DECORAZIONI.map((d) => {
+      const chiusa = !sbloccato(d);
+      return `<button type="button" class="chip ${s.decorazioni[d.id] && !chiusa ? "is-active" : ""} ${chiusa ? "bloccata" : ""}" ` +
+        `data-deco="${d.id}">${esc(d.nome)}</button>`;
+    }).join("");
+
+    const fantasiaViva = fantasiaInUso();
+    $("#fantasie").innerHTML = Store.FANTASIE.map((f) => {
+      const chiusa = !sbloccato(f);
+      return `<button type="button" class="chip ${f.id === fantasiaViva ? "is-active" : ""} ${chiusa ? "bloccata" : ""}" ` +
+        `data-fantasia="${f.id}">${esc(f.nome)}</button>`;
+    }).join("");
+
+    renderPro();
+
+    $("#distractors").innerHTML = s.distractors.length
+      ? s.distractors.map((d, i) =>
+          `<span class="chip">${esc(d)}<button type="button" class="x" data-distractor="${i}" aria-label="Togli ${esc(d)}">×</button></span>`).join("")
+      : `<span class="empty">Nessun distrattore in elenco.</span>`;
+  }
+
+  /* --------------------------------------------------- concentrazione profonda */
+
+  /**
+   * Non è il blocco delle app — una pagina web non ce l'ha — ma è la cosa più
+   * vicina che può fare: la sessione si prende tutto lo schermo e sparisce
+   * tutto il resto, comprese le altre schede dell'app.
+   */
+  function entraProfonda() {
+    if (!Store.settings().profonda) return;
+    document.body.classList.add("profonda");
+    const el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen().catch(() => { /* il browser può dire di no */ });
+  }
+
+  function esciProfonda() {
+    document.body.classList.remove("profonda");
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => { /* pazienza */ });
+    }
+  }
+
+  /* ----------------------------------------------------------------- Pro */
+
+  function renderPro() {
+    const attiva = Licenza.attiva();
+    const giorni = Licenza.giorniRimasti();
+    const parolaGiorni = giorni === 1 ? "giorno" : "giorni";
+    $("#pro-card").classList.toggle("is-attivo", attiva);
+    $("#pro-stato").textContent = attiva
+      ? `${Licenza.inProva() ? "prova" : "attivo"} · ${giorni} ${parolaGiorni}`
+      : "non attivo";
+    $("#btn-pro").textContent = attiva ? "Gestisci il Pro" : "Vedi il Pro";
+    $("#pro-prezzo").textContent = Licenza.PREZZO;
+
+    const avviso = $("#pro-attivo");
+    avviso.hidden = !attiva;
+    if (attiva) {
+      const fine = Licenza.scadenza();
+      const quando = `${dataBreve(fine)}/${fine.getFullYear()}`;
+      avviso.textContent = Licenza.inProva()
+        ? `Prova gratuita: ancora ${giorni} ${parolaGiorni}, fino al ${quando}.`
+        : `Pro attivo fino al ${quando} — ${giorni} ${parolaGiorni}.`;
+    }
+
+    $("#btn-prova").hidden = !Licenza.puoiProvare();
+    $("#btn-pro-rimuovi").hidden = !attiva;
+    $("#btn-paga").textContent = attiva && !Licenza.inProva() ? "Rinnova" : "Abbonati";
+    $("#pro-pagamento-nota").textContent = Licenza.PAGAMENTO_URL
+      ? "Dopo il pagamento ricevi un codice da incollare qui sotto."
+      : "Il link del pagamento non è ancora configurato: va messo in js/licenza.js (PAGAMENTO_URL). Fino ad allora si entra solo con un codice.";
+  }
+
+  function apriPro(motivo) {
+    renderPro();
+    $("#pro-errore").hidden = true;
+    $("#sheet-pro").hidden = false;
+    if (motivo) toast(motivo);
+  }
+
+  function bindPro() {
+    $("#btn-pro").addEventListener("click", () => apriPro());
+    $("#btn-pro-close").addEventListener("click", () => { $("#sheet-pro").hidden = true; });
+
+    $("#btn-prova").addEventListener("click", () => {
+      const res = Licenza.avviaProva();
+      if (!res.ok) return toast(res.error);
+      $("#sheet-pro").hidden = true;
+      applyLook();
+      renderAll();
+      toast(`Pro in prova per ${Licenza.GIORNI_PROVA} giorni: da adesso i calzini sono due per sessione.`);
+    });
+
+    $("#btn-paga").addEventListener("click", () => {
+      if (!Licenza.PAGAMENTO_URL) return toast("Manca il link del pagamento: va messo in js/licenza.js.");
+      window.open(Licenza.PAGAMENTO_URL, "_blank", "noopener");
+    });
+
+    $("#form-codice").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const errore = $("#pro-errore");
+      const res = await Licenza.riscatta($("#pro-codice").value);
+      if (!res.ok) {
+        errore.textContent = res.error;
+        errore.hidden = false;
+        return;
+      }
+      errore.hidden = true;
+      $("#pro-codice").value = "";
+      $("#sheet-pro").hidden = true;
+      applyLook();
+      renderAll();
+      toast(`Pro attivo fino al ${dataBreve(res.scadenza)}/${res.scadenza.getFullYear()}.`);
+    });
+
+    $("#btn-pro-rimuovi").addEventListener("click", () => {
+      if (!confirm("Togliere la licenza da questo dispositivo? Il codice resta valido e si può reinserire.")) return;
+      Licenza.rimuovi();
+      $("#sheet-pro").hidden = true;
+      applyLook();
+      renderAll();
+      toast("Licenza tolta da qui.");
+    });
+  }
+
+  function bindNumber(sel, key) {
+    const el = $(sel);
+    el.addEventListener("change", () => {
+      Store.setSetting(key, el.value);
+      el.value = Store.settings()[key];
+      Timer.syncIdleDuration();
+      renderToday();
+      renderTimer(Timer.snapshot());
+    });
+  }
+
+  function bindSwitch(sel, key, after) {
+    const el = $(sel);
+    el.addEventListener("change", () => {
+      Store.setSetting(key, el.checked);
+      if (after) after(el);
+    });
+  }
+
+  /* ------------------------------------------------------------- avvio UI */
+
+  function bind() {
+    bindPro();
+    bindInstalla();
+    $$(".tab").forEach((t) => t.addEventListener("click", () => showView(t.dataset.view)));
+
+    $$(".phase").forEach((b) => b.addEventListener("click", () => {
+      Timer.setPhase(b.dataset.phase);
+      $("#sheet-sessione").hidden = true;
+    }));
+
+    $("#btn-sessione").addEventListener("click", () => {
+      const snap = Timer.snapshot();
+      $("#sessione-nota").textContent = snap.modo === "libera"
+        ? `Il conto sale finché non chiudi tu: sotto i ${Math.round(snap.minimoMs / 60000)} minuti non fa calzino, sopra le ${Math.round(snap.totalMs / 3600000)} ore si chiude da sé.`
+        : `Durate: ${Store.settings().focusMin} minuti di lavoro, ${Store.settings().shortMin} di pausa breve, ${Store.settings().longMin} di pausa lunga. Si cambiano in Impostazioni.`;
+      $("#sheet-sessione").hidden = false;
+    });
+    $("#btn-sessione-close").addEventListener("click", () => { $("#sheet-sessione").hidden = true; });
+
+    $("#btn-profonda").addEventListener("click", () => {
+      const acceso = !Store.settings().profonda;
+      Store.setSetting("profonda", acceso);
+      renderTimer(Timer.snapshot());
+      renderSettings();
+      toast(acceso ? "Avviando, solo Mora a schermo intero." : "Schermo intero spento.");
+    });
+
+    $$("#modo-seg .seg-btn").forEach((b) => b.addEventListener("click", () => {
+      Timer.setModo(b.dataset.modo);
+      $("#sheet-sessione").hidden = true;
+      const ore = Math.round(Timer.limiteLibera() / 3600000);
+      if (b.dataset.modo === "libera") {
+        toast(`Sessione libera: il conto sale, minimo ${Math.round(Timer.MINIMO_LIBERA / 60000)} minuti, tetto ${ore} ore.`);
+      }
+    }));
+
+    $("#btn-chiudi").addEventListener("click", () => Timer.chiudiLibera());
+
+    $("#btn-start").addEventListener("click", () => {
+      Timer.unlockAudio();
+      const prima = Timer.snapshot();
+      Timer.toggle();
+      const dopo = Timer.snapshot();
+      if (dopo.status === "running" && dopo.phase === "focus") entraProfonda();
+      if (prima.status === "running") esciProfonda();
+    });
+
+    $("#btn-esci").addEventListener("click", () => { Timer.pause(); esciProfonda(); });
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) document.body.classList.remove("profonda");
+    });
+
+    // cose da fare
+    $("#form-todo").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const campo = $("#todo-testo");
+      const res = Store.addTodo(campo.value);
+      if (!res.ok) return toast(res.error);
+      campo.value = "";
+      renderTodo();
+    });
+    $("#todo").addEventListener("click", (e) => {
+      const via = e.target.closest("[data-todo-via]");
+      if (via) { Store.deleteTodo(via.dataset.todoVia); return renderTodo(); }
+      const box = e.target.closest("[data-todo]");
+      if (box) { Store.toggleTodo(box.dataset.todo); renderTodo(); }
+    });
+    $("#btn-todo-pulisci").addEventListener("click", () => {
+      const tolte = Store.pulisciTodo();
+      renderTodo();
+      if (tolte) toast(`${tolte} ${tolte === 1 ? "cosa fatta tolta" : "cose fatte tolte"}.`);
+    });
+
+    // fine sessione
+    $("#btn-festa-chiudi").addEventListener("click", () => { $("#sheet-fine").hidden = true; });
+    $("#btn-festa-pausa").addEventListener("click", () => {
+      $("#sheet-fine").hidden = true;
+      Timer.start();
+    });
+
+    // primo incontro
+    $("#btn-ciao-via").addEventListener("click", () => {
+      Store.setSetting("presentata", true);
+      $("#sheet-ciao").hidden = true;
+      Timer.unlockAudio();
+      Timer.start();
+      entraProfonda();
+    });
+    $("#btn-ciao-dopo").addEventListener("click", () => {
+      Store.setSetting("presentata", true);
+      $("#sheet-ciao").hidden = true;
+    });
+    $("#btn-skip").addEventListener("click", () => Timer.skip());
+    $("#btn-reset").addEventListener("click", () => Timer.reset());
+
+    $("#btn-theme").addEventListener("click", () => {
+      const ordine = ["auto", "light", "dark"];
+      const next = ordine[(ordine.indexOf(Store.settings().theme) + 1) % 3];
+      Store.setSetting("theme", next);
+      applyLook();
+      renderSettings();
+      toast(next === "auto" ? "Tema: come il sistema" : next === "light" ? "Tema chiaro" : "Tema scuro");
+    });
+
+    // attività
+    $("#btn-task-new").addEventListener("click", () => {
+      const f = $("#form-task");
+      f.hidden = !f.hidden;
+      if (!f.hidden) $("#task-name").focus();
+    });
+    $("#btn-task-cancel").addEventListener("click", () => { $("#form-task").hidden = true; });
+    $("#form-task").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const res = Store.addTask($("#task-name").value);
+      const err = $("#task-error");
+      if (!res.ok) { err.textContent = res.error; err.hidden = false; return; }
+      err.hidden = true;
+      $("#task-name").value = "";
+      $("#form-task").hidden = true;
+      renderTasks();
+    });
+    $("#task-chips").addEventListener("click", (e) => {
+      const archivia = e.target.closest("[data-archive]");
+      if (archivia) {
+        const t = Store.getTask(archivia.dataset.archive);
+        if (t && confirm(`Togliere «${t.name}» dall'elenco? Le sessioni già fatte restano.`)) {
+          Store.archiveTask(t.id);
+          renderTasks();
+        }
+        return;
+      }
+      const scegli = e.target.closest("[data-task]");
+      if (!scegli) return;
+      Store.setCurrentTask(scegli.dataset.task || null);
+      renderTasks();
+    });
+
+    // cassetto
+    $("#cassetto").addEventListener("click", (e) => {
+      const c = e.target.closest("[data-sock]");
+      if (c) showCalzino(c.dataset.sock);
+    });
+    $("#btn-calzino-close").addEventListener("click", () => { $("#sheet-calzino").hidden = true; });
+    $("#btn-escape-ok").addEventListener("click", () => { $("#sheet-escape").hidden = true; });
+
+    // impostazioni
+    bindNumber("#s-focus", "focusMin");
+    bindNumber("#s-short", "shortMin");
+    bindNumber("#s-long", "longMin");
+    bindNumber("#s-cycles", "cycles");
+    bindNumber("#s-goal", "goalMin");
+    bindSwitch("#s-auto-break", "autoStartBreak");
+    bindSwitch("#s-auto-focus", "autoStartFocus");
+    bindSwitch("#s-sound", "sound", () => Timer.unlockAudio());
+    bindSwitch("#s-wake", "wakeLock");
+    bindSwitch("#s-strict", "strict");
+    bindSwitch("#s-profonda", "profonda", () => renderTimer(Timer.snapshot()));
+    bindSwitch("#s-notte", "notte", () => {
+      document.body.classList.toggle("schermo-timer",
+        !$("#view-timer").hidden && Store.settings().notte);
+    });
+    bindSwitch("#s-notify", "notify", async (el) => {
+      if (el.checked && typeof Notification !== "undefined" && Notification.permission === "default") {
+        const esito = await Notification.requestPermission();
+        if (esito !== "granted") {
+          Store.setSetting("notify", false);
+          el.checked = false;
+          toast("Permesso negato: resta il suono.");
+        }
+      }
+      renderSettings();
+    });
+
+    $$("[data-preset]").forEach((b) => b.addEventListener("click", () => {
+      const [f, s, l, c] = b.dataset.preset.split("-").map(Number);
+      Store.setSetting("focusMin", f);
+      Store.setSetting("shortMin", s);
+      Store.setSetting("longMin", l);
+      Store.setSetting("cycles", c);
+      Timer.syncIdleDuration();
+      renderSettings();
+      renderTimer(Timer.snapshot());
+      toast(`Durate: ${f} / ${s} / ${l} minuti`);
+    }));
+
+    $("#palettes").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-palette]");
+      if (!b) return;
+      const pal = Store.PALETTES.find((x) => x.id === b.dataset.palette);
+      if (!sbloccato(pal)) return apriPro(`«${pal.nome}» è una tavolozza del Pro.`);
+      Store.setSetting("palette", pal.id);
+      applyLook();
+      renderSettings();
+    });
+
+    $$("#tema-seg .seg-btn").forEach((b) => b.addEventListener("click", () => {
+      Store.setSetting("theme", b.dataset.theme);
+      applyLook();
+      renderSettings();
+    }));
+
+    $("#outfit").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-outfit]");
+      if (!b) return;
+      const acc = Store.ACCESSORI.find((x) => x.id === b.dataset.outfit);
+      if (!sbloccato(acc)) return apriPro(`«${acc.nome}» è un accessorio del Pro.`);
+      const outfit = Object.assign({}, Store.settings().outfit);
+      outfit[acc.id] = !outfit[acc.id];
+      Store.setSetting("outfit", outfit);
+      applyLook();
+      renderSettings();
+    });
+
+    $("#pelli").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-pelle]");
+      if (!b) return;
+      const pelle = Store.PELLI.find((x) => x.id === b.dataset.pelle);
+      if (!sbloccato(pelle)) return apriPro(`«${pelle.nome}» è una pelle del Pro.`);
+      Store.setSetting("pelle", pelle.id);
+      renderStanza();
+      renderSettings();
+    });
+
+    $("#decorazioni").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-deco]");
+      if (!b) return;
+      const deco = Store.DECORAZIONI.find((x) => x.id === b.dataset.deco);
+      if (!sbloccato(deco)) return apriPro(`«${deco.nome}» è una decorazione del Pro.`);
+      const attuali = Object.assign({}, Store.settings().decorazioni);
+      attuali[deco.id] = !attuali[deco.id];
+      Store.setSetting("decorazioni", attuali);
+      renderStanza();
+      renderSettings();
+    });
+
+    $("#fantasie").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-fantasia]");
+      if (!b) return;
+      const f = Store.FANTASIE.find((x) => x.id === b.dataset.fantasia);
+      if (!sbloccato(f)) return apriPro(`«${f.nome}» è una fantasia del Pro.`);
+      Store.setSetting("fantasia", f.id);
+      renderSettings();
+      renderCassetto();
+    });
+
+    $("#form-distractor").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = $("#distractor-name");
+      const valore = input.value.trim();
+      if (!valore) return;
+      const lista = Store.settings().distractors.slice();
+      if (!lista.some((d) => d.toLowerCase() === valore.toLowerCase())) lista.push(valore);
+      Store.setSetting("distractors", lista);
+      input.value = "";
+      renderSettings();
+    });
+    $("#distractors").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-distractor]");
+      if (!b) return;
+      const lista = Store.settings().distractors.slice();
+      lista.splice(Number(b.dataset.distractor), 1);
+      Store.setSetting("distractors", lista);
+      renderSettings();
+    });
+
+    // dati
+    $("#btn-export").addEventListener("click", () => {
+      const dati = Store.exportAll();
+      const blob = new Blob([JSON.stringify(dati, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `calzino-${dayKey(new Date().toISOString())}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      $("#data-note").textContent = `Esportate ${dati.sessions.length} sessioni.`;
+    });
+
+    $("#file-import").addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      try {
+        const res = Store.importAll(JSON.parse(await file.text()));
+        $("#data-note").textContent = res.ok
+          ? `Importate ${res.added} sessioni (${res.skipped} già presenti).`
+          : res.error;
+        if (res.ok) { applyLook(); renderAll(); }
+      } catch (err) {
+        $("#data-note").textContent = "Il file non è leggibile.";
+      }
+      e.target.value = "";
+    });
+
+    $("#btn-wipe").addEventListener("click", () => {
+      if (!confirm("Cancellare sessioni, attività e impostazioni? Non si torna indietro.")) return;
+      Store.wipe();
+      Timer.setPhase("focus", { keepCycle: false });
+      applyLook();
+      renderAll();
+      toast("Tutto azzerato.");
+    });
+
+    // scorciatoie: solo quando non si sta scrivendo
+    document.addEventListener("keydown", (e) => {
+      const tag = (e.target.tagName || "").toLowerCase();
+      if (tag === "input" || tag === "textarea" || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.code === "Space") { e.preventDefault(); Timer.unlockAudio(); Timer.toggle(); }
+      else if (e.key === "r" || e.key === "R") Timer.reset();
+      else if (e.key === "s" || e.key === "S") {
+        if (Timer.snapshot().modo === "libera") Timer.chiudiLibera();
+        else Timer.skip();
+      }
+    });
+
+    // Uscite dalla scheda durante la concentrazione. Il conteggio aspetta un
+    // istante: anche un semplice ricaricamento passa di qui, e in modalità
+    // severa avrebbe disfatto un calzino per niente. Se la pagina se ne va, il
+    // timeout muore con lei; se torni entro un battito, non era una fuga.
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        escapeTimer = setTimeout(() => {
+          escapeTimer = null;
+          const info = Timer.noteEscape();
+          if (info) lastEscapeInfo = info;
+        }, ATTESA_FUGA);
+        return;
+      }
+      if (escapeTimer) {
+        clearTimeout(escapeTimer);
+        escapeTimer = null;
+      }
+      Timer.refreshWakeLock();
+      if (lastEscapeInfo) {
+        mostraRientro(lastEscapeInfo);
+        lastEscapeInfo = null;
+      }
+    });
+  }
+
+  function mostraRientro(info) {
+    const distrattori = Store.settings().distractors;
+    const elenco = distrattori.length ? ` Il tuo elenco dice: ${distrattori.join(", ")}.` : "";
+    $("#escape-title").textContent = info.strict ? "Calzino disfatto" : "Sei tornato";
+    $("#escape-text").textContent = info.strict
+      ? `Modalità severa: la sessione si è chiusa qui, con ${info.minutes} minuti registrati e nessun calzino.${elenco}`
+      : `Sei uscito ${info.escapes} ${info.escapes === 1 ? "volta" : "volte"} da quando hai iniziato. Il timer è andato avanti lo stesso.${elenco}`;
+    $("#sheet-escape").hidden = false;
+  }
+
+  /* ------------------------------------------------------------ redisegno */
+
+  function renderAll() {
+    renderTimer(Timer.snapshot());
+    renderStanza();
+    renderTasks();
+    renderTodo();
+    renderToday();
+    renderCasa();
+    renderCassetto();
+    renderStats();
+    renderSettings();
+  }
+
+  function onTimer(snap, event) {
+    renderTimer(snap);
+    if (!event) return;
+    if (["complete", "reset", "disfatto"].includes(event.type)) {
+      renderToday();
+      renderStanza();
+      if (!$("#view-casa").hidden) { renderCasa(); renderCassetto(); }
+      if (!$("#view-statistiche").hidden) renderStats();
+    }
+    if (event.type === "complete" && event.natural && event.phase === "focus") {
+      esciProfonda();
+      festeggia(event.session);
+      controllaCasa();
+    }
+    if (event.type === "complete" && event.natural && event.phase !== "focus") esciProfonda();
+    if (event.type === "reset" && event.partial) toast(`Registrati ${event.partial} minuti, senza calzino.`);
+  }
+
+  /** La sessione finita si guarda un attimo prima di ripartire: è il momento
+      in cui il lavoro diventa una cosa che si vede. */
+  function festeggia(session) {
+    const quanti = session && session.calzini > 1 ? 2 : 1;
+    const totali = Store.socks().length;
+    const paia = Math.floor(totali / Store.CALZINI_PER_PAIO);
+    const colore = session && session.taskId && Store.getTask(session.taskId)
+      ? Store.getTask(session.taskId).color
+      : Store.FILATI[(totali - 1) % Store.FILATI.length];
+
+    $("#calzino-festa").innerHTML =
+      `<path class="corpo" d="${SAGOMA}" fill="${colore}"/>` +
+      `<g clip-path="url(#clip-sagoma)">${svgFantasia(fantasiaInUso())}</g>` +
+      `<path class="bordo" d="M37 22h26"/>`;
+
+    $("#festa-titolo").textContent = quanti === 2 ? "Due calzini" : "Calzino finito";
+    $("#festa-testo").textContent = `${session ? session.minutes : 0} minuti di lavoro. ` +
+      `Nel cassetto: ${totali} ${totali === 1 ? "calzino" : "calzini"}, ${paia} ${paia === 1 ? "paio" : "paia"}.`;
+
+    const c = Store.casa();
+    $("#festa-casa").textContent = c.finita
+      ? Store.CASA_FINITA
+      : `${c.prossimo.nome}: ${c.mancano === 1 ? "manca un paio" : `mancano ${c.mancano} paia`}.`;
+
+    // Se la pausa è già partita da sola, il bottone non deve promettere di
+    // farla partire: la si sta già facendo.
+    // «Fai la pausa» ha senso solo se una pausa esiste e non è già partita: nel
+    // modo libero non c'è, e con l'avvio automatico è già cominciata.
+    const stato = Timer.snapshot();
+    const pausaAvviata = stato.status === "running" || Store.settings().autoStartBreak;
+    const offriPausa = stato.modo !== "libera" && !pausaAvviata;
+    $("#btn-festa-pausa").hidden = !offriPausa;
+    $("#btn-festa-chiudi").hidden = false;
+    $("#btn-festa-chiudi").textContent = offriPausa ? "Chiudi" : "Va bene";
+
+    $("#sheet-fine").hidden = false;
+  }
+
+  /** Un pezzo di casa in più merita più del messaggio sul calzino: arriva dopo,
+      così è quello che resta sullo schermo. */
+  function controllaCasa() {
+    const c = Store.casa();
+    if (faseCasa >= 0 && c.fase > faseCasa) {
+      const pezzo = Store.CASA[c.fase - 1];
+      toast(c.finita ? "La casa è finita." : `${pezzo.nome}: fatto. La casa cresce.`);
+    }
+    faseCasa = c.fase;
+  }
+
+  /* ------------------------------------------------------------ installare */
+
+  /**
+   * Su Android il browser offre l'installazione e noi ce ne impossessiamo con
+   * un bottone; su iPhone quel gancio non esiste — lì si passa dal menù
+   * Condividi, e l'unica cosa onesta è dirlo.
+   */
+  let promptInstalla = null;
+
+  function bindInstalla() {
+    const bottone = $("#btn-installa");
+    const nota = $("#installa-nota");
+    const iOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+    const giaInstallata = window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+
+    if (giaInstallata) {
+      nota.textContent = "È già installata: la stai usando come app.";
+      return;
+    }
+    if (iOS) {
+      nota.textContent = "Su iPhone e iPad: premi Condividi (il quadrato con la freccia) " +
+        "e poi «Aggiungi a Home». Da lì parte a tutto schermo e funziona senza rete.";
+      return;
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      promptInstalla = e;
+      bottone.hidden = false;
+    });
+
+    bottone.addEventListener("click", async () => {
+      if (!promptInstalla) return;
+      promptInstalla.prompt();
+      const esito = await promptInstalla.userChoice;
+      promptInstalla = null;
+      bottone.hidden = true;
+      if (esito.outcome === "accepted") toast("Installata: la trovi fra le app.");
+    });
+
+    window.addEventListener("appinstalled", () => {
+      bottone.hidden = true;
+      nota.textContent = "Installata: la trovi fra le app.";
+    });
+  }
+
+  /* -------------------------------------------------------- service worker */
+
+  function registerServiceWorker() {
+    if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
+    navigator.serviceWorker.register("sw.js").catch(() => { /* offline non disponibile: pazienza */ });
+  }
+
+  function init() {
+    applyLook();
+    bind();
+    Timer.on(onTimer);
+    Timer.boot();
+    renderAll();
+    showView("timer");
+    $("#storage-warning").hidden = Store.isStorageAvailable();
+    if (!Store.settings().presentata) $("#sheet-ciao").hidden = false;
+    // file unico: nessun service worker da registrare
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+
+</script>

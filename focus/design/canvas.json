@@ -1,0 +1,96 @@
+{
+  "artboards": [
+    {
+      "file": "Attuale.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Com'è adesso",
+      "page": "page-1"
+    },
+    {
+      "file": "Main.dc.html",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "A · Notte calda (applicata)",
+      "page": "page-1"
+    },
+    {
+      "file": "DirezioneB.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "B · Carta stampata",
+      "page": "page-2"
+    },
+    {
+      "file": "DirezioneC.dc.html",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "C · Giocattolo",
+      "page": "page-2"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "nota-problema",
+      "x": 0,
+      "y": -190,
+      "w": 860,
+      "text": "Direzione scelta: A. Applicata all'app il 8 settembre.\n\nIl conto dei comandi in cima alla schermata del timer passa da sei a uno: una riga «Concentrazione · 25 min · cambia» apre un foglio con modo e fase, lo schermo intero è un'icona in testa, Salta e Azzera sono due parole sotto il bottone.\n\nDue scarti fra il disegno e l'app vera: la stanza arriva ai bordi dello schermo (qui ha ancora il margine della scheda), e i caratteri Bricolage/Azeret arrivano da Google Fonts — senza rete l'app ripiega su quelli di sistema.",
+      "page": "page-1"
+    },
+    {
+      "id": "nota-attuale",
+      "x": 0,
+      "y": 890,
+      "w": 390,
+      "text": "Com'è adesso, ricostruito con i valori veri del foglio di stile. Serve solo per il confronto.",
+      "page": "page-1"
+    },
+    {
+      "id": "nota-a",
+      "x": 470,
+      "y": 890,
+      "w": 390,
+      "text": "A · Notte calda. La stanza diventa lo schermo e il tempo ci sta sopra; restano un bottone e due parole sottolineate. Fase e modo si cambiano toccando la riga «Concentrazione · 25 min».\n\nPro: la cosa più vicina a una app di concentrazione seria; di sera non abbaglia.\nContro: la stanza si vede meno bene di quanto la si veda su fondo chiaro, e il buio fisso mal si sposa con l'uso diurno a scuola.",
+      "page": "page-1"
+    },
+    {
+      "id": "nota-b",
+      "x": 0,
+      "y": 890,
+      "w": 390,
+      "text": "B · Carta stampata. Niente schede: filetti, un serif grande per il tempo, la stanza come un'illustrazione incorniciata con didascalia.\n\nPro: non somiglia a nessun'altra app; l'oggetto sembra un quaderno, che è coerente con lo studio.\nContro: il serif a 96px è bello ma meno leggibile di sbieco, e i tocchi sono testo sottolineato: bersagli piccoli per un dito.",
+      "page": "page-2"
+    },
+    {
+      "id": "nota-c",
+      "x": 470,
+      "y": 890,
+      "w": 390,
+      "text": "C · Giocattolo. Contorni spessi, ombre piene, bottoni grossi: la lingua dei giochi per ragazzi.\n\nPro: bersagli enormi, funziona benissimo su telefoni piccoli e con studenti; la ricompensa dei calzini regge meglio in questo tono.\nContro: è la direzione che invecchia prima, e per un adulto che lavora rischia di sembrare infantile.",
+      "page": "page-2"
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-1"
+  },
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "Scelta e applicata"
+    },
+    {
+      "id": "page-2",
+      "name": "Scartate"
+    }
+  ]
+}

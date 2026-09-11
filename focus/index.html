@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calzino</title>
+<meta name="description" content="Timer di concentrazione con Mora, la talpa che sferruzza: ogni sessione finita è un calzino, due calzini fanno un paio. Gratis; con il Pro a 1 € al mese i calzini sono due e si aprono le decorazioni.">
+<meta name="theme-color" content="#3B3128">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="icona-192.png" sizes="192x192" type="image/png">
+<!-- iOS ignora l'SVG e la trasparenza: per «Aggiungi a Home» vuole questo. -->
+<link rel="apple-touch-icon" href="icona-apple-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Calzino">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Azeret+Mono:wght@300;500&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- La sagoma del calzino, definita una volta sola: i calzini del cassetto la
+     usano per ritagliare dentro il contorno le fantasie. -->
+<svg class="sagoma-condivisa" aria-hidden="true" focusable="false">
+  <clipPath id="clip-sagoma" clipPathUnits="userSpaceOnUse">
+    <path d="M43 8h14a9 9 0 0 1 9 9v56a9 9 0 0 1-9 9h-30a15 15 0 0 1 0-30h7v-35a9 9 0 0 1 9-9z"/>
+  </clipPath>
+</svg>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <img src="icon.svg" alt="" width="34" height="34">
+      <div class="brand-text">
+        <strong>Calzino</strong>
+        <span class="sub" id="top-sub">Mora è pronta a sferruzzare.</span>
+      </div>
+    </div>
+    <button type="button" class="btn ghost small" id="btn-theme" aria-label="Cambia tema">Tema</button>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sezioni">
+    <button type="button" class="tab is-active" role="tab" data-view="timer" aria-selected="true" aria-controls="view-timer">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>
+      <span>Timer</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-view="casa" aria-selected="false" aria-controls="view-casa">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+      <span>Casa</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-view="statistiche" aria-selected="false" aria-controls="view-statistiche">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      <span>Numeri</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-view="impostazioni" aria-selected="false" aria-controls="view-impostazioni">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+      <span>Impostazioni</span>
+    </button>
+  </nav>
+
+  <main class="views">
+
+    <!-- ================================================== CONCENTRAZIONE -->
+    <section id="view-timer" class="view" role="tabpanel" tabindex="-1">
+
+      <div class="timer-testa">
+        <span class="marchio">Calzino</span>
+        <div class="testa-destra">
+          <span class="conta-calzini" id="conta-calzini"></span>
+          <button type="button" class="icona" id="btn-profonda" aria-pressed="true"
+                  aria-label="Concentrazione profonda" title="Concentrazione profonda">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="card scene-card">
+        <div class="scene" id="scene" data-state="idle">
+          <svg class="stanza" id="stanza" viewBox="0 0 340 192" role="img" aria-labelledby="stanza-title">
+            <title id="stanza-title">La stanza di Mora</title>
+            <defs>
+              <clipPath id="clip-calzino" clipPathUnits="userSpaceOnUse">
+                <rect x="42" y="12" width="34" height="62" rx="10"/>
+                <rect x="18" y="58" width="58" height="32" rx="16"/>
+              </clipPath>
+            </defs>
+
+            <!-- Finché la casa non ha i muri, Mora lavora fuori, sul prato. -->
+            <g id="fuori">
+              <rect class="cielo" x="0" y="0" width="340" height="152"/>
+              <circle class="sole" cx="46" cy="34" r="17"/>
+              <ellipse class="collina" cx="50" cy="168" rx="110" ry="34"/>
+              <ellipse class="collina lontana" cx="290" cy="172" rx="120" ry="38"/>
+              <rect class="erba" x="0" y="152" width="340" height="68"/>
+            </g>
+
+            <!-- Dai muri in poi, la stessa scena è un interno. -->
+            <g id="dentro">
+              <rect class="parete" x="0" y="0" width="340" height="146"/>
+              <rect class="battiscopa" x="0" y="140" width="340" height="10"/>
+              <rect class="assito" x="0" y="150" width="340" height="70"/>
+              <path class="fughe" d="M46 150v70M108 150v70M170 150v70M232 150v70M294 150v70"/>
+            </g>
+
+            <g class="arredo" data-fase="7"><rect class="trave" x="0" y="0" width="340" height="13"/></g>
+
+            <g class="arredo" data-fase="5">
+              <rect class="vetro" x="256" y="18" width="80" height="60" rx="4"/>
+              <path class="telaio" d="M296 18v60M256 48h80"/>
+              <rect class="davanzale" x="250" y="78" width="92" height="8" rx="3"/>
+            </g>
+
+            <g class="arredo" data-deco="tenda">
+              <path class="tenda" d="M250 12q13 36 4 68h-15q9-34-2-68z"/>
+              <path class="tenda" d="M336 12q-13 36-4 68h-15q9-34 2-68z"/>
+            </g>
+
+            <g class="arredo" data-fase="6">
+              <rect class="porta-s" x="-10" y="40" width="46" height="112" rx="5"/>
+              <circle class="pomo" cx="27" cy="100" r="3.6"/>
+            </g>
+
+            <g class="arredo" data-fase="8">
+              <rect class="stufa" x="50" y="104" width="40" height="48" rx="5"/>
+              <rect class="tubo" x="65" y="72" width="10" height="34" rx="3"/>
+              <path class="fuoco" d="M70 142q-10-11 0-23 10 12 0 23z"/>
+            </g>
+
+            <g class="arredo" data-fase="11">
+              <rect class="cornice" x="46" y="34" width="46" height="36" rx="3"/>
+              <path class="quadro-dentro" d="M52 64l12-16 10 12 8-8 10 12z"/>
+            </g>
+
+            <g class="arredo" data-fase="9">
+              <path class="filo-lampada" d="M170 13v22"/>
+              <path class="paralume" d="M150 56l20-22 20 22z"/>
+              <circle class="alone" cx="170" cy="62" r="14"/>
+            </g>
+
+            <g class="arredo" data-deco="ghirlanda">
+              <path class="corda" d="M6 22q84 26 164 0t164 0"/>
+              <g class="lucine">
+                <circle cx="48" cy="30" r="4"/><circle cx="90" cy="34" r="4"/><circle cx="132" cy="34" r="4"/>
+                <circle cx="174" cy="30" r="4"/><circle cx="216" cy="26" r="4"/><circle cx="258" cy="24" r="4"/>
+                <circle cx="300" cy="24" r="4"/>
+              </g>
+            </g>
+
+            <g class="arredo fuori-solo" data-fase="1">
+              <path class="palo-s" d="M300 176v-30"/>
+              <rect class="cartello-s" x="284" y="136" width="32" height="14" rx="3"/>
+            </g>
+            <g class="arredo fuori-solo" data-fase="2">
+              <rect class="gradino" x="94" y="150" width="150" height="12" rx="4"/>
+            </g>
+
+            <g class="arredo" data-fase="3"><ellipse class="tappeto" cx="166" cy="160" rx="90" ry="14"/></g>
+
+            <g class="arredo" data-fase="10">
+              <rect class="vaso" x="300" y="128" width="30" height="24" rx="4"/>
+              <path class="foglie" d="M315 128q-16-8-14-26 14 4 14 26zM315 128q16-10 15-30-16 6-15 30z"/>
+            </g>
+
+            <g class="arredo" data-deco="gatto">
+              <ellipse class="gatto-corpo" cx="72" cy="146" rx="26" ry="12"/>
+              <circle class="gatto-corpo" cx="52" cy="140" r="10"/>
+              <path class="gatto-tratto" d="M46 133l-3-6 6 2M58 133l3-6-6 2M44 140h-6M44 144h-6"/>
+            </g>
+
+            <g class="arredo" data-deco="tazza">
+              <path class="tazza" d="M8 140h18v9a5 5 0 0 1-5 5h-8a5 5 0 0 1-5-5z"/>
+              <path class="manico" d="M26 143q6 0 6 4t-6 4"/>
+              <path class="vapore" d="M14 136q4-5 0-9M21 136q4-5 0-9"/>
+            </g>
+
+            <!-- Mora, dentro la scena: la pelle cambia solo i suoi colori. -->
+            <g class="mora" id="mora" data-pelle="mora" transform="translate(92 27) scale(0.72)">
+              <ellipse class="mora-ombra" cx="110" cy="173" rx="58" ry="8"/>
+              <path class="mora-corpo" d="M110 40c-30 0-52 24-52 58 0 40 22 66 52 66s52-26 52-66c0-34-22-58-52-58z"/>
+              <ellipse class="mora-pancia" cx="110" cy="124" rx="34" ry="30"/>
+
+              <g class="acc acc-grembiule">
+                <path d="M92 104q18 8 36 0l7 38q-25 10-50 0z"/>
+                <path d="M99 104l-5-10M121 104l5-10"/>
+              </g>
+
+              <path class="mora-muso" d="M110 60c-16 0-27 10-27 22s11 20 27 20 27-8 27-20-11-22-27-22z"/>
+              <circle class="mora-naso" cx="110" cy="70" r="6"/>
+              <g class="mora-occhi">
+                <path class="occhio" d="M84 54q7 7 14 0"/>
+                <path class="occhio" d="M122 54q7 7 14 0"/>
+              </g>
+              <g class="mora-baffi">
+                <path d="M82 82h-14M82 88h-12M138 82h14M138 88h12"/>
+              </g>
+
+              <g class="acc acc-occhiali">
+                <circle cx="91" cy="55" r="13"/>
+                <circle cx="129" cy="55" r="13"/>
+                <path d="M104 55h12"/>
+              </g>
+              <g class="acc acc-cappello">
+                <path d="M78 45q32-26 64 0z"/>
+                <path d="M70 47h80"/>
+                <circle cx="110" cy="21" r="7"/>
+              </g>
+              <g class="acc acc-coroncina">
+                <path d="M80 46l5-22 11 13 14-18 14 18 11-13 5 22z"/>
+              </g>
+              <g class="acc acc-fiore">
+                <circle cx="148" cy="46" r="6"/><circle cx="160" cy="46" r="6"/>
+                <circle cx="154" cy="36" r="6"/><circle cx="154" cy="56" r="6"/>
+                <circle class="cuore" cx="154" cy="46" r="4.5"/>
+              </g>
+              <g class="acc acc-papillon">
+                <path d="M110 106l-17-10v20zM110 106l17-10v20z"/>
+                <circle class="cuore" cx="110" cy="106" r="4.5"/>
+              </g>
+
+              <g class="gomitolo">
+                <circle cx="34" cy="156" r="15"/>
+                <path d="M23 150q11 10 22 3M25 162q9-12 20-7"/>
+                <path class="filo" d="M47 150q22-12 42-6"/>
+              </g>
+
+              <ellipse class="mora-zampa" cx="86" cy="142" rx="13" ry="10"/>
+              <g class="mora-braccio" id="mora-braccio">
+                <g class="ferri"><path d="M84 150l54-35M88 158l54-35"/></g>
+                <ellipse class="mora-zampa" cx="134" cy="132" rx="13" ry="10"/>
+                <g class="acc acc-ditale"><path d="M142 124q9-5 13 4t-8 9"/></g>
+              </g>
+            </g>
+
+            <!-- il calzino in lavorazione, per terra davanti a lei -->
+            <g id="calzino-live" transform="translate(196 92) scale(0.52)">
+              <g clip-path="url(#clip-calzino)">
+                <rect class="calzino-vuoto" x="0" y="0" width="120" height="120"/>
+                <rect class="calzino-lana" id="calzino-lana" x="0" y="120" width="120" height="120"/>
+              </g>
+              <g class="calzino-bordo">
+                <rect x="42" y="12" width="34" height="62" rx="10"/>
+                <rect x="18" y="58" width="58" height="32" rx="16"/>
+                <path d="M42 26h34"/>
+              </g>
+            </g>
+          </svg>
+
+          <p class="conta-calzini" id="conta-calzini"></p>
+        </div>
+
+        <p class="clock" id="clock" aria-live="off">25:00</p>
+
+        <button type="button" class="riga-sessione" id="btn-sessione">
+          <span id="clock-note">Sessione da 25 minuti</span>
+          <span class="cambia">cambia</span>
+        </button>
+
+        <div class="cycles" id="cycles" aria-label="Sessioni prima della pausa lunga"></div>
+
+        <div class="controls">
+          <button type="button" class="btn primary big" id="btn-start">Avvia</button>
+        </div>
+
+        <div class="controls-min">
+          <button type="button" class="link" id="btn-skip">Salta</button>
+          <button type="button" class="link" id="btn-chiudi" hidden>Chiudi il calzino</button>
+          <button type="button" class="link" id="btn-reset">Azzera</button>
+        </div>
+        <button type="button" class="btn ghost small btn-esci" id="btn-esci">Esci dalla concentrazione</button>
+        <p class="hint kbd-hint" id="kbd-hint"></p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Su che cosa stai lavorando</h2>
+          <button type="button" class="btn ghost small" id="btn-task-new">+ Attività</button>
+        </div>
+        <div class="task-chips" id="task-chips"></div>
+        <form id="form-task" class="inline-form" autocomplete="off" hidden>
+          <input id="task-name" type="text" maxlength="40" placeholder="es. Matematica, Tesi, Correzioni">
+          <button type="submit" class="btn primary small">Aggiungi</button>
+          <button type="button" class="btn ghost small" id="btn-task-cancel">Annulla</button>
+        </form>
+        <p class="error" id="task-error" role="alert" hidden></p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Cose da fare</h2>
+          <button type="button" class="btn ghost small" id="btn-todo-pulisci">Togli le fatte</button>
+        </div>
+        <ul class="todo" id="todo"></ul>
+        <p class="empty" id="todo-empty">Niente in lista. Scrivi qui sotto che cosa vuoi finire oggi.</p>
+        <form id="form-todo" class="inline-form" autocomplete="off">
+          <input id="todo-testo" type="text" maxlength="80" placeholder="es. finire il capitolo 3">
+          <button type="submit" class="btn primary small">Aggiungi</button>
+        </form>
+      </div>
+
+      <div class="card today-card">
+        <h2>Oggi</h2>
+        <div class="stat-row" id="today-stats"></div>
+        <div class="goal">
+          <div class="goal-bar"><span id="goal-fill"></span></div>
+          <p class="hint" id="goal-note"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================= CASA -->
+    <section id="view-casa" class="view" role="tabpanel" tabindex="-1" hidden>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>La casa di Mora</h2>
+          <span class="pill" id="casa-fase">0 pezzi su 11</span>
+        </div>
+
+        <div class="casa-scena">
+          <svg id="casa" viewBox="0 0 320 210" role="img" aria-labelledby="casa-title">
+            <title id="casa-title">La casa che Mora sta costruendo</title>
+
+            <g data-fase="1">
+              <ellipse class="prato" cx="160" cy="188" rx="150" ry="17"/>
+              <path class="palo" d="M42 188v-30"/>
+              <rect class="cartello" x="24" y="146" width="40" height="16" rx="3"/>
+            </g>
+
+            <g data-fase="2"><rect class="fondamenta" x="86" y="168" width="150" height="18" rx="3"/></g>
+
+            <g data-fase="3">
+              <rect class="pavimento" x="90" y="156" width="142" height="14" rx="2"/>
+              <path class="assi" d="M112 156v14M140 156v14M168 156v14M196 156v14"/>
+            </g>
+
+            <g data-fase="4"><rect class="muri" x="94" y="96" width="134" height="62" rx="4"/></g>
+
+            <g data-fase="5">
+              <rect class="finestra" x="108" y="110" width="32" height="30" rx="3"/>
+              <rect class="finestra" x="182" y="110" width="32" height="30" rx="3"/>
+              <path class="croce" d="M124 110v30M108 125h32M198 110v30M182 125h32"/>
+            </g>
+
+            <g data-fase="6">
+              <rect class="porta" x="148" y="116" width="28" height="42" rx="4"/>
+              <circle class="maniglia" cx="169" cy="138" r="2.6"/>
+            </g>
+
+            <g data-fase="7"><path class="tetto" d="M82 100l79-50 79 50z"/></g>
+
+            <g data-fase="8">
+              <rect class="camino" x="198" y="60" width="18" height="32" rx="2"/>
+              <path class="fumo" d="M207 56q11-7 3-15t5-13"/>
+            </g>
+
+            <g data-fase="9">
+              <rect class="luce" x="110" y="112" width="28" height="26" rx="2"/>
+              <rect class="luce" x="184" y="112" width="28" height="26" rx="2"/>
+            </g>
+
+            <g data-fase="10">
+              <rect class="tronco" x="266" y="148" width="11" height="38" rx="4"/>
+              <circle class="chioma" cx="271" cy="138" r="27"/>
+              <circle class="mela" cx="260" cy="132" r="4"/>
+              <circle class="mela" cx="282" cy="146" r="4"/>
+              <path class="ravanelli" d="M40 176h34M40 182h34M40 188h34"/>
+            </g>
+
+            <g data-fase="11">
+              <path class="staccionata" d="M10 172v28M32 172v28M54 172v28M244 172v28M266 172v28M288 172v28M310 172v28"/>
+              <path class="staccionata-corr" d="M6 180h56M240 180h74M6 192h56M240 192h74"/>
+            </g>
+          </svg>
+        </div>
+
+        <p class="lede" id="casa-racconto"></p>
+        <div class="goal">
+          <div class="goal-bar"><span id="casa-fill"></span></div>
+          <p class="hint" id="casa-nota"></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>La storia</h2>
+        <ol class="storia" id="storia"></ol>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Il cassetto</h2>
+          <span class="pill" id="paia-count">0 paia</span>
+        </div>
+        <p class="lede" id="cassetto-lede"></p>
+        <div class="cassetto" id="cassetto"></div>
+        <p class="empty" id="cassetto-empty">Il cassetto è vuoto: la prima sessione finita è il primo calzino.</p>
+      </div>
+
+      <div class="card">
+        <h2>Traguardi</h2>
+        <div class="badges" id="badges"></div>
+      </div>
+    </section>
+
+    <!-- ===================================================== STATISTICHE -->
+    <section id="view-statistiche" class="view" role="tabpanel" tabindex="-1" hidden>
+      <div class="card">
+        <h2>In breve</h2>
+        <div class="stat-row" id="stats-row"></div>
+      </div>
+
+      <div class="card">
+        <h2>Ultimi 14 giorni</h2>
+        <div class="chart" id="chart" role="img" aria-label="Minuti di concentrazione degli ultimi 14 giorni"></div>
+      </div>
+
+      <div class="card">
+        <h2>Per attività</h2>
+        <div class="breakdown" id="breakdown"></div>
+        <p class="empty" id="breakdown-empty">Nessuna sessione registrata.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Ultime sessioni</h2>
+          <span class="pill" id="sessions-count">0</span>
+        </div>
+        <ul class="log" id="log"></ul>
+        <p class="empty" id="log-empty">Il registro è vuoto.</p>
+      </div>
+    </section>
+
+    <!-- ==================================================== IMPOSTAZIONI -->
+    <section id="view-impostazioni" class="view" role="tabpanel" tabindex="-1" hidden>
+
+      <div class="card">
+        <h2>Durate</h2>
+        <div class="grid grid-2">
+          <label class="field"><span>Concentrazione (min)</span>
+            <input id="s-focus" type="number" min="1" max="180" step="1" inputmode="numeric"></label>
+          <label class="field"><span>Pausa breve (min)</span>
+            <input id="s-short" type="number" min="1" max="60" step="1" inputmode="numeric"></label>
+          <label class="field"><span>Pausa lunga (min)</span>
+            <input id="s-long" type="number" min="1" max="90" step="1" inputmode="numeric"></label>
+          <label class="field"><span>Sessioni prima della pausa lunga</span>
+            <input id="s-cycles" type="number" min="2" max="12" step="1" inputmode="numeric"></label>
+          <label class="field"><span>Obiettivo giornaliero (min)</span>
+            <input id="s-goal" type="number" min="10" max="960" step="5" inputmode="numeric"></label>
+        </div>
+        <div class="preset-row">
+          <span class="hint">Preimpostati:</span>
+          <button type="button" class="chip" data-preset="25-5-15-4">25 / 5 / 15</button>
+          <button type="button" class="chip" data-preset="50-10-30-2">50 / 10 / 30</button>
+          <button type="button" class="chip" data-preset="90-20-30-2">90 / 20 / 30</button>
+          <button type="button" class="chip" data-preset="15-3-10-4">15 / 3 / 10</button>
+        </div>
+        <div class="switches">
+          <label class="switch"><input type="checkbox" id="s-auto-break"><span>Avvia da sola la pausa</span></label>
+          <label class="switch"><input type="checkbox" id="s-auto-focus"><span>Avvia da sola la sessione dopo la pausa</span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Avvisi</h2>
+        <div class="switches">
+          <label class="switch"><input type="checkbox" id="s-sound"><span>Suono a fine sessione</span></label>
+          <label class="switch"><input type="checkbox" id="s-notify"><span>Notifica di sistema</span></label>
+          <label class="switch"><input type="checkbox" id="s-wake"><span>Tieni acceso lo schermo mentre il timer va</span></label>
+          <label class="switch"><input type="checkbox" id="s-profonda"><span>Concentrazione profonda: avviando, solo Mora a schermo intero</span></label>
+          <label class="switch"><input type="checkbox" id="s-notte"><span>Schermata del timer scura</span></label>
+        </div>
+        <p class="hint" id="notify-note"></p>
+      </div>
+
+      <div class="card">
+        <h2>Distrattori</h2>
+        <p class="lede">Una pagina web non può spegnere le altre app del telefono: quello lo può fare
+          solo un'app installata con i permessi di sistema. Qui il patto è diverso — scrivi che cosa
+          ti ruba il tempo, e se esci dalla scheda mentre lavori Mora se ne accorge.</p>
+        <div class="chips-edit" id="distractors"></div>
+        <form id="form-distractor" class="inline-form" autocomplete="off">
+          <input id="distractor-name" type="text" maxlength="30" placeholder="es. Instagram, YouTube, chat di gruppo">
+          <button type="submit" class="btn primary small">Aggiungi</button>
+        </form>
+        <div class="switches">
+          <label class="switch"><input type="checkbox" id="s-strict"><span>Modalità severa: uscire dalla scheda disfa il calzino</span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Aspetto</h2>
+        <p class="hint">Tutti i colori e tutti gli accessori sono qui, senza nulla da sbloccare.</p>
+        <div class="palette-row" id="palettes"></div>
+        <div class="seg" id="tema-seg" role="group" aria-label="Tema chiaro o scuro">
+          <button type="button" class="seg-btn" data-theme="auto">Automatico</button>
+          <button type="button" class="seg-btn" data-theme="light">Chiaro</button>
+          <button type="button" class="seg-btn" data-theme="dark">Scuro</button>
+        </div>
+        <h3>Accessori di Mora</h3>
+        <div class="outfit-row" id="outfit"></div>
+        <h3>Fantasia dei calzini</h3>
+        <div class="outfit-row" id="fantasie"></div>
+        <h3>Come è fatta Mora</h3>
+        <div class="outfit-row" id="pelli"></div>
+        <h3>Decorazioni della stanza</h3>
+        <p class="hint">I mobili arrivano da soli con i pezzi della casa. Queste si accendono a mano.</p>
+        <div class="outfit-row" id="decorazioni"></div>
+      </div>
+
+      <div class="card">
+        <h2>Installala sul telefono</h2>
+        <p class="lede" id="installa-nota">Calzino è un sito che si comporta da app: aggiunto alla
+          schermata Home parte a tutto schermo, funziona senza rete e non passa da nessuno store.</p>
+        <div class="btn-row">
+          <button type="button" class="btn primary" id="btn-installa" hidden>Installa</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>I tuoi dati</h2>
+        <p class="lede">Tutto sta nel <code>localStorage</code> di questo browser: niente account,
+          niente server. Svuotare i dati del browser cancella anche il cassetto.</p>
+        <div class="btn-row">
+          <button type="button" class="btn ghost" id="btn-export">Esporta</button>
+          <label class="btn ghost file-btn">Importa<input type="file" id="file-import" accept="application/json,.json" hidden></label>
+          <button type="button" class="btn danger ghost" id="btn-wipe">Cancella tutto</button>
+        </div>
+        <p class="hint" id="data-note"></p>
+      </div>
+
+      <div class="card pro-card" id="pro-card">
+        <div class="card-head">
+          <h2>Calzino Pro</h2>
+          <span class="pill" id="pro-stato">non attivo</span>
+        </div>
+        <p class="lede">Un euro al mese. Cambia due cose: ogni sessione finita mette
+          <b>due calzini</b> nel cassetto invece di uno — e la casa di Mora cresce il doppio
+          più in fretta. In più: sessioni libere fino a sei ore invece di due, quattro
+          tavolozze, tre accessori per Mora, quattro fantasie per i calzini.</p>
+        <p class="hint">Timer, casa, cassetto, statistiche, esportazione e tutto il resto restano
+          gratis e completi: la casa si costruisce tutta anche senza pagare, ci vuole il doppio
+          del lavoro. Il Pro non toglie niente a chi non paga.</p>
+        <div class="btn-row">
+          <button type="button" class="btn primary" id="btn-pro">Vedi il Pro</button>
+        </div>
+      </div>
+
+      <div class="card about">
+        <h2>Il blocco delle app</h2>
+        <p>Non c'è, né gratis né a pagamento: questa è una pagina web e quel permesso
+          non ce l'ha. Per spegnere davvero le altre app servirebbe un'app Android
+          installata. Qui restano l'elenco dei distrattori e il conteggio delle uscite.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <p class="error block-warning" id="storage-warning" role="alert" hidden>
+    Questo browser non permette di salvare i dati (navigazione privata?). Il timer funziona,
+    ma i calzini non verranno conservati.
+  </p>
+</div>
+
+<!-- rientro da una fuga: compare quando torni sulla scheda -->
+<div class="sheet" id="sheet-escape" hidden>
+  <div class="sheet-box">
+    <h2 id="escape-title">Bentornato</h2>
+    <p id="escape-text"></p>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-escape-ok">Riprendo</button>
+    </div>
+  </div>
+</div>
+
+<!-- che sessione: modo e fase, fuori dalla schermata -->
+<div class="sheet" id="sheet-sessione" hidden>
+  <div class="sheet-box">
+    <h2>Che sessione</h2>
+
+    <div class="seg modo-seg" id="modo-seg" role="group" aria-label="Modo del timer">
+      <button type="button" class="seg-btn is-active" data-modo="timer">A tempo</button>
+      <button type="button" class="seg-btn" data-modo="libera">Libera</button>
+    </div>
+
+    <div class="phase-switch" role="group" aria-label="Tipo di sessione">
+      <button type="button" class="phase is-active" data-phase="focus">Concentrazione</button>
+      <button type="button" class="phase" data-phase="short">Pausa breve</button>
+      <button type="button" class="phase" data-phase="long">Pausa lunga</button>
+    </div>
+
+    <p class="hint" id="sessione-nota"></p>
+    <div class="btn-row">
+      <button type="button" class="btn ghost" id="btn-sessione-close">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- fine sessione: il calzino appena finito -->
+<div class="sheet" id="sheet-fine" hidden>
+  <div class="sheet-box festa">
+    <svg class="calzino-festa" id="calzino-festa" viewBox="0 0 100 110" aria-hidden="true"></svg>
+    <h2 id="festa-titolo">Calzino finito</h2>
+    <p id="festa-testo"></p>
+    <p class="hint" id="festa-casa"></p>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-festa-pausa">Fai la pausa</button>
+      <button type="button" class="btn ghost" id="btn-festa-chiudi">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- il primo incontro con Mora -->
+<div class="sheet" id="sheet-ciao" hidden>
+  <div class="sheet-box festa">
+    <img src="icon.svg" alt="" width="64" height="64" class="ciao-icona">
+    <h2>Lei è Mora</h2>
+    <p>È una talpa e sferruzza. Quando parte il timer, prende i ferri; quando la sessione
+      arriva in fondo, nel cassetto c'è un calzino. Due calzini fanno un paio, e i paia
+      pagano la casa che si sta costruendo — un pezzo alla volta, dal terreno alla staccionata.</p>
+    <p class="hint">Tu devi solo lasciar stare il telefono finché il timer scende.</p>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-ciao-via">Comincia: 25 minuti</button>
+      <button type="button" class="btn ghost" id="btn-ciao-dopo">Guardo prima in giro</button>
+    </div>
+  </div>
+</div>
+
+<!-- il Pro: prova, pagamento, codice -->
+<div class="sheet" id="sheet-pro" hidden>
+  <div class="sheet-box">
+    <h2>Calzino Pro — <span id="pro-prezzo">1 € al mese</span></h2>
+    <p class="pro-attivo" id="pro-attivo" hidden></p>
+    <ul class="pro-lista">
+      <li><b>Calzini ×2</b> — ogni sessione finita ne mette due nel cassetto, segnati come doppi: la casa cresce il doppio più in fretta.</li>
+      <li><b>Sessioni libere fino a sei ore</b> invece di due.</li>
+      <li><b>Quattro tavolozze in più</b> — Tramonto, Menta, Lavanda, Rame.</li>
+      <li><b>Tre accessori per Mora</b> — coroncina, papillon, fiorellino.</li>
+      <li><b>Quattro fantasie</b> per i calzini del cassetto.</li>
+    </ul>
+
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btn-prova">Prova 7 giorni</button>
+      <button type="button" class="btn ghost" id="btn-paga">Abbonati</button>
+    </div>
+    <p class="hint" id="pro-pagamento-nota"></p>
+
+    <h3>Hai un codice?</h3>
+    <form id="form-codice" class="inline-form" autocomplete="off">
+      <input id="pro-codice" type="text" maxlength="19" placeholder="CALZ-0000-0000-0000"
+             autocapitalize="characters" spellcheck="false">
+      <button type="submit" class="btn primary small">Sblocca</button>
+    </form>
+    <p class="error" id="pro-errore" role="alert" hidden></p>
+
+    <p class="hint">Il codice viene controllato qui dentro, nel browser: è una porta
+      chiusa, non una cassaforte. Chi apre il sorgente può aggirarla — se paghi, paghi
+      perché ti va che questa cosa esista.</p>
+
+    <div class="btn-row">
+      <button type="button" class="btn ghost small" id="btn-pro-rimuovi" hidden>Togli la licenza da qui</button>
+      <button type="button" class="btn ghost" id="btn-pro-close">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- dettaglio di un calzino -->
+<div class="sheet" id="sheet-calzino" hidden>
+  <div class="sheet-box">
+    <h2>Calzino</h2>
+    <dl class="detail" id="calzino-detail"></dl>
+    <div class="btn-row">
+      <button type="button" class="btn ghost" id="btn-calzino-close">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<p class="toast" id="toast" role="status" aria-live="polite" hidden></p>
+
+<script src="js/storage.js"></script>
+<script src="js/licenza.js"></script>
+<script src="js/timer.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
