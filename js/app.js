@@ -1,7 +1,8 @@
 /**
  * Leggi di più — interfaccia.
  *
- * Tre schermate: accesso (solo username), form nuova lettura, diario e profilo.
+ * Accesso con il solo nome utente, poi libreria, nuova lettura, diario e
+ * profilo; più la scheda di un libro e la conversazione con Nina.
  * Nessuna dipendenza esterna: il DOM viene costruito a mano con h().
  */
 (() => {
@@ -254,7 +255,9 @@
     $("#screen-app").hidden = false;
     resetForm();
     renderAll();
-    switchView("nuova");
+    // Chi non ha ancora letto niente parte dalla libreria; chi legge già,
+    // dal form: è il gesto che ripete ogni giorno.
+    switchView(Store.entries().length ? "nuova" : "libreria");
   }
 
   function doLogin(name) {
@@ -268,6 +271,9 @@
   }
 
   function switchView(name) {
+    // La vista attiva finisce sul body: la striscia di «Oggi» riguarda la
+    // lettura, non la libreria, e in libreria si toglie di mezzo.
+    document.body.dataset.view = name;
     for (const tab of $$(".tab")) {
       const active = tab.dataset.view === name;
       tab.classList.toggle("is-active", active);
@@ -651,6 +657,10 @@
           type: "button", class: "btn ghost small", onClick: () => aiFeedback(entry),
           text: entry.aiComment ? "Chiedi di nuovo" : "Commento di Claude"
         }),
+        h("button", {
+          type: "button", class: "btn ghost small",
+          onClick: () => ninaFromEntry(entry), text: "Racconta a Nina"
+        }),
         h("button", { type: "button", class: "btn ghost small danger", onClick: () => removeEntry(entry), text: "Elimina" })
       )
     );
@@ -807,11 +817,39 @@
     $("#ai-body").append(h("p", { class: "ai-loading", text: message }));
   }
 
-  function dialogAnswer(text) {
+  function dialogAnswer(text, sources) {
     clear($("#ai-body"));
     $("#ai-body").append(h("p", { class: "ai-answer", text: text }));
+    if (sources && sources.length) {
+      const line = h("p", { class: "muted small" }, "Costruita su: ");
+      sources.forEach((source, i) => {
+        if (i) line.append(document.createTextNode(" · "));
+        line.append(h("a", { href: source.url, target: "_blank", rel: "noopener noreferrer", text: source.name }));
+      });
+      $("#ai-body").append(line);
+    }
     clear($("#ai-actions"));
     $("#ai-actions").append(h("button", { type: "button", class: "btn", onClick: closeDialog, text: "Chiudi" }));
+  }
+
+  /** Chiede prima qualcosa all'utente, poi passa il testo a chi ha chiamato. */
+  function dialogCompose(label, placeholder, onSubmit) {
+    const field = h("textarea", { rows: "3", maxlength: "600", placeholder, "aria-label": label });
+    clear($("#ai-body"));
+    $("#ai-body").append(h("p", { class: "compose-label", text: label }), field);
+    clear($("#ai-actions"));
+    $("#ai-actions").append(
+      h("button", {
+        type: "button", class: "btn primary", text: "Chiedi",
+        onClick: () => {
+          const value = field.value.trim();
+          if (!value) { toast("Scrivi prima la tua domanda."); field.focus(); return; }
+          onSubmit(value);
+        }
+      }),
+      h("button", { type: "button", class: "btn ghost", onClick: closeDialog, text: "Annulla" })
+    );
+    field.focus();
   }
 
   /**
@@ -887,19 +925,30 @@
    * Il giro completo di una richiesta: chiave presente → chiama l'API;
    * altrimenti, o se la chiamata fallisce, mostra il prompt da copiare.
    */
-  async function askClaude({ title, note, prompt, onText, onPaste }) {
-    openDialog(title, note);
+  async function askClaude({ title, note, prompt, onText, onPaste, sources, quiet }) {
     if (!AI.hasKey()) {
+      openDialog(title, note);
       dialogManual(prompt, "Non hai una chiave API di Claude: copia la domanda qui sotto e incollala in Claude.", onPaste);
       return;
     }
-    dialogLoading("Sto chiedendo a Claude…");
+
+    // Con «quiet» il risultato non si legge nel dialogo ma finisce nella
+    // pagina: aprirlo e richiuderlo subito sarebbe solo un lampo fastidioso.
+    if (quiet) toast("Chiedo a Claude…");
+    else {
+      openDialog(title, note);
+      dialogLoading("Sto chiedendo a Claude…");
+    }
+
     const result = await AI.ask(prompt);
+
     if (result.ok) {
       if (onText) onText(result.text);
-      else dialogAnswer(result.text);
+      else dialogAnswer(result.text, sources);
       return;
     }
+
+    openDialog(title, note);
     dialogManual(prompt, `${AI.explain(result)} Intanto puoi copiare la domanda e incollarla in Claude.`, onPaste);
   }
 
@@ -947,6 +996,7 @@
       title: "Domande su misura",
       note: `Per «${title}».`,
       prompt,
+      quiet: true,          // le domande compaiono nel form, non nel dialogo
       onText: useQuestions,
       onPaste: useQuestions
     });
@@ -999,6 +1049,455 @@
       field.placeholder = "sk-ant-…";
       state.textContent = "Nessuna chiave: l'app prepara la domanda da copiare in Claude.";
     }
+  }
+
+  /* ============================================================== LIBRERIA */
+
+  const SUGGERIMENTI = ["Italo Calvino", "Il piccolo principe", "Roald Dahl", "Harry Potter", "Primo Levi", "Jules Verne"];
+
+  let currentBook = null;
+  let currentDossier = null;
+  let searchToken = 0;
+
+  function hashString(text) {
+    let hash = 0;
+    const s = String(text || "");
+    for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+    return hash;
+  }
+
+  /**
+   * La copertina vera se c'è e si carica, altrimenti una disegnata col titolo.
+   * Serve davvero: moltissimi libri non hanno copertina, e in certe pagine le
+   * immagini esterne non vengono caricate affatto.
+   */
+  function coverNode(book, size) {
+    const wrap = h("div", { class: `cover cover-${size}` });
+    const drawCover = () => {
+      clear(wrap);
+      wrap.classList.remove("is-loading");
+      wrap.classList.add("is-drawn", "pattern-" + (hashString(book.title) % 4));
+      wrap.append(
+        h("span", { class: "cover-title", text: book.title }),
+        h("span", { class: "cover-author", text: (book.author || "").split(",")[0] })
+      );
+    };
+    if (book.cover) {
+      // L'ascoltatore va agganciato prima di src: se il caricamento fallisce
+      // subito, l'evento parte prima ancora che si faccia in tempo ad ascoltarlo.
+      const img = h("img", { alt: "", loading: "lazy", decoding: "async" });
+      // Una richiesta che non fallisce ma resta appesa lascerebbe un buco
+      // vuoto per sempre: dopo qualche secondo si disegna la copertina.
+      const giveUp = setTimeout(drawCover, 3500);
+      wrap.classList.add("is-loading");
+      img.addEventListener("load", () => {
+        clearTimeout(giveUp);
+        wrap.classList.remove("is-loading");
+        if (!img.naturalWidth) drawCover(); // immagine servita ma vuota
+      });
+      img.addEventListener("error", () => {
+        clearTimeout(giveUp);
+        drawCover();
+      });
+      wrap.append(img);
+      img.src = book.cover;
+    } else {
+      drawCover();
+    }
+    return wrap;
+  }
+
+  function bookCard(book) {
+    const open = () => openBookSheet(book);
+    return h("article", { class: "book-card" },
+      h("button", { type: "button", class: "book-card-btn", onClick: open, "aria-label": `Apri ${book.title}` },
+        coverNode(book, "md"),
+        h("span", { class: "book-card-text" },
+          h("strong", { class: "book-card-title", text: book.title }),
+          h("span", { class: "book-card-author", text: book.author || "autore sconosciuto" }),
+          book.year ? h("span", { class: "book-card-year", text: String(book.year) }) : null
+        )
+      )
+    );
+  }
+
+  function renderSuggestions() {
+    const box = $("#lib-suggerimenti");
+    clear(box);
+    for (const word of SUGGERIMENTI) {
+      box.append(h("button", {
+        type: "button", class: "chip", text: word,
+        onClick: () => { $("#f-cerca").value = word; runSearch(word); }
+      }));
+    }
+  }
+
+  async function runSearch(query) {
+    const clean = String(query || "").trim();
+    if (clean.length < 2) {
+      toast("Scrivi almeno due lettere.");
+      return;
+    }
+    const token = ++searchToken;
+    const box = $("#lib-risultati");
+    $("#lib-stato").textContent = "Cerco…";
+    clear(box);
+    for (let i = 0; i < 6; i++) box.append(h("div", { class: "book-card is-skeleton" }));
+
+    const result = await Books.search(clean);
+    if (token !== searchToken) return; // è già partita una ricerca più recente
+
+    clear(box);
+    if (!result.books.length) {
+      $("#lib-stato").textContent = "";
+      box.append(emptyState(
+        "Nessun libro trovato.",
+        result.online
+          ? "Prova con il titolo esatto, o solo con il cognome dell'autore."
+          : "Da questa pagina non riesco a raggiungere il catalogo online: restano i libri che l'app porta con sé."
+      ));
+      return;
+    }
+
+    $("#lib-stato").textContent = result.online
+      ? (result.total > result.books.length
+          ? `I primi ${result.books.length} di ${result.total}.`
+          : plural(result.books.length, "libro trovato", "libri trovati") + ".")
+      : `${plural(result.books.length, "libro", "libri")} dal catalogo interno: il catalogo online non è raggiungibile da qui.`;
+
+    for (const book of result.books) box.append(bookCard(book));
+  }
+
+  /* ------------------------------------------------------ scheda del libro */
+
+  async function openBookSheet(book) {
+    currentBook = book;
+    currentDossier = null;
+
+    $("#sheet-title").textContent = book.title;
+    $("#sheet-author").textContent = book.author || "Autore sconosciuto";
+    $("#sheet-meta").textContent = [
+      book.year ? String(book.year) : "",
+      book.pages ? plural(book.pages, "pagina", "pagine") : ""
+    ].filter(Boolean).join(" · ");
+
+    clear($("#sheet-cover"));
+    $("#sheet-cover").append(coverNode(book, "lg"));
+    clear($("#sheet-temi"));
+    clear($("#sheet-body"));
+    $("#sheet-sources").textContent = "";
+    $("#sheet-body").append(h("p", { class: "ai-loading", text: "Cerco di che cosa parla…" }));
+
+    const sheet = $("#book-sheet");
+    if (!sheet.open) sheet.showModal();
+
+    const dossier = await Books.research(book);
+    if (currentBook !== book) return; // l'utente ha già aperto un altro libro
+    currentDossier = dossier;
+    renderSheetBody(dossier);
+  }
+
+  function renderSheetBody(dossier) {
+    const book = dossier.book;
+    const body = $("#sheet-body");
+    clear(body);
+
+    const opening = dossier.intro || book.blurb;
+    if (opening) {
+      body.append(
+        h("h4", { class: "sheet-h", text: "Di che cosa parla" }),
+        h("p", { class: "sheet-text", text: trimTo(opening, 700) })
+      );
+    }
+
+    if (dossier.plot) {
+      // La trama enciclopedica racconta anche il finale: sta dietro un clic.
+      body.append(
+        h("details", { class: "plot" },
+          h("summary", { text: "Leggi la trama completa" }),
+          h("p", { class: "plot-warning", text: "Attenzione: una trama completa di solito racconta anche come va a finire." }),
+          h("p", { class: "sheet-text", text: dossier.plot }),
+          h("p", { class: "muted small", text: "Fonte: " + dossier.plotSource })
+        )
+      );
+    } else if (!opening) {
+      body.append(
+        h("p", { class: "muted", text: dossier.online
+          ? "Nessuna delle fonti pubbliche racconta questo libro."
+          : "Da questa pagina non riesco a consultare le fonti online." }),
+        h("button", {
+          type: "button", class: "btn small", text: "Chiedi a Claude di che cosa parla",
+          onClick: () => askClaude({
+            title: "Di che cosa parla",
+            note: `«${book.title}»`,
+            prompt: AI.prompts.plot(book)
+          })
+        })
+      );
+    }
+
+    clear($("#sheet-temi"));
+    for (const tema of dossier.subjects.slice(0, 6)) {
+      $("#sheet-temi").append(h("span", { class: "chip is-static", text: tema }));
+    }
+
+    const sources = $("#sheet-sources");
+    clear(sources);
+    if (dossier.sources.length) {
+      sources.append(document.createTextNode("Fonti consultate: "));
+      dossier.sources.forEach((source, i) => {
+        if (i) sources.append(document.createTextNode(" · "));
+        sources.append(h("a", { href: source.url, target: "_blank", rel: "noopener noreferrer", text: source.name }));
+      });
+    }
+  }
+
+  function trimTo(text, max) {
+    const clean = String(text || "").trim();
+    if (clean.length <= max) return clean;
+    const cut = clean.slice(0, max);
+    const stop = cut.lastIndexOf(". ");
+    return (stop > max * 0.5 ? cut.slice(0, stop + 1) : cut) + " […]";
+  }
+
+  function closeSheet() {
+    if ($("#book-sheet").open) $("#book-sheet").close();
+  }
+
+  /** Dalla scheda al diario: il libro scelto entra nel form già compilato. */
+  function startReading(book) {
+    resetForm();
+    $("#f-titolo").value = book.title;
+    $("#f-autore").value = book.author || "";
+    const known = groupByBook(Store.entries()).find(
+      (b) => Books.normalize(b.title) === Books.normalize(book.title)
+    );
+    if (known && known.lastPage > 0) $("#f-da").value = String(known.lastPage + 1);
+    closeSheet();
+    switchView("nuova");
+    ($("#f-da").value ? $("#f-a") : $("#f-pagine")).focus();
+    toast(`«${book.title}» è pronto nel diario.`);
+  }
+
+  /** Il dubbio dell'utente, sciolto con il materiale raccolto in rete. */
+  function askDoubt(book, dossier) {
+    openDialog("Non ho capito una cosa", `Su «${book.title}».`);
+    dialogCompose(
+      "Che cosa non ti torna?",
+      "es. perché il padre si arrabbia così tanto per un piatto di lumache?",
+      (doubt) => {
+        const material = dossier && !dossier.empty
+          ? Books.dossierText(dossier)
+          : `Libro: «${book.title}»${book.author ? " di " + book.author : ""}. Non ho trovato materiale in rete su questo libro.`;
+        askClaude({
+          title: "La spiegazione",
+          note: `Su «${book.title}».`,
+          prompt: AI.prompts.doubt({ dossier: material, doubt }),
+          sources: dossier ? dossier.sources : []
+        });
+      }
+    );
+  }
+
+  /* ============================================= RACCONTA A UNA BAMBINA */
+
+  const nina = { book: null, material: "", messages: [], busy: false };
+
+  function openNina(book, dossier) {
+    nina.book = book;
+    nina.material = dossier && !dossier.empty ? Books.dossierText(dossier, { maxPlot: 2000 }) : "";
+    nina.messages = [];
+    nina.busy = false;
+
+    $("#nina-libro").textContent = book.title;
+    clear($("#nina-chat"));
+    ninaBubble("nina", "Ciao! Che cosa hai letto? Raccontamelo tutto. Però parla facile, che io ho sei anni.");
+    $("#nina-hint").textContent = nina.material
+      ? "Nina conosce la storia, ma fa finta di no."
+      : "Non ho trovato materiale su questo libro: Nina ti ascolta e basta.";
+    $("#nina-input").value = "";
+
+    closeSheet();
+    $("#nina").hidden = false;
+    document.body.classList.add("is-locked");
+    $("#nina-input").focus();
+  }
+
+  /**
+   * Da una lettura del diario a Nina. Il libro qui è solo un titolo scritto a
+   * mano: va prima ritrovato nel catalogo, se possibile, per dare a Nina la
+   * storia vera. Intanto la conversazione è già aperta.
+   */
+  async function ninaFromEntry(entry) {
+    const book = { title: entry.title, author: entry.author || "", subjects: [], cover: null, blurb: "" };
+    openNina(book, null);
+    $("#nina-hint").textContent = "Cerco la storia vera…";
+
+    const found = await Books.search(`${entry.title} ${entry.author || ""}`.trim(), { limit: 4 });
+    if (nina.book !== book) return;
+
+    const wanted = Books.normalize(entry.title);
+    const match = (found.books || []).find((b) => Books.normalize(b.title) === wanted) || (found.books || [])[0];
+    if (!match) {
+      $("#nina-hint").textContent = "Non ho trovato materiale su questo libro: Nina ti ascolta e basta.";
+      return;
+    }
+
+    const dossier = await Books.research(match);
+    if (nina.book !== book) return;
+    nina.material = dossier.empty ? "" : Books.dossierText(dossier, { maxPlot: 2000 });
+    $("#nina-hint").textContent = nina.material
+      ? "Nina conosce la storia, ma fa finta di no."
+      : "Non ho trovato materiale su questo libro: Nina ti ascolta e basta.";
+  }
+
+  function closeNina() {
+    stopDictation();
+    $("#nina").hidden = true;
+    document.body.classList.remove("is-locked");
+  }
+
+  function ninaBubble(who, text, extra) {
+    const bubble = h("div", { class: "bubble bubble-" + who },
+      extra ? h("span", { class: "bubble-badge", text: extra }) : null,
+      h("p", { text: text })
+    );
+    $("#nina-chat").append(bubble);
+    bubble.scrollIntoView({ block: "end", behavior: "smooth" });
+    return bubble;
+  }
+
+  function ninaTyping(on) {
+    const existing = $("#nina-typing");
+    if (existing) existing.remove();
+    if (!on) return;
+    const dots = h("div", { class: "bubble bubble-nina is-typing", id: "nina-typing" },
+      h("p", { text: "Nina sta pensando…" }));
+    $("#nina-chat").append(dots);
+    dots.scrollIntoView({ block: "end", behavior: "smooth" });
+  }
+
+  async function ninaSend(text) {
+    const clean = String(text || "").trim();
+    if (!clean || nina.busy) return;
+    ninaBubble("me", clean);
+    nina.messages.push({ role: "user", content: clean });
+    $("#nina-input").value = "";
+    await ninaAnswer(AI.childSystem(nina.material), "nina");
+  }
+
+  async function ninaCoach() {
+    if (nina.busy) return;
+    if (!nina.messages.some((m) => m.role === "user")) {
+      toast("Prima raccontale qualcosa.");
+      return;
+    }
+    const messages = nina.messages.concat([{ role: "user", content: AI.coachRequest }]);
+    await ninaAnswer(AI.coachSystem(nina.material), "coach", messages);
+  }
+
+  /**
+   * Un turno di conversazione. In «coach» il risultato non entra nella
+   * cronologia: è un commento sul racconto, non una battuta del racconto.
+   */
+  async function ninaAnswer(system, kind, messagesOverride) {
+    const messages = messagesOverride || nina.messages;
+
+    if (!AI.hasKey()) {
+      ninaManual(system, messages, kind);
+      return;
+    }
+
+    nina.busy = true;
+    $("#nina-send").disabled = true;
+    ninaTyping(true);
+
+    const result = await AI.ask(messages, { system, maxTokens: kind === "coach" ? 1200 : 700 });
+
+    ninaTyping(false);
+    nina.busy = false;
+    $("#nina-send").disabled = false;
+
+    if (!result.ok) {
+      ninaManual(system, messages, kind, AI.explain(result));
+      return;
+    }
+    receiveNina(result.text, kind);
+  }
+
+  function receiveNina(text, kind) {
+    if (kind === "coach") {
+      const { score, body } = AI.parseScore(text);
+      ninaBubble("coach", body, score ? `Chiarezza ${score}/5` : null);
+      return;
+    }
+    nina.messages.push({ role: "assistant", content: text });
+    ninaBubble("nina", text);
+  }
+
+  /** Senza chiave: la conversazione continua passando dal copia e incolla. */
+  function ninaManual(system, messages, kind, why) {
+    const transcript = messages
+      .map((m) => (m.role === "user" ? "IO: " : "NINA: ") + m.content)
+      .join("\n\n");
+    const prompt = `${system}\n\n---\n\nLa conversazione fino a qui:\n\n${transcript}\n\n---\n\nScrivi ora la tua risposta, e soltanto quella.`;
+
+    openDialog(
+      kind === "coach" ? "Come sto andando?" : "La risposta di Nina",
+      `Su «${nina.book.title}».`
+    );
+    dialogManual(
+      prompt,
+      (why ? why + " " : "") + "Copia tutto questo in Claude e riporta qui la risposta.",
+      (answer) => receiveNina(answer, kind)
+    );
+  }
+
+  /* ---- dettatura: spiegare a voce è più naturale che scrivere ---- */
+
+  let recognition = null;
+
+  function stopDictation() {
+    if (!recognition) return;
+    try { recognition.stop(); } catch (err) { /* già ferma */ }
+    recognition = null;
+    $("#nina-mic").classList.remove("is-recording");
+  }
+
+  function setupDictation() {
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const mic = $("#nina-mic");
+    if (!Recognition) return; // il bottone resta nascosto dove non funziona
+    mic.hidden = false;
+
+    mic.addEventListener("click", () => {
+      if (recognition) { stopDictation(); return; }
+      recognition = new Recognition();
+      recognition.lang = "it-IT";
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      const field = $("#nina-input");
+      const before = field.value;
+
+      recognition.addEventListener("result", (event) => {
+        let said = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) said += event.results[i][0].transcript;
+        field.value = (before ? before + " " : "") + said.trim();
+      });
+      recognition.addEventListener("error", () => {
+        stopDictation();
+        toast("Non riesco a sentirti. Controlla il permesso del microfono.");
+      });
+      recognition.addEventListener("end", () => stopDictation());
+
+      try {
+        recognition.start();
+        mic.classList.add("is-recording");
+        toast("Ti ascolto: parla pure.");
+      } catch (err) {
+        stopDictation();
+      }
+    });
   }
 
   /* --------------------------------------------------------- import/export */
@@ -1089,6 +1588,34 @@
     $("#btn-ai-domande").addEventListener("click", aiSuggestQuestions);
     $("#ai-close").addEventListener("click", closeDialog);
 
+    // ---- libreria
+    $("#form-cerca").addEventListener("submit", (e) => {
+      e.preventDefault();
+      runSearch($("#f-cerca").value);
+    });
+    $("#sheet-close").addEventListener("click", closeSheet);
+    $("#btn-leggi").addEventListener("click", () => currentBook && startReading(currentBook));
+    $("#btn-nina").addEventListener("click", () => currentBook && openNina(currentBook, currentDossier));
+    $("#btn-dubbio").addEventListener("click", () => currentBook && askDoubt(currentBook, currentDossier));
+
+    // ---- racconta a Nina
+    $("#nina-close").addEventListener("click", closeNina);
+    $("#nina-coach").addEventListener("click", ninaCoach);
+    $("#nina-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      ninaSend($("#nina-input").value);
+    });
+    // Invio manda, a capo con maiuscolo: come in una chat.
+    $("#nina-input").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        ninaSend($("#nina-input").value);
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !$("#nina").hidden) closeNina();
+    });
+
     $("#btn-ai-key").addEventListener("click", () => {
       const value = $("#ai-key").value.trim();
       if (!value) { toast("Incolla prima la chiave."); return; }
@@ -1121,6 +1648,8 @@
 
   function init() {
     buildQuestionFields();
+    renderSuggestions();
+    setupDictation();
     wire();
     if (Store.current()) enterApp();
     else showLogin();

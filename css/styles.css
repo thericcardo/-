@@ -27,6 +27,9 @@
   --btn-primary-bg:       var(--green);
   --btn-primary-ink:      var(--yellow);
   --btn-primary-bg-hover: var(--green-soft);
+  --btn-accent-bg:        var(--yellow);
+  --btn-accent-ink:       var(--green);
+  --btn-accent-border:    var(--yellow);
   --focus-border:         var(--green-soft);
   --focus-glow:           var(--yellow-wash);
   --login-glow:           var(--yellow-wash);
@@ -43,8 +46,8 @@
   --shadow:       0 1px 2px rgba(32, 43, 34, .06), 0 8px 24px rgba(32, 43, 34, .06);
   --shadow-soft:  0 1px 2px rgba(32, 43, 34, .05);
 
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  --sans: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --serif: "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
 }
 
 /* Tema scuro. Le due regole hanno lo stesso contenuto e vanno tenute allineate:
@@ -66,6 +69,9 @@
     --btn-primary-bg:       var(--yellow);
     --btn-primary-ink:      var(--green);
     --btn-primary-bg-hover: var(--yellow-deep);
+    --btn-accent-bg:        transparent;
+    --btn-accent-ink:       var(--yellow);
+    --btn-accent-border:    var(--yellow);
     --focus-border:         var(--yellow);
     --focus-glow:           rgba(255, 216, 95, .16);
     --login-glow:           rgba(255, 216, 95, .10);
@@ -91,6 +97,9 @@
   --btn-primary-bg:       var(--yellow);
   --btn-primary-ink:      var(--green);
   --btn-primary-bg-hover: var(--yellow-deep);
+  --btn-accent-bg:        transparent;
+  --btn-accent-ink:       var(--yellow);
+  --btn-accent-border:    var(--yellow);
   --focus-border:         var(--yellow);
   --focus-glow:           rgba(255, 216, 95, .16);
   --login-glow:           rgba(255, 216, 95, .10);
@@ -472,6 +481,16 @@ textarea { resize: vertical; min-height: 2.8rem; }
 .tab:hover { color: var(--ink); }
 .tab.is-active { background: var(--yellow); color: var(--accent-ink); }
 
+/* Quattro sezioni devono entrare anche su uno schermo da telefono, senza che
+   l'ultima resti tagliata a metà. */
+@media (max-width: 480px) {
+  .tabs { gap: .1rem; padding: .22rem; }
+  .tab { font-size: .8rem; padding: .45rem .5rem; }
+}
+
+/* La striscia di «Oggi» racconta la lettura, non la ricerca di un libro. */
+body[data-view="libreria"] .today { display: none; }
+
 .view:focus { outline: none; }
 .view-head { display: flex; align-items: center; gap: .6rem; margin-bottom: .8rem; }
 
@@ -658,6 +677,333 @@ textarea { resize: vertical; min-height: 2.8rem; }
   font-size: .78rem;
   color: var(--muted);
 }
+
+/* ------------------------------------------------------------ libreria --- */
+
+.lib-hero { margin-bottom: 1.2rem; }
+.lib-hero h2 { font-size: clamp(1.6rem, 6vw, 2.1rem); text-wrap: balance; }
+.lib-hero .lede { color: var(--muted); margin-top: .35rem; max-width: 34rem; }
+
+.search-bar {
+  display: flex;
+  gap: .5rem;
+  margin-top: 1rem;
+}
+.search-bar input { flex: 1 1 auto; padding: .75rem .9rem; font-size: 1rem; }
+.search-bar .btn { flex: 0 0 auto; }
+
+.chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .7rem; }
+
+.chip {
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .26rem .7rem;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.chip:hover { background: var(--chip-hover-bg); border-color: var(--chip-hover-border); color: var(--ink); }
+.chip.is-static { cursor: default; background: var(--surface-alt); }
+.chip.is-static:hover { background: var(--surface-alt); border-color: var(--line); color: var(--muted); }
+
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+  gap: 1rem .8rem;
+}
+
+.book-card { min-width: 0; }
+.book-card-btn {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+  width: 100%;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.book-card-text { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
+.book-card-title {
+  font-family: var(--serif);
+  font-size: .98rem;
+  font-weight: 600;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.book-card-author { font-size: .8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.book-card-year { font-size: .74rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Copertina: quella vera se c'è, altrimenti disegnata col titolo dentro. */
+.cover {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  aspect-ratio: 2 / 3;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--surface-alt);
+  box-shadow: var(--shadow-soft);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Mentre l'immagine arriva la copertina pulsa: un riquadro fermo sembra rotto. */
+.cover.is-loading {
+  background: linear-gradient(100deg, var(--surface-alt) 30%, var(--line) 50%, var(--surface-alt) 70%);
+  background-size: 250% 100%;
+  animation: shimmer 1.3s linear infinite;
+}
+.book-card-btn:hover .cover { transform: translateY(-3px); box-shadow: var(--shadow); }
+
+/* Senza immagine la copertina è composta come una vera: titolo al centro,
+   un filetto, l'autore sotto. Meglio di un rettangolo vuoto. */
+.cover.is-drawn {
+  justify-content: center;
+  gap: .55rem;
+  padding: 1rem .8rem 1rem 1.1rem;
+  color: var(--yellow);
+  background: var(--green);
+  border-left: 5px solid var(--yellow-deep);
+  text-align: center;
+}
+.cover.is-drawn .cover-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.22;
+  text-wrap: balance;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cover.is-drawn .cover-title::after {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 2px;
+  margin: .5rem auto 0;
+  background: currentColor;
+  opacity: .5;
+}
+.cover.is-drawn .cover-author {
+  font-size: .72rem;
+  color: rgba(255, 216, 95, .72);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cover.is-drawn.pattern-1 { background: linear-gradient(160deg, #2C3B2F, var(--green)); }
+.cover.is-drawn.pattern-2 { background: linear-gradient(200deg, var(--green) 40%, #3C4E3F); }
+.cover.is-drawn.pattern-3 { background: var(--green-soft); border-left-color: var(--yellow); }
+
+.cover-lg { width: 108px; flex: 0 0 108px; border-radius: 10px; }
+.cover-lg.is-drawn { padding: .7rem .5rem .7rem .7rem; }
+.cover-lg.is-drawn .cover-title {
+  font-size: .82rem;
+  -webkit-line-clamp: 7;
+  hyphens: auto;         /* «rampante» non deve spezzarsi a metà parola */
+}
+.cover-lg.is-drawn .cover-title::after { margin-top: .4rem; }
+
+.book-card.is-skeleton {
+  aspect-ratio: 2 / 3;
+  border-radius: 8px;
+  background: linear-gradient(100deg, var(--surface-alt) 30%, var(--line) 50%, var(--surface-alt) 70%);
+  background-size: 250% 100%;
+  animation: shimmer 1.3s linear infinite;
+}
+@keyframes shimmer { to { background-position: -150% 0; } }
+
+/* -------------------------------------------------- scheda del libro --- */
+
+.sheet {
+  position: relative;
+  width: min(42rem, calc(100vw - 1.5rem));
+  max-height: min(46rem, calc(100dvh - 2rem));
+  overflow-y: auto;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+  box-shadow: var(--shadow);
+}
+.sheet::backdrop { background: rgba(20, 27, 22, .6); }
+.sheet-close { position: absolute; top: .7rem; right: .7rem; }
+
+.sheet-top { display: flex; gap: 1rem; align-items: flex-start; padding-right: 2rem; }
+.sheet-id { min-width: 0; display: flex; flex-direction: column; gap: .25rem; }
+.sheet-id h3 { font-size: 1.4rem; text-wrap: balance; }
+.sheet-author { font-size: 1rem; color: var(--muted); }
+
+.sheet-body { margin-top: 1.2rem; display: flex; flex-direction: column; gap: .6rem; }
+.sheet-h {
+  font-family: var(--sans);
+  font-size: .76rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sheet-text { white-space: pre-wrap; line-height: 1.6; max-width: 42rem; }
+
+.plot { margin-top: .4rem; border-top: 1px solid var(--line); padding-top: .7rem; }
+.plot summary { cursor: pointer; font-weight: 600; font-size: .92rem; }
+.plot summary::marker { color: var(--yellow-deep); }
+.plot-warning {
+  margin: .6rem 0;
+  padding: .5rem .7rem;
+  font-size: .84rem;
+  color: var(--muted);
+  background: var(--surface-alt);
+  border-left: 3px solid var(--yellow);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.plot .sheet-text { margin-bottom: .5rem; }
+
+.sheet-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.3rem; }
+.btn.accent {
+  background: var(--btn-accent-bg);
+  color: var(--btn-accent-ink);
+  border-color: var(--btn-accent-border);
+}
+.btn.accent:hover { background: var(--yellow-deep); border-color: var(--yellow-deep); color: var(--green); }
+
+.sheet-sources { margin-top: .8rem; font-size: .8rem; color: var(--muted); }
+.sheet-sources a { color: inherit; }
+
+@media (max-width: 520px) {
+  .sheet { padding: 1.1rem; }
+  .sheet-top { gap: .8rem; }
+  .cover-lg { width: 94px; flex-basis: 94px; }
+  .sheet-id h3 { font-size: 1.2rem; }
+}
+
+/* ------------------------------------------------------ racconta a Nina --- */
+
+body.is-locked { overflow: hidden; }
+
+.nina {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.nina-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .8rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.nina-who { display: flex; align-items: center; gap: .7rem; min-width: 0; }
+.nina-face { display: grid; place-items: center; flex: 0 0 auto; }
+.nina-who-text { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.nina-who-text strong { font-family: var(--serif); font-size: 1.05rem; }
+.nina-who-text .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.nina-chat {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+  max-width: 46rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.bubble {
+  max-width: min(30rem, 86%);
+  padding: .7rem .95rem;
+  border-radius: 16px;
+  line-height: 1.5;
+  box-shadow: var(--shadow-soft);
+}
+.bubble p { white-space: pre-wrap; word-break: break-word; }
+
+.bubble-nina {
+  align-self: flex-start;
+  background: var(--yellow);
+  color: var(--green);
+  border-bottom-left-radius: 5px;
+}
+.bubble-me {
+  align-self: flex-end;
+  background: var(--green);
+  color: #F1F4F0;
+  border-bottom-right-radius: 5px;
+}
+.bubble-coach {
+  align-self: stretch;
+  max-width: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--yellow-deep);
+  border-radius: var(--radius);
+}
+.bubble-badge {
+  display: inline-block;
+  margin-bottom: .35rem;
+  padding: .16rem .6rem;
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  background: var(--yellow);
+  border-radius: 999px;
+}
+.bubble.is-typing { opacity: .7; font-style: italic; }
+
+.nina-compose {
+  display: flex;
+  gap: .5rem;
+  align-items: flex-end;
+  padding: .8rem 1rem .4rem;
+  max-width: 46rem;
+  width: 100%;
+  margin: 0 auto;
+}
+.nina-compose textarea { flex: 1 1 auto; min-height: 3.6rem; max-height: 8rem; overflow-y: auto; }
+.nina-buttons { display: flex; gap: .4rem; align-items: center; flex: 0 0 auto; }
+
+#nina-mic { display: grid; place-items: center; border: 1px solid var(--line); color: var(--muted); }
+#nina-mic.is-recording { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+.nina-foot {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  flex-wrap: wrap;
+  padding: 0 1rem 1rem;
+  max-width: 46rem;
+  width: 100%;
+  margin: 0 auto;
+}
+.nina-foot .hint { margin-top: 0; }
+
+.compose-label { font-weight: 600; }
 
 /* ------------------------------------------------------------- Claude --- */
 

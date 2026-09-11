@@ -1,16 +1,17 @@
 # Leggi di più
 
-Un diario di lettura essenziale: segni **titolo**, **pagine lette** e rispondi alle
-**domande sul contesto**; l'app tiene il conto sul tuo profilo. Per entrare serve
-solo un **nome utente** — niente password, niente email, niente server.
+Cerca fra i libri del mondo, leggine la trama, poi tieni il conto di quello che
+leggi — e mettiti alla prova raccontandolo a una bambina di sei anni. Per entrare
+serve solo un **nome utente**: niente password, niente email, niente server.
 
 ## Come si usa
 
 1. Apri `index.html` (doppio clic va benissimo) oppure il sito pubblicato.
 2. Scrivi un nome utente e premi **Entra**. Se non esiste, viene creato.
-3. **Nuova lettura** → titolo, pagine lette, e le domande sul contesto.
-4. **Diario** → tutte le letture, in ordine di data, con ricerca e filtro per libro.
-5. **Profilo** → pagine totali, giorni di fila, pagine della settimana, grafico degli
+3. **Libreria** → cerca fra i libri del mondo, leggi di che cosa parlano, scegli.
+4. **Nuova lettura** → titolo, pagine lette, e le domande sul contesto.
+5. **Diario** → tutte le letture, in ordine di data, con ricerca e filtro per libro.
+6. **Profilo** → pagine totali, giorni di fila, pagine della settimana, grafico degli
    ultimi 14 giorni, elenco dei libri e obiettivo giornaliero.
 
 Più persone possono usare lo stesso dispositivo: ogni nome utente ha il suo diario
@@ -29,6 +30,63 @@ e servono a fissare quello che hai letto invece di dimenticarlo alla pagina dopo
 6. Che cosa pensi che succederà? Che cosa vuoi scoprire?
 
 Puoi aggiungerne di tue con **+ Aggiungi una tua domanda**.
+
+## La libreria
+
+La scheda **Libreria** cerca fra i libri del mondo. Scrivi un titolo, un autore o
+un argomento e per ogni libro trovi copertina, anno, numero di pagine, temi e —
+soprattutto — **di che cosa parla**.
+
+Le fonti sono tre, pubbliche e senza chiavi, interrogate direttamente dal browser:
+
+| Fonte | Che cosa dà |
+|---|---|
+| [Open Library](https://openlibrary.org) | catalogo, copertine, scheda dell'opera |
+| [Wikipedia italiana](https://it.wikipedia.org) | la trama vera, presa dalla sezione «Trama» della voce |
+| [Google Books](https://books.google.com) | la descrizione dell'editore, come ripiego |
+
+La trama completa sta dietro un clic, con un avviso: una trama enciclopedica di
+solito racconta anche come va a finire. L'introduzione, che non svela il finale,
+è invece subito leggibile.
+
+Due accortezze che contano:
+
+- **Wikipedia viene accettata solo se il titolo della voce corrisponde davvero**
+  al libro. Meglio nessuna trama che la trama di un altro libro.
+- Se una fonte non risponde, le altre lavorano lo stesso; se non risponde
+  nessuna, resta il **catalogo interno** di una cinquantina di titoli che viaggia
+  dentro il file, e la ricerca funziona comunque.
+
+Da ogni scheda: **Comincia a leggerlo** porta il libro nel diario già compilato,
+**Non ho capito una cosa** apre la spiegazione, **Raccontalo a Nina** apre quello
+che segue.
+
+## Raccontalo a Nina
+
+Nina ha sei anni e ti ascolta raccontare il libro che stai leggendo.
+
+Non è un vezzo: è il metodo di Feynman. Chi ha capito una cosa la sa dire con
+parole semplici; chi non l'ha capita si nasconde dietro parole difficili. Nina
+non le accetta: se gliene dici una, ti chiede che cosa vuol dire, e per
+risponderle devi averla capita davvero.
+
+Come funziona:
+
+- Nina **conosce la storia vera** (le arriva il dossier raccolto in rete) ma fa
+  finta di no: vuole che sia tu a raccontargliela.
+- Se dici qualcosa che non torna, non ti corregge come farebbe un adulto: si
+  stupisce. «Ah sì? Io pensavo che…».
+- Risponde in massimo sessanta parole e finisce sempre con una domanda da
+  bambina — quelle che vanno dritte al punto che hai saltato.
+- **Come sto andando?** la fa uscire dal personaggio: arriva un voto di chiarezza
+  da 1 a 5 e tre righe su che cosa è arrivato, che cosa è rimasto confuso e quale
+  parte del libro sembra non essere stata capita.
+
+Dove il browser lo permette c'è anche il **microfono**: raccontare a voce è più
+naturale che scrivere, ed è esattamente il gesto che l'esercizio richiede.
+
+Nina si raggiunge dalla scheda di un libro in libreria, e da ogni lettura del
+diario.
 
 ## Claude come compagno di lettura
 
@@ -59,6 +117,17 @@ strada funziona ovunque e non costa niente.
 Le chiamate usano `fetch` verso l'API di Anthropic invece dell'SDK ufficiale,
 perché l'SDK richiederebbe npm e un bundler e l'app deve restare un sito statico
 apribile con un doppio clic.
+
+## Una nota sulla versione pubblicata come artifact
+
+Una pagina pubblicata come artifact su claude.ai non ha il permesso di chiamare
+servizi esterni. Lì la ricerca online, le trame e le chiamate all'API non
+possono funzionare: restano il catalogo interno e la strada del copia e incolla,
+e l'app lo dice invece di fallire in silenzio.
+
+Per avere tutto — catalogo mondiale, trame da Wikipedia e Claude dentro l'app —
+va aperta in locale (`index.html` o `dist/leggi-di-piu.html`) oppure pubblicata
+su GitHub Pages.
 
 ## Dove finiscono i dati
 
@@ -101,11 +170,12 @@ sostituire, così non produce silenziosamente una versione monca.
 ## Struttura
 
 ```
-index.html              markup delle tre schermate
+index.html              markup di tutte le schermate
 css/styles.css          stile (verde #202B22 + giallo #FFD85F, chiaro e scuro)
 js/storage.js           profili e letture su localStorage
+js/books.js             catalogo, trame e dossier dalle fonti pubbliche
 js/ai.js                chiamate a Claude e costruzione dei prompt
-js/app.js               interfaccia, statistiche, import/export
+js/app.js               interfaccia, libreria, Nina, statistiche
 sw.js                   cache offline
 manifest.webmanifest    installazione come app
 icon.svg                icona

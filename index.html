@@ -8,6 +8,9 @@
 <meta name="theme-color" content="#202B22">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -58,15 +61,33 @@
   <section class="today" id="today-strip" aria-label="Riepilogo di oggi"></section>
 
   <nav class="tabs" role="tablist" aria-label="Sezioni">
-    <button type="button" class="tab is-active" role="tab" data-view="nuova" aria-selected="true" aria-controls="view-nuova">Nuova lettura</button>
+    <button type="button" class="tab is-active" role="tab" data-view="libreria" aria-selected="true" aria-controls="view-libreria">Libreria</button>
+    <button type="button" class="tab" role="tab" data-view="nuova" aria-selected="false" aria-controls="view-nuova">Nuova lettura</button>
     <button type="button" class="tab" role="tab" data-view="diario" aria-selected="false" aria-controls="view-diario">Diario</button>
     <button type="button" class="tab" role="tab" data-view="profilo" aria-selected="false" aria-controls="view-profilo">Profilo</button>
   </nav>
 
   <main class="views">
 
+    <!-- ---- LIBRERIA ---- -->
+    <section id="view-libreria" class="view" role="tabpanel" tabindex="-1">
+      <div class="lib-hero">
+        <h2>Tutti i libri del mondo</h2>
+        <p class="lede">Cerca un titolo o un autore, scopri di che cosa parla, poi comincia a leggerlo.</p>
+        <form id="form-cerca" class="search-bar" autocomplete="off" novalidate>
+          <input id="f-cerca" type="search" aria-label="Cerca un libro"
+                 placeholder="Un titolo, un autore, un argomento…" maxlength="120">
+          <button type="submit" class="btn primary" id="btn-cerca">Cerca</button>
+        </form>
+        <div class="chips" id="lib-suggerimenti"></div>
+      </div>
+
+      <p class="hint" id="lib-stato" role="status" aria-live="polite"></p>
+      <div id="lib-risultati" class="book-grid"></div>
+    </section>
+
     <!-- ---- NUOVA LETTURA ---- -->
-    <section id="view-nuova" class="view" role="tabpanel" tabindex="-1">
+    <section id="view-nuova" class="view" role="tabpanel" tabindex="-1" hidden>
       <h2 id="form-title">Nuova lettura</h2>
 
       <form id="form-lettura" autocomplete="off" novalidate>
@@ -208,6 +229,69 @@
   <footer class="footer">Leggi di più · i tuoi dati non escono da questo dispositivo</footer>
 </div>
 
+<!-- ============ SCHEDA DEL LIBRO ============ -->
+<dialog id="book-sheet" class="sheet" aria-labelledby="sheet-title">
+  <button type="button" class="sheet-close btn ghost small icon" id="sheet-close" aria-label="Chiudi">×</button>
+  <div class="sheet-top">
+    <div class="sheet-cover" id="sheet-cover"></div>
+    <div class="sheet-id">
+      <h3 id="sheet-title"></h3>
+      <p class="sheet-author" id="sheet-author"></p>
+      <p class="muted small" id="sheet-meta"></p>
+      <div class="chips" id="sheet-temi"></div>
+    </div>
+  </div>
+
+  <div class="sheet-body" id="sheet-body"></div>
+
+  <div class="sheet-actions">
+    <button type="button" class="btn primary" id="btn-leggi">Comincia a leggerlo</button>
+    <button type="button" class="btn accent" id="btn-nina">Raccontalo a Nina</button>
+    <button type="button" class="btn" id="btn-dubbio">Non ho capito una cosa</button>
+  </div>
+  <p class="sheet-sources" id="sheet-sources"></p>
+</dialog>
+
+<!-- ============ RACCONTA A NINA ============ -->
+<div id="nina" class="nina" hidden>
+  <header class="nina-head">
+    <div class="nina-who">
+      <span class="nina-face" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="40" height="40">
+          <circle cx="24" cy="24" r="22" fill="#FFD85F"/>
+          <circle cx="17" cy="21" r="2.6" fill="#202B22"/>
+          <circle cx="31" cy="21" r="2.6" fill="#202B22"/>
+          <path d="M16 29c2.6 3.4 13.4 3.4 16 0" stroke="#202B22" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <div class="nina-who-text">
+        <strong>Nina, 6 anni</strong>
+        <span class="sub" id="nina-libro"></span>
+      </div>
+    </div>
+    <button type="button" class="btn ghost small" id="nina-close">Chiudi</button>
+  </header>
+
+  <div class="nina-chat" id="nina-chat" aria-live="polite"></div>
+
+  <form class="nina-compose" id="nina-form" autocomplete="off">
+    <textarea id="nina-input" rows="2" maxlength="2000"
+              placeholder="Racconta con parole semplici…" aria-label="Il tuo racconto"></textarea>
+    <div class="nina-buttons">
+      <button type="button" class="btn ghost small icon" id="nina-mic" hidden aria-label="Detta a voce" title="Detta a voce">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>
+        </svg>
+      </button>
+      <button type="submit" class="btn primary" id="nina-send">Racconta</button>
+    </div>
+  </form>
+  <div class="nina-foot">
+    <button type="button" class="btn small" id="nina-coach">Come sto andando?</button>
+    <span class="hint" id="nina-hint"></span>
+  </div>
+</div>
+
 <dialog id="ai-dialog" class="ai-dialog" aria-labelledby="ai-title">
   <div class="ai-head">
     <h3 id="ai-title">Claude</h3>
@@ -221,6 +305,7 @@
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="js/storage.js"></script>
+<script src="js/books.js"></script>
 <script src="js/ai.js"></script>
 <script src="js/app.js"></script>
 </body>

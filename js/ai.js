@@ -62,9 +62,12 @@ const AI = (() => {
    * `effort: "low"` perché sono richieste corte e l'utente aspetta davanti allo
    * schermo.
    */
-  async function ask(prompt, { maxTokens = 4000 } = {}) {
+  async function ask(input, { maxTokens = 4000, system = SYSTEM, effort = "low" } = {}) {
     const key = getKey();
     if (!key) return { ok: false, reason: "no-key" };
+
+    // Una stringa è la domanda secca; un array è una conversazione già avviata.
+    const messages = typeof input === "string" ? [{ role: "user", content: input }] : input;
 
     let response;
     try {
@@ -79,9 +82,9 @@ const AI = (() => {
         body: JSON.stringify({
           model: MODEL,
           max_tokens: maxTokens,
-          output_config: { effort: "low" },
-          system: SYSTEM,
-          messages: [{ role: "user", content: prompt }]
+          output_config: { effort },
+          system,
+          messages
         })
       });
     } catch (err) {
@@ -204,6 +207,105 @@ const AI = (() => {
     return lines.join("\n");
   }
 
+  /* ------------------------------------- spiegare a una bambina di sei anni */
+
+  /**
+   * Il sistema di Nina. Il punto pedagogico è tutto qui: Nina conosce il libro,
+   * ma fa finta di no. Se chi racconta usa una parola difficile, lei chiede che
+   * cosa vuol dire — e chi racconta è costretto a capirla davvero per spiegarla.
+   * È il metodo di Feynman, travestito da bambina.
+   */
+  function childSystem(dossier) {
+    const lines = [
+      "Sei Nina, hai sei anni e stai ascoltando una persona più grande che ti racconta un libro che ha letto.",
+      "",
+      "Come parli:",
+      "- Frasi corte e parole semplici, quelle che usa davvero una bambina di sei anni.",
+      "- Al massimo 60 parole in tutto. Mai di più.",
+      "- Curiosa e sincera. Se una cosa non l'hai capita, lo dici: «non ho capito perché…».",
+      "- Niente markdown, niente elenchi. Al massimo una faccina, e solo se ci sta.",
+      "",
+      "Che cosa fai ogni volta:",
+      "1. Ripeti con parole tue la cosa che hai capito, corta corta.",
+      "2. Fai una o due domande vere, quelle che verrebbero a una bambina: «ma perché?», «e poi come fa a mangiare?», «era triste?».",
+      "3. Se senti una parola difficile, chiedi che cosa vuol dire, senza vergogna.",
+      "",
+      "Regole importanti:",
+      "- Non fare la maestra. Niente voti, niente «bravo», niente spiegazioni da grande.",
+      "- Tu conosci già la storia perché te l'hanno letta, ma fai finta di no: vuoi che sia l'altra persona a raccontartela.",
+      "- Se ti dice una cosa che non torna con la storia vera, non correggerla come farebbe un adulto: stupisciti. «Ah sì? Io pensavo che…», «sei sicuro?».",
+      "- Non raccontare tu la storia e non dire come va a finire. Chi racconta sei non sei tu."
+    ];
+    if (dossier) {
+      lines.push("", "Questa è la storia vera, per sapere se quello che ti raccontano torna. Non ripeterla e non citarla:", dossier);
+    }
+    return lines.join("\n");
+  }
+
+  /** Fuori personaggio: la valutazione di come è andato il racconto. */
+  function coachSystem(dossier) {
+    const lines = [
+      "Valuti quanto bene una persona ha spiegato un libro a una bambina di sei anni.",
+      "Chi spiega una cosa con parole semplici l'ha capita; chi si rifugia in parole difficili di solito no.",
+      "",
+      "Rispondi in italiano, dando del tu, in questo formato esatto:",
+      "- prima riga: «Chiarezza: N/5», dove N è un numero da 1 a 5 e nient'altro su quella riga;",
+      "- poi al massimo 130 parole di testo normale, senza markdown e senza elenchi.",
+      "",
+      "Nel testo dici tre cose, in quest'ordine: che cosa è arrivato chiaro; che cosa è rimasto confuso o troppo difficile per una bambina;",
+      "quale parte del libro sembra non essere stata capita fino in fondo, se ce n'è una.",
+      "Chiudi con una sola cosa concreta da fare al prossimo tentativo.",
+      "Niente complimenti di cortesia: il voto serve solo se è onesto."
+    ];
+    if (dossier) {
+      lines.push("", "Il libro di cui si parla, per confronto:", dossier);
+    }
+    return lines.join("\n");
+  }
+
+  const childOpening = (book) =>
+    `Ciao Nina! Ti racconto «${book.title}»${book.author ? " di " + book.author : ""}.`;
+
+  const coachRequest = "Fermiamoci un momento. Guardando tutto quello che ho raccontato qui sopra, come sono andato?";
+
+  /** Estrae il voto dalla prima riga, se c'è. */
+  function parseScore(text) {
+    const match = String(text || "").match(/chiarezza:\s*([1-5])\s*\/\s*5/i);
+    if (!match) return { score: null, body: String(text || "").trim() };
+    return {
+      score: Number(match[1]),
+      body: String(text).replace(/^.*chiarezza:\s*[1-5]\s*\/\s*5.*$/im, "").trim()
+    };
+  }
+
+  /* ------------------------------------------------ dubbi e trame mancanti */
+
+  /** Una spiegazione costruita sul dossier raccolto in rete, non sui ricordi. */
+  function doubtPrompt({ dossier, doubt }) {
+    return [
+      "Sto leggendo questo libro e c'è una cosa che non ho capito.",
+      "",
+      dossier,
+      "",
+      "La mia domanda è questa:",
+      doubt.trim(),
+      "",
+      "Rispondi in non più di 150 parole, con parole semplici e concrete, basandoti sul materiale qui sopra.",
+      "Se il materiale non basta a rispondere, dillo apertamente invece di inventare, e spiegami che cosa sappiamo di sicuro."
+    ].join("\n");
+  }
+
+  /** Quando nessuna fonte in rete ha una trama da mostrare. */
+  function plotPrompt(book) {
+    return [
+      `Raccontami di che cosa parla ${bookLabel(book.title, book.author)}${book.year ? `, uscito nel ${book.year}` : ""}.`,
+      "",
+      "Massimo 150 parole: la situazione di partenza, chi è il protagonista e qual è la spinta della storia.",
+      "Non rivelare il finale e non anticipare i colpi di scena: serve a decidere se leggerlo.",
+      "Se non conosci questo libro con sicurezza, dillo in una riga invece di inventare una trama."
+    ].join("\n");
+  }
+
   /** Da una risposta a righe libere alle domande vere e proprie. */
   function parseQuestions(text, limit = 3) {
     return String(text || "")
@@ -221,11 +323,18 @@ const AI = (() => {
     ask,
     explain,
     parseQuestions,
+    parseScore,
     formatQA,
+    childSystem,
+    coachSystem,
+    childOpening,
+    coachRequest,
     prompts: {
       questions: questionsPrompt,
       feedback: feedbackPrompt,
-      recap: recapPrompt
+      recap: recapPrompt,
+      doubt: doubtPrompt,
+      plot: plotPrompt
     }
   };
 })();

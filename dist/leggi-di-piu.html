@@ -37,6 +37,9 @@
   --btn-primary-bg:       var(--green);
   --btn-primary-ink:      var(--yellow);
   --btn-primary-bg-hover: var(--green-soft);
+  --btn-accent-bg:        var(--yellow);
+  --btn-accent-ink:       var(--green);
+  --btn-accent-border:    var(--yellow);
   --focus-border:         var(--green-soft);
   --focus-glow:           var(--yellow-wash);
   --login-glow:           var(--yellow-wash);
@@ -53,8 +56,8 @@
   --shadow:       0 1px 2px rgba(32, 43, 34, .06), 0 8px 24px rgba(32, 43, 34, .06);
   --shadow-soft:  0 1px 2px rgba(32, 43, 34, .05);
 
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  --sans: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --serif: "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
 }
 
 /* Tema scuro. Le due regole hanno lo stesso contenuto e vanno tenute allineate:
@@ -76,6 +79,9 @@
     --btn-primary-bg:       var(--yellow);
     --btn-primary-ink:      var(--green);
     --btn-primary-bg-hover: var(--yellow-deep);
+    --btn-accent-bg:        transparent;
+    --btn-accent-ink:       var(--yellow);
+    --btn-accent-border:    var(--yellow);
     --focus-border:         var(--yellow);
     --focus-glow:           rgba(255, 216, 95, .16);
     --login-glow:           rgba(255, 216, 95, .10);
@@ -101,6 +107,9 @@
   --btn-primary-bg:       var(--yellow);
   --btn-primary-ink:      var(--green);
   --btn-primary-bg-hover: var(--yellow-deep);
+  --btn-accent-bg:        transparent;
+  --btn-accent-ink:       var(--yellow);
+  --btn-accent-border:    var(--yellow);
   --focus-border:         var(--yellow);
   --focus-glow:           rgba(255, 216, 95, .16);
   --login-glow:           rgba(255, 216, 95, .10);
@@ -482,6 +491,16 @@ textarea { resize: vertical; min-height: 2.8rem; }
 .tab:hover { color: var(--ink); }
 .tab.is-active { background: var(--yellow); color: var(--accent-ink); }
 
+/* Quattro sezioni devono entrare anche su uno schermo da telefono, senza che
+   l'ultima resti tagliata a metà. */
+@media (max-width: 480px) {
+  .tabs { gap: .1rem; padding: .22rem; }
+  .tab { font-size: .8rem; padding: .45rem .5rem; }
+}
+
+/* La striscia di «Oggi» racconta la lettura, non la ricerca di un libro. */
+body[data-view="libreria"] .today { display: none; }
+
 .view:focus { outline: none; }
 .view-head { display: flex; align-items: center; gap: .6rem; margin-bottom: .8rem; }
 
@@ -669,6 +688,333 @@ textarea { resize: vertical; min-height: 2.8rem; }
   color: var(--muted);
 }
 
+/* ------------------------------------------------------------ libreria --- */
+
+.lib-hero { margin-bottom: 1.2rem; }
+.lib-hero h2 { font-size: clamp(1.6rem, 6vw, 2.1rem); text-wrap: balance; }
+.lib-hero .lede { color: var(--muted); margin-top: .35rem; max-width: 34rem; }
+
+.search-bar {
+  display: flex;
+  gap: .5rem;
+  margin-top: 1rem;
+}
+.search-bar input { flex: 1 1 auto; padding: .75rem .9rem; font-size: 1rem; }
+.search-bar .btn { flex: 0 0 auto; }
+
+.chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .7rem; }
+
+.chip {
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .26rem .7rem;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.chip:hover { background: var(--chip-hover-bg); border-color: var(--chip-hover-border); color: var(--ink); }
+.chip.is-static { cursor: default; background: var(--surface-alt); }
+.chip.is-static:hover { background: var(--surface-alt); border-color: var(--line); color: var(--muted); }
+
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+  gap: 1rem .8rem;
+}
+
+.book-card { min-width: 0; }
+.book-card-btn {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+  width: 100%;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.book-card-text { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
+.book-card-title {
+  font-family: var(--serif);
+  font-size: .98rem;
+  font-weight: 600;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.book-card-author { font-size: .8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.book-card-year { font-size: .74rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Copertina: quella vera se c'è, altrimenti disegnata col titolo dentro. */
+.cover {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  aspect-ratio: 2 / 3;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--surface-alt);
+  box-shadow: var(--shadow-soft);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Mentre l'immagine arriva la copertina pulsa: un riquadro fermo sembra rotto. */
+.cover.is-loading {
+  background: linear-gradient(100deg, var(--surface-alt) 30%, var(--line) 50%, var(--surface-alt) 70%);
+  background-size: 250% 100%;
+  animation: shimmer 1.3s linear infinite;
+}
+.book-card-btn:hover .cover { transform: translateY(-3px); box-shadow: var(--shadow); }
+
+/* Senza immagine la copertina è composta come una vera: titolo al centro,
+   un filetto, l'autore sotto. Meglio di un rettangolo vuoto. */
+.cover.is-drawn {
+  justify-content: center;
+  gap: .55rem;
+  padding: 1rem .8rem 1rem 1.1rem;
+  color: var(--yellow);
+  background: var(--green);
+  border-left: 5px solid var(--yellow-deep);
+  text-align: center;
+}
+.cover.is-drawn .cover-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.22;
+  text-wrap: balance;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cover.is-drawn .cover-title::after {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 2px;
+  margin: .5rem auto 0;
+  background: currentColor;
+  opacity: .5;
+}
+.cover.is-drawn .cover-author {
+  font-size: .72rem;
+  color: rgba(255, 216, 95, .72);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cover.is-drawn.pattern-1 { background: linear-gradient(160deg, #2C3B2F, var(--green)); }
+.cover.is-drawn.pattern-2 { background: linear-gradient(200deg, var(--green) 40%, #3C4E3F); }
+.cover.is-drawn.pattern-3 { background: var(--green-soft); border-left-color: var(--yellow); }
+
+.cover-lg { width: 108px; flex: 0 0 108px; border-radius: 10px; }
+.cover-lg.is-drawn { padding: .7rem .5rem .7rem .7rem; }
+.cover-lg.is-drawn .cover-title {
+  font-size: .82rem;
+  -webkit-line-clamp: 7;
+  hyphens: auto;         /* «rampante» non deve spezzarsi a metà parola */
+}
+.cover-lg.is-drawn .cover-title::after { margin-top: .4rem; }
+
+.book-card.is-skeleton {
+  aspect-ratio: 2 / 3;
+  border-radius: 8px;
+  background: linear-gradient(100deg, var(--surface-alt) 30%, var(--line) 50%, var(--surface-alt) 70%);
+  background-size: 250% 100%;
+  animation: shimmer 1.3s linear infinite;
+}
+@keyframes shimmer { to { background-position: -150% 0; } }
+
+/* -------------------------------------------------- scheda del libro --- */
+
+.sheet {
+  position: relative;
+  width: min(42rem, calc(100vw - 1.5rem));
+  max-height: min(46rem, calc(100dvh - 2rem));
+  overflow-y: auto;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+  box-shadow: var(--shadow);
+}
+.sheet::backdrop { background: rgba(20, 27, 22, .6); }
+.sheet-close { position: absolute; top: .7rem; right: .7rem; }
+
+.sheet-top { display: flex; gap: 1rem; align-items: flex-start; padding-right: 2rem; }
+.sheet-id { min-width: 0; display: flex; flex-direction: column; gap: .25rem; }
+.sheet-id h3 { font-size: 1.4rem; text-wrap: balance; }
+.sheet-author { font-size: 1rem; color: var(--muted); }
+
+.sheet-body { margin-top: 1.2rem; display: flex; flex-direction: column; gap: .6rem; }
+.sheet-h {
+  font-family: var(--sans);
+  font-size: .76rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sheet-text { white-space: pre-wrap; line-height: 1.6; max-width: 42rem; }
+
+.plot { margin-top: .4rem; border-top: 1px solid var(--line); padding-top: .7rem; }
+.plot summary { cursor: pointer; font-weight: 600; font-size: .92rem; }
+.plot summary::marker { color: var(--yellow-deep); }
+.plot-warning {
+  margin: .6rem 0;
+  padding: .5rem .7rem;
+  font-size: .84rem;
+  color: var(--muted);
+  background: var(--surface-alt);
+  border-left: 3px solid var(--yellow);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.plot .sheet-text { margin-bottom: .5rem; }
+
+.sheet-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.3rem; }
+.btn.accent {
+  background: var(--btn-accent-bg);
+  color: var(--btn-accent-ink);
+  border-color: var(--btn-accent-border);
+}
+.btn.accent:hover { background: var(--yellow-deep); border-color: var(--yellow-deep); color: var(--green); }
+
+.sheet-sources { margin-top: .8rem; font-size: .8rem; color: var(--muted); }
+.sheet-sources a { color: inherit; }
+
+@media (max-width: 520px) {
+  .sheet { padding: 1.1rem; }
+  .sheet-top { gap: .8rem; }
+  .cover-lg { width: 94px; flex-basis: 94px; }
+  .sheet-id h3 { font-size: 1.2rem; }
+}
+
+/* ------------------------------------------------------ racconta a Nina --- */
+
+body.is-locked { overflow: hidden; }
+
+.nina {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.nina-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .8rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.nina-who { display: flex; align-items: center; gap: .7rem; min-width: 0; }
+.nina-face { display: grid; place-items: center; flex: 0 0 auto; }
+.nina-who-text { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.nina-who-text strong { font-family: var(--serif); font-size: 1.05rem; }
+.nina-who-text .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.nina-chat {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+  max-width: 46rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.bubble {
+  max-width: min(30rem, 86%);
+  padding: .7rem .95rem;
+  border-radius: 16px;
+  line-height: 1.5;
+  box-shadow: var(--shadow-soft);
+}
+.bubble p { white-space: pre-wrap; word-break: break-word; }
+
+.bubble-nina {
+  align-self: flex-start;
+  background: var(--yellow);
+  color: var(--green);
+  border-bottom-left-radius: 5px;
+}
+.bubble-me {
+  align-self: flex-end;
+  background: var(--green);
+  color: #F1F4F0;
+  border-bottom-right-radius: 5px;
+}
+.bubble-coach {
+  align-self: stretch;
+  max-width: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--yellow-deep);
+  border-radius: var(--radius);
+}
+.bubble-badge {
+  display: inline-block;
+  margin-bottom: .35rem;
+  padding: .16rem .6rem;
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  background: var(--yellow);
+  border-radius: 999px;
+}
+.bubble.is-typing { opacity: .7; font-style: italic; }
+
+.nina-compose {
+  display: flex;
+  gap: .5rem;
+  align-items: flex-end;
+  padding: .8rem 1rem .4rem;
+  max-width: 46rem;
+  width: 100%;
+  margin: 0 auto;
+}
+.nina-compose textarea { flex: 1 1 auto; min-height: 3.6rem; max-height: 8rem; overflow-y: auto; }
+.nina-buttons { display: flex; gap: .4rem; align-items: center; flex: 0 0 auto; }
+
+#nina-mic { display: grid; place-items: center; border: 1px solid var(--line); color: var(--muted); }
+#nina-mic.is-recording { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+.nina-foot {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  flex-wrap: wrap;
+  padding: 0 1rem 1rem;
+  max-width: 46rem;
+  width: 100%;
+  margin: 0 auto;
+}
+.nina-foot .hint { margin-top: 0; }
+
+.compose-label { font-weight: 600; }
+
 /* ------------------------------------------------------------- Claude --- */
 
 .book-actions { display: flex; gap: .3rem; flex-wrap: wrap; justify-content: flex-end; }
@@ -789,15 +1135,33 @@ textarea { resize: vertical; min-height: 2.8rem; }
   <section class="today" id="today-strip" aria-label="Riepilogo di oggi"></section>
 
   <nav class="tabs" role="tablist" aria-label="Sezioni">
-    <button type="button" class="tab is-active" role="tab" data-view="nuova" aria-selected="true" aria-controls="view-nuova">Nuova lettura</button>
+    <button type="button" class="tab is-active" role="tab" data-view="libreria" aria-selected="true" aria-controls="view-libreria">Libreria</button>
+    <button type="button" class="tab" role="tab" data-view="nuova" aria-selected="false" aria-controls="view-nuova">Nuova lettura</button>
     <button type="button" class="tab" role="tab" data-view="diario" aria-selected="false" aria-controls="view-diario">Diario</button>
     <button type="button" class="tab" role="tab" data-view="profilo" aria-selected="false" aria-controls="view-profilo">Profilo</button>
   </nav>
 
   <main class="views">
 
+    <!-- ---- LIBRERIA ---- -->
+    <section id="view-libreria" class="view" role="tabpanel" tabindex="-1">
+      <div class="lib-hero">
+        <h2>Tutti i libri del mondo</h2>
+        <p class="lede">Cerca un titolo o un autore, scopri di che cosa parla, poi comincia a leggerlo.</p>
+        <form id="form-cerca" class="search-bar" autocomplete="off" novalidate>
+          <input id="f-cerca" type="search" aria-label="Cerca un libro"
+                 placeholder="Un titolo, un autore, un argomento…" maxlength="120">
+          <button type="submit" class="btn primary" id="btn-cerca">Cerca</button>
+        </form>
+        <div class="chips" id="lib-suggerimenti"></div>
+      </div>
+
+      <p class="hint" id="lib-stato" role="status" aria-live="polite"></p>
+      <div id="lib-risultati" class="book-grid"></div>
+    </section>
+
     <!-- ---- NUOVA LETTURA ---- -->
-    <section id="view-nuova" class="view" role="tabpanel" tabindex="-1">
+    <section id="view-nuova" class="view" role="tabpanel" tabindex="-1" hidden>
       <h2 id="form-title">Nuova lettura</h2>
 
       <form id="form-lettura" autocomplete="off" novalidate>
@@ -937,6 +1301,69 @@ textarea { resize: vertical; min-height: 2.8rem; }
   </main>
 
   <footer class="footer">Leggi di più · i tuoi dati non escono da questo dispositivo</footer>
+</div>
+
+<!-- ============ SCHEDA DEL LIBRO ============ -->
+<dialog id="book-sheet" class="sheet" aria-labelledby="sheet-title">
+  <button type="button" class="sheet-close btn ghost small icon" id="sheet-close" aria-label="Chiudi">×</button>
+  <div class="sheet-top">
+    <div class="sheet-cover" id="sheet-cover"></div>
+    <div class="sheet-id">
+      <h3 id="sheet-title"></h3>
+      <p class="sheet-author" id="sheet-author"></p>
+      <p class="muted small" id="sheet-meta"></p>
+      <div class="chips" id="sheet-temi"></div>
+    </div>
+  </div>
+
+  <div class="sheet-body" id="sheet-body"></div>
+
+  <div class="sheet-actions">
+    <button type="button" class="btn primary" id="btn-leggi">Comincia a leggerlo</button>
+    <button type="button" class="btn accent" id="btn-nina">Raccontalo a Nina</button>
+    <button type="button" class="btn" id="btn-dubbio">Non ho capito una cosa</button>
+  </div>
+  <p class="sheet-sources" id="sheet-sources"></p>
+</dialog>
+
+<!-- ============ RACCONTA A NINA ============ -->
+<div id="nina" class="nina" hidden>
+  <header class="nina-head">
+    <div class="nina-who">
+      <span class="nina-face" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="40" height="40">
+          <circle cx="24" cy="24" r="22" fill="#FFD85F"/>
+          <circle cx="17" cy="21" r="2.6" fill="#202B22"/>
+          <circle cx="31" cy="21" r="2.6" fill="#202B22"/>
+          <path d="M16 29c2.6 3.4 13.4 3.4 16 0" stroke="#202B22" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <div class="nina-who-text">
+        <strong>Nina, 6 anni</strong>
+        <span class="sub" id="nina-libro"></span>
+      </div>
+    </div>
+    <button type="button" class="btn ghost small" id="nina-close">Chiudi</button>
+  </header>
+
+  <div class="nina-chat" id="nina-chat" aria-live="polite"></div>
+
+  <form class="nina-compose" id="nina-form" autocomplete="off">
+    <textarea id="nina-input" rows="2" maxlength="2000"
+              placeholder="Racconta con parole semplici…" aria-label="Il tuo racconto"></textarea>
+    <div class="nina-buttons">
+      <button type="button" class="btn ghost small icon" id="nina-mic" hidden aria-label="Detta a voce" title="Detta a voce">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>
+        </svg>
+      </button>
+      <button type="submit" class="btn primary" id="nina-send">Racconta</button>
+    </div>
+  </form>
+  <div class="nina-foot">
+    <button type="button" class="btn small" id="nina-coach">Come sto andando?</button>
+    <span class="hint" id="nina-hint"></span>
+  </div>
 </div>
 
 <dialog id="ai-dialog" class="ai-dialog" aria-labelledby="ai-title">
@@ -1213,6 +1640,484 @@ const Store = (() => {
 
 
 /**
+ * Leggi di più — la libreria.
+ *
+ * Cerca fra i libri del mondo e ne ricostruisce la trama, mettendo insieme tre
+ * fonti pubbliche che si possono interrogare da un browser senza chiavi:
+ *
+ *   Open Library   catalogo e copertine
+ *   Wikipedia (it) la trama vera, dalla sezione «Trama» della voce
+ *   Google Books   descrizione dell'editore, come ripiego
+ *
+ * Tutte e tre rispondono con `access-control-allow-origin: *`, quindi la pagina
+ * può chiamarle direttamente. Dove la rete non c'è — o dove la pagina non ha il
+ * permesso di uscire — resta il catalogo di partenza qui sotto, che vive dentro
+ * il file: la ricerca funziona comunque, solo su meno libri.
+ */
+const Books = (() => {
+  "use strict";
+
+  const OPEN_LIBRARY = "https://openlibrary.org";
+  const COVERS = "https://covers.openlibrary.org/b/id";
+  const GOOGLE_BOOKS = "https://www.googleapis.com/books/v1/volumes";
+  const WIKIPEDIA = "https://it.wikipedia.org/w/api.php";
+
+  /** null finché non si sa, poi true/false: serve a spiegare all'utente che cosa succede. */
+  let reachable = null;
+
+  /**
+   * Il catalogo che viaggia dentro il file. Non pretende di essere completo:
+   * serve a dare risultati immediati e a far funzionare l'app anche offline.
+   * La ricerca online, quando c'è, aggiunge tutto il resto.
+   */
+  const SEED = [
+    { title: "Il barone rampante", author: "Italo Calvino", year: 1957, pages: 275, blurb: "Un ragazzo di dodici anni sale su un albero dopo un litigio a tavola e decide di non scendere mai più. Da lassù si costruisce una vita intera." },
+    { title: "Il visconte dimezzato", author: "Italo Calvino", year: 1952, pages: 120, blurb: "Una palla di cannone taglia in due un visconte. Le due metà tornano a casa separate: una cattivissima, l'altra buonissima." },
+    { title: "Le città invisibili", author: "Italo Calvino", year: 1972, pages: 164, blurb: "Marco Polo descrive a Kublai Khan decine di città impossibili. Ogni città è un modo diverso di guardare la vita." },
+    { title: "Il piccolo principe", author: "Antoine de Saint-Exupéry", year: 1943, pages: 96, blurb: "Un aviatore precipita nel deserto e incontra un bambino arrivato da un piccolo pianeta, che gli fa domande a cui i grandi non sanno rispondere." },
+    { title: "Pinocchio", author: "Carlo Collodi", year: 1883, pages: 180, blurb: "Un burattino di legno vuole diventare un bambino vero, ma ogni volta che può scegliere sceglie la strada sbagliata." },
+    { title: "Cuore", author: "Edmondo De Amicis", year: 1886, pages: 250, blurb: "Il diario di un anno di scuola nella Torino dell'Ottocento, fra compagni, maestri e racconti mensili." },
+    { title: "I promessi sposi", author: "Alessandro Manzoni", year: 1827, pages: 720, blurb: "Due giovani vogliono sposarsi, un signorotto locale lo impedisce. Attorno a loro, la Lombardia del Seicento fra carestia, guerra e peste." },
+    { title: "La Divina Commedia", author: "Dante Alighieri", year: 1321, pages: 798, blurb: "Un uomo smarrito attraversa Inferno, Purgatorio e Paradiso per ritrovare la strada. Il viaggio più influente della letteratura europea." },
+    { title: "Il fu Mattia Pascal", author: "Luigi Pirandello", year: 1904, pages: 280, blurb: "Un uomo scopre di essere stato dichiarato morto e coglie l'occasione per rifarsi una vita da capo. Non è semplice come sembra." },
+    { title: "Se questo è un uomo", author: "Primo Levi", year: 1947, pages: 213, blurb: "La testimonianza lucida di un anno ad Auschwitz, scritta da un chimico che voleva soprattutto capire e far capire." },
+    { title: "Il Gattopardo", author: "Giuseppe Tomasi di Lampedusa", year: 1958, pages: 299, blurb: "Un principe siciliano guarda il proprio mondo finire mentre l'Italia si unisce, e decide che cambiare tutto serve a non cambiare niente." },
+    { title: "Il giorno della civetta", author: "Leonardo Sciascia", year: 1961, pages: 120, blurb: "Un capitano dei carabinieri indaga su un omicidio in un paese siciliano dove nessuno ha visto niente." },
+    { title: "La coscienza di Zeno", author: "Italo Svevo", year: 1923, pages: 437, blurb: "Un uomo scrive la propria autobiografia per il medico che lo cura, e mentre la scrive si giustifica, si contraddice, forse mente." },
+    { title: "Novecento", author: "Alessandro Baricco", year: 1994, pages: 62, blurb: "Un pianista nato su una nave non scende mai a terra in tutta la vita. Un monologo breve sul coraggio e sui limiti che scegliamo." },
+    { title: "L'amica geniale", author: "Elena Ferrante", year: 2011, pages: 331, blurb: "Due bambine crescono in un rione povero di Napoli negli anni Cinquanta, legate da un'amicizia che le spinge e le ferisce per tutta la vita." },
+    { title: "Io non ho paura", author: "Niccolò Ammaniti", year: 2001, pages: 219, blurb: "In un'estate rovente del Sud, un bambino di nove anni scopre un segreto che riguarda gli adulti del suo paese." },
+    { title: "Le avventure di Tom Sawyer", author: "Mark Twain", year: 1876, pages: 274, blurb: "Un ragazzo del Mississippi salta la scuola, cerca tesori e finisce testimone di un delitto." },
+    { title: "L'isola del tesoro", author: "Robert Louis Stevenson", year: 1883, pages: 292, blurb: "Un ragazzo trova una mappa in un baule e parte per un'isola, su una nave dove metà equipaggio ha altri piani." },
+    { title: "Il giro del mondo in ottanta giorni", author: "Jules Verne", year: 1873, pages: 256, blurb: "Un gentiluomo inglese scommette metà del suo patrimonio che riuscirà a fare il giro del mondo in ottanta giorni esatti." },
+    { title: "Ventimila leghe sotto i mari", author: "Jules Verne", year: 1870, pages: 400, blurb: "Tre naufraghi vengono raccolti da un sottomarino comandato da un capitano che ha voltato le spalle al mondo." },
+    { title: "Alice nel Paese delle Meraviglie", author: "Lewis Carroll", year: 1865, pages: 152, blurb: "Una bambina insegue un coniglio con l'orologio e finisce in un mondo dove la logica funziona al contrario." },
+    { title: "Il meraviglioso mago di Oz", author: "L. Frank Baum", year: 1900, pages: 154, blurb: "Un ciclone porta Dorothy in un paese lontano. Per tornare a casa deve seguire una strada di mattoni gialli." },
+    { title: "Il libro della giungla", author: "Rudyard Kipling", year: 1894, pages: 277, blurb: "Un bambino cresciuto dai lupi impara le leggi della giungla da una pantera, un orso e un pitone." },
+    { title: "Robinson Crusoe", author: "Daniel Defoe", year: 1719, pages: 320, blurb: "Un naufrago resta solo su un'isola per ventotto anni e ricostruisce da zero tutto quello che sapeva fare." },
+    { title: "Zanna Bianca", author: "Jack London", year: 1906, pages: 298, blurb: "Un lupo nato nel Grande Nord passa di padrone in padrone e impara che cosa cambia fra chi lo picchia e chi lo rispetta." },
+    { title: "Il richiamo della foresta", author: "Jack London", year: 1903, pages: 172, blurb: "Un cane da salotto viene rapito e venduto come cane da slitta in Alaska, dove ritrova istinti che non sapeva di avere." },
+    { title: "Frankenstein", author: "Mary Shelley", year: 1818, pages: 280, blurb: "Uno scienziato costruisce una creatura vivente e poi scappa dalla sua stessa creazione. La creatura lo cerca per chiedergli conto." },
+    { title: "Orgoglio e pregiudizio", author: "Jane Austen", year: 1813, pages: 432, blurb: "Cinque sorelle, poca dote e una madre decisa a maritarle. Elizabeth Bennet detesta il signor Darcy, almeno all'inizio." },
+    { title: "Delitto e castigo", author: "Fëdor Dostoevskij", year: 1866, pages: 671, blurb: "Uno studente povero uccide una vecchia usuraia convinto di averne il diritto, e poi deve convivere con quello che ha fatto." },
+    { title: "Anna Karenina", author: "Lev Tolstoj", year: 1878, pages: 864, blurb: "Una donna dell'aristocrazia russa lascia marito e posizione per amore, e scopre il prezzo che la società le presenta." },
+    { title: "Il vecchio e il mare", author: "Ernest Hemingway", year: 1952, pages: 127, blurb: "Un pescatore vecchio e senza fortuna aggancia il pesce più grande della sua vita, lontano da riva e da solo." },
+    { title: "1984", author: "George Orwell", year: 1949, pages: 328, blurb: "In uno Stato che sorveglia tutto e riscrive il passato ogni giorno, un impiegato comincia a tenere un diario." },
+    { title: "La fattoria degli animali", author: "George Orwell", year: 1945, pages: 112, blurb: "Gli animali cacciano il contadino e si governano da soli. Poi qualcuno comincia a essere più uguale degli altri." },
+    { title: "Il signore delle mosche", author: "William Golding", year: 1954, pages: 224, blurb: "Un gruppo di ragazzi naufraga su un'isola senza adulti e prova a darsi delle regole." },
+    { title: "Il giovane Holden", author: "J. D. Salinger", year: 1951, pages: 234, blurb: "Tre giorni a New York di un ragazzo appena cacciato da scuola, che trova falso quasi tutto il mondo dei grandi." },
+    { title: "Fahrenheit 451", author: "Ray Bradbury", year: 1953, pages: 194, blurb: "In un futuro dove i pompieri bruciano i libri invece di spegnere gli incendi, uno di loro ne apre uno." },
+    { title: "Lo Hobbit", author: "J. R. R. Tolkien", year: 1937, pages: 310, blurb: "Un hobbit sedentario viene trascinato da tredici nani e un mago in un viaggio verso una montagna occupata da un drago." },
+    { title: "Il signore degli anelli", author: "J. R. R. Tolkien", year: 1954, pages: 1178, blurb: "Un anello che dà potere assoluto va distrutto, e tocca farlo alla creatura più piccola e meno potente di tutte." },
+    { title: "Harry Potter e la pietra filosofale", author: "J. K. Rowling", year: 1997, pages: 223, blurb: "Un bambino cresciuto in un sottoscala scopre a undici anni di essere un mago e parte per una scuola di magia." },
+    { title: "Le cronache di Narnia", author: "C. S. Lewis", year: 1950, pages: 767, blurb: "Quattro fratelli attraversano un armadio e finiscono in un paese dove è sempre inverno e mai Natale." },
+    { title: "Momo", author: "Michael Ende", year: 1973, pages: 240, blurb: "Una bambina che sa ascoltare come nessuno affronta gli uomini grigi, che rubano il tempo alle persone." },
+    { title: "La storia infinita", author: "Michael Ende", year: 1979, pages: 448, blurb: "Un ragazzo ruba un libro e, leggendolo, si accorge che la storia dentro il libro sta parlando proprio di lui." },
+    { title: "Il Grande Gigante Gentile", author: "Roald Dahl", year: 1982, pages: 208, blurb: "Una bambina viene rapita da un gigante che, a differenza degli altri giganti, non mangia i bambini: soffia sogni." },
+    { title: "Matilde", author: "Roald Dahl", year: 1988, pages: 240, blurb: "Una bambina straordinariamente intelligente, con una famiglia che la ignora e una preside terrificante, scopre di avere un potere." },
+    { title: "Il buio oltre la siepe", author: "Harper Lee", year: 1960, pages: 281, blurb: "In una cittadina dell'Alabama degli anni Trenta, un avvocato difende un uomo nero accusato ingiustamente, e i suoi figli guardano." },
+    { title: "Cent'anni di solitudine", author: "Gabriel García Márquez", year: 1967, pages: 417, blurb: "Sette generazioni della famiglia Buendía nel villaggio di Macondo, dove il meraviglioso è parte della vita quotidiana." },
+    { title: "Il nome della rosa", author: "Umberto Eco", year: 1980, pages: 512, blurb: "In un'abbazia medievale i monaci muoiono uno dopo l'altro. Un frate inglese indaga usando la logica." },
+    { title: "Sapiens. Da animali a dèi", author: "Yuval Noah Harari", year: 2011, pages: 512, blurb: "Come una scimmia poco importante dell'Africa orientale sia arrivata a dominare il pianeta, in tre rivoluzioni." }
+  ];
+
+  /* --------------------------------------------------------------- rete --- */
+
+  async function getJSON(url, { timeout = 9000 } = {}) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      reachable = true; // ha risposto: la rete c'è, anche se lo stato è un errore
+      if (!response.ok) return { ok: false, reason: "http", status: response.status };
+      return { ok: true, data: await response.json() };
+    } catch (err) {
+      if (reachable !== true) reachable = false;
+      return { ok: false, reason: err && err.name === "AbortError" ? "timeout" : "network" };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  const isReachable = () => reachable;
+
+  /* ------------------------------------------------------------ ricerca --- */
+
+  const normalize = (s) => String(s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  function seedId(book) {
+    return "seed:" + normalize(book.title + " " + book.author).replace(/ /g, "-");
+  }
+
+  function searchSeed(query, limit) {
+    const words = normalize(query).split(" ").filter(Boolean);
+    if (!words.length) return [];
+    return SEED
+      .map((book) => {
+        const hay = normalize(book.title + " " + book.author);
+        let score = 0;
+        for (const word of words) {
+          if (hay.includes(word)) score += 2;
+          if (normalize(book.title).startsWith(word)) score += 3;
+        }
+        return { book, score };
+      })
+      .filter((row) => row.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map((row) => Object.assign({
+        id: seedId(row.book),
+        source: "catalogo",
+        cover: null,
+        subjects: []
+      }, row.book));
+  }
+
+  function fromOpenLibrary(doc) {
+    return {
+      id: doc.key || null,
+      source: "openlibrary",
+      title: doc.title || "",
+      author: (doc.author_name || []).slice(0, 2).join(", "),
+      year: doc.first_publish_year || null,
+      pages: doc.number_of_pages_median || null,
+      cover: doc.cover_i ? `${COVERS}/${doc.cover_i}-M.jpg` : null,
+      coverLarge: doc.cover_i ? `${COVERS}/${doc.cover_i}-L.jpg` : null,
+      subjects: (doc.subject || []).slice(0, 10),
+      languages: doc.language || [],
+      editions: doc.edition_count || 0,
+      blurb: ""
+    };
+  }
+
+  /**
+   * Open Library ordina per pertinenza testuale. Qui davanti vanno i libri che
+   * un lettore italiano cerca davvero: edizione italiana, tante ristampe,
+   * copertina disponibile.
+   */
+  function rank(books, query) {
+    const words = normalize(query).split(" ").filter(Boolean);
+    return books
+      .map((book, index) => {
+        let score = -index * 0.4; // l'ordine di Open Library conta, ma non decide
+        const title = normalize(book.title);
+        if (words.length && words.every((w) => title.includes(w))) score += 6;
+        if (title === normalize(query)) score += 10;
+        if ((book.languages || []).includes("ita")) score += 5;
+        if (book.cover) score += 2;
+        score += Math.min(4, Math.log10((book.editions || 0) + 1) * 2);
+        return { book, score };
+      })
+      .sort((a, b) => b.score - a.score)
+      .map((row) => row.book);
+  }
+
+  function dedupe(books) {
+    const seen = new Set();
+    const out = [];
+    for (const book of books) {
+      const key = normalize(book.title) + "|" + normalize(book.author).split(" ").slice(-1)[0];
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(book);
+    }
+    return out;
+  }
+
+  /**
+   * Cerca prima nel catalogo interno (risposta immediata), poi online.
+   * Restituisce sempre qualcosa: se la rete manca, restano i risultati locali.
+   */
+  async function search(query, { limit = 24 } = {}) {
+    const clean = String(query || "").trim();
+    if (clean.length < 2) return { ok: true, books: [], online: false };
+
+    const local = searchSeed(clean, 6);
+    const fields = "key,title,author_name,first_publish_year,cover_i,number_of_pages_median,language,subject,edition_count";
+    const url = `${OPEN_LIBRARY}/search.json?q=${encodeURIComponent(clean)}&limit=${limit}&fields=${fields}`;
+    const result = await getJSON(url);
+
+    if (!result.ok) {
+      return { ok: local.length > 0, books: local, online: false, reason: result.reason };
+    }
+
+    const remote = rank((result.data.docs || []).map(fromOpenLibrary).filter((b) => b.title), clean);
+
+    // Il risultato online è più ricco (copertina, temi, scheda dell'opera):
+    // il catalogo interno non deve coprirlo, gli presta solo la presentazione.
+    for (const book of remote) {
+      const known = SEED.find((s) => normalize(s.title) === normalize(book.title));
+      if (known && !book.blurb) book.blurb = known.blurb;
+    }
+    const onlyLocal = local.filter(
+      (book) => !remote.some((r) => normalize(r.title) === normalize(book.title))
+    );
+
+    return {
+      ok: true,
+      books: dedupe(remote.concat(onlyLocal)).slice(0, limit),
+      online: true,
+      total: result.data.numFound || remote.length
+    };
+  }
+
+  /* ---------------------------------------------------------- Wikipedia --- */
+
+  const wikiApi = (params) =>
+    `${WIKIPEDIA}?${new URLSearchParams(Object.assign({ format: "json", origin: "*" }, params))}`;
+
+  function htmlToText(html) {
+    const cleaned = String(html || "")
+      .replace(/<style[\s\S]*?<\/style>/gi, "")
+      .replace(/<table[\s\S]*?<\/table>/gi, "")
+      .replace(/<sup[\s\S]*?<\/sup>/gi, "");
+    const doc = document.createElement("div");
+    doc.innerHTML = cleaned;
+    return doc.textContent
+      .replace(/\[modifica[^\]]*\]/gi, "")
+      .replace(/\[\d+\]/g, "")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
+
+  /**
+   * Trova la voce giusta. Meglio nessuna trama che la trama di un altro libro:
+   * se il titolo della voce non somiglia a quello del libro, si lascia perdere.
+   */
+  function pickPage(hits, book) {
+    const wanted = normalize(book.title);
+    for (const hit of hits) {
+      const found = normalize(hit.title).replace(/ (romanzo|libro|film)$/, "");
+      if (found === wanted) return hit.title;
+    }
+    for (const hit of hits) {
+      const found = normalize(hit.title);
+      if (found.startsWith(wanted) && found.length <= wanted.length + 14) return hit.title;
+    }
+    return null;
+  }
+
+  const PLOT_SECTIONS = /^(trama|contenuto|sinossi|riassunto|argomento|contenuti)$/i;
+
+  async function wikipedia(book) {
+    const query = `${book.title} ${(book.author || "").split(",")[0]}`.trim();
+    const found = await getJSON(wikiApi({ action: "query", list: "search", srsearch: query, srlimit: "5" }));
+    if (!found.ok) return null;
+
+    const title = pickPage(found.data?.query?.search || [], book);
+    if (!title) return null;
+
+    const [intro, sections] = await Promise.all([
+      getJSON(wikiApi({ action: "query", prop: "extracts", exintro: "1", explaintext: "1", redirects: "1", titles: title })),
+      getJSON(wikiApi({ action: "parse", prop: "sections", page: title }))
+    ]);
+
+    const page = intro.ok ? Object.values(intro.data?.query?.pages || {})[0] : null;
+    const list = sections.ok ? (sections.data?.parse?.sections || []) : [];
+    const plotSection = list.find((s) => PLOT_SECTIONS.test(String(s.line || "").trim()));
+
+    let plot = "";
+    if (plotSection) {
+      const body = await getJSON(wikiApi({ action: "parse", prop: "text", section: plotSection.index, page: title }));
+      if (body.ok) {
+        plot = htmlToText(body.data?.parse?.text?.["*"] || "")
+          .replace(new RegExp("^" + plotSection.line + "\\s*", "i"), "")
+          .trim();
+      }
+    }
+
+    return {
+      title,
+      url: `https://it.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`,
+      intro: (page && page.extract) ? page.extract.trim() : "",
+      plot
+    };
+  }
+
+  /* ------------------------------------------------- altre due fonti --- */
+
+  async function openLibraryWork(book) {
+    if (!book.id || !book.id.startsWith("/works/")) return null;
+    const result = await getJSON(`${OPEN_LIBRARY}${book.id}.json`);
+    if (!result.ok) return null;
+    let description = result.data.description;
+    if (description && typeof description === "object") description = description.value;
+    return {
+      url: `${OPEN_LIBRARY}${book.id}`,
+      description: String(description || "").trim(),
+      subjects: (result.data.subjects || []).slice(0, 10)
+    };
+  }
+
+  async function googleBooks(book) {
+    const query = `intitle:${book.title}${book.author ? " inauthor:" + book.author.split(",")[0] : ""}`;
+    const result = await getJSON(`${GOOGLE_BOOKS}?q=${encodeURIComponent(query)}&maxResults=3`);
+    if (!result.ok) return null; // quota esaurita o rete: è solo un ripiego
+    const items = result.data.items || [];
+    for (const item of items) {
+      const info = item.volumeInfo || {};
+      if (info.description) {
+        return {
+          url: info.infoLink || "",
+          description: String(info.description).trim(),
+          categories: info.categories || [],
+          pages: info.pageCount || null
+        };
+      }
+    }
+    return null;
+  }
+
+  /* ------------------------------------------------------------- i temi --- */
+
+  /**
+   * I soggetti di Open Library sono in inglese e mescolano generi veri a
+   * rumore di catalogazione («Accessible book», «Readers»). Qui passa solo
+   * quello che un lettore italiano riconosce come un tema, tradotto.
+   */
+  const TEMI = {
+    "fiction": "Narrativa",
+    "history": "Storia",
+    "historical fiction": "Romanzo storico",
+    "italian fiction": "Narrativa italiana",
+    "fantasy": "Fantasy",
+    "fantasy fiction": "Fantasy",
+    "science fiction": "Fantascienza",
+    "adventure": "Avventura",
+    "adventure stories": "Avventura",
+    "adventure and adventurers": "Avventura",
+    "juvenile fiction": "Per ragazzi",
+    "juvenile literature": "Per ragazzi",
+    "children's stories": "Per bambini",
+    "children's fiction": "Per bambini",
+    "young adult fiction": "Per ragazzi",
+    "love stories": "Storie d'amore",
+    "romance": "Romanzo d'amore",
+    "detective and mystery stories": "Giallo",
+    "mystery": "Giallo",
+    "mystery and detective stories": "Giallo",
+    "horror": "Horror",
+    "biography": "Biografia",
+    "autobiography": "Autobiografia",
+    "poetry": "Poesia",
+    "philosophy": "Filosofia",
+    "psychology": "Psicologia",
+    "travel": "Viaggi",
+    "voyages and travels": "Viaggi",
+    "war": "Guerra",
+    "world war, 1939-1945": "Seconda guerra mondiale",
+    "holocaust, jewish (1939-1945)": "Shoah",
+    "friendship": "Amicizia",
+    "family": "Famiglia",
+    "families": "Famiglia",
+    "fathers and sons": "Padri e figli",
+    "brothers": "Fratelli",
+    "mothers and daughters": "Madri e figlie",
+    "animals": "Animali",
+    "dogs": "Cani",
+    "wolves": "Lupi",
+    "magic": "Magia",
+    "wizards": "Maghi",
+    "witches": "Streghe",
+    "nobility": "Nobiltà",
+    "kings and rulers": "Re e sovrani",
+    "politics and government": "Politica",
+    "social conditions": "Società",
+    "coming of age": "Formazione",
+    "bildungsromans": "Romanzo di formazione",
+    "classic literature": "Classico",
+    "classics": "Classico",
+    "satire": "Satira",
+    "humor": "Umorismo",
+    "fairy tales": "Fiabe",
+    "folklore": "Folclore",
+    "islands": "Isole",
+    "pirates": "Pirati",
+    "sea stories": "Storie di mare",
+    "school stories": "Storie di scuola",
+    "orphans": "Orfani",
+    "utopias": "Utopie",
+    "dystopias": "Distopia",
+    "science": "Scienza",
+    "nature": "Natura",
+    "death": "Morte",
+    "religion": "Religione"
+  };
+
+  function temiItaliani(raw) {
+    const out = [];
+    for (const subject of raw) {
+      const key = String(subject || "").trim().toLowerCase();
+      const tema = TEMI[key];
+      if (tema && !out.includes(tema)) out.push(tema);
+    }
+    return out.slice(0, 6);
+  }
+
+  /* --------------------------------------------------------- il dossier --- */
+
+  /**
+   * Tutto quello che si riesce a sapere del libro, in una volta sola: è il
+   * materiale che poi finisce sotto gli occhi di Claude quando deve spiegare
+   * qualcosa, e l'elenco delle fonti che l'utente può andare a controllare.
+   */
+  async function research(book) {
+    const [wiki, work, google] = await Promise.all([
+      wikipedia(book).catch(() => null),
+      openLibraryWork(book).catch(() => null),
+      googleBooks(book).catch(() => null)
+    ]);
+
+    const sources = [];
+    if (wiki && (wiki.plot || wiki.intro)) sources.push({ name: `Wikipedia — ${wiki.title}`, url: wiki.url });
+    if (work && work.description) sources.push({ name: "Open Library", url: work.url });
+    if (google && google.description) sources.push({ name: "Google Books", url: google.url });
+
+    const plot = (wiki && wiki.plot) || (work && work.description) || (google && google.description) || "";
+    const plotSource = (wiki && wiki.plot) ? "Wikipedia"
+      : (work && work.description) ? "Open Library"
+      : (google && google.description) ? "Google Books"
+      : "";
+
+    const subjects = temiItaliani(
+      [].concat(book.subjects || [], work ? work.subjects : [], google ? google.categories : []).filter(Boolean)
+    );
+
+    return {
+      book,
+      plot,
+      plotSource,
+      intro: wiki ? wiki.intro : "",
+      subjects: Array.from(new Set(subjects)).slice(0, 12),
+      sources,
+      online: reachable === true,
+      empty: !plot && !(wiki && wiki.intro) && !book.blurb
+    };
+  }
+
+  /** Il dossier compattato per stare dentro un prompt senza sprechi. */
+  function dossierText(dossier, { maxPlot = 2600 } = {}) {
+    const parts = [];
+    const book = dossier.book;
+    parts.push(`Libro: «${book.title}»${book.author ? " di " + book.author : ""}${book.year ? ", " + book.year : ""}.`);
+    if (dossier.intro) parts.push("Dalla voce enciclopedica:\n" + dossier.intro.slice(0, 900));
+    if (dossier.plot) parts.push(`Trama (fonte: ${dossier.plotSource}):\n` + dossier.plot.slice(0, maxPlot));
+    else if (book.blurb) parts.push("In breve:\n" + book.blurb);
+    if (dossier.subjects.length) parts.push("Temi e generi: " + dossier.subjects.join(", ") + ".");
+    return parts.join("\n\n");
+  }
+
+  return { SEED, search, research, wikipedia, dossierText, isReachable, normalize, seedId };
+})();
+
+
+/**
  * Leggi di più — il compagno di lettura.
  *
  * Parla con l'API di Claude direttamente dal browser, con la chiave che l'utente
@@ -1276,9 +2181,12 @@ const AI = (() => {
    * `effort: "low"` perché sono richieste corte e l'utente aspetta davanti allo
    * schermo.
    */
-  async function ask(prompt, { maxTokens = 4000 } = {}) {
+  async function ask(input, { maxTokens = 4000, system = SYSTEM, effort = "low" } = {}) {
     const key = getKey();
     if (!key) return { ok: false, reason: "no-key" };
+
+    // Una stringa è la domanda secca; un array è una conversazione già avviata.
+    const messages = typeof input === "string" ? [{ role: "user", content: input }] : input;
 
     let response;
     try {
@@ -1293,9 +2201,9 @@ const AI = (() => {
         body: JSON.stringify({
           model: MODEL,
           max_tokens: maxTokens,
-          output_config: { effort: "low" },
-          system: SYSTEM,
-          messages: [{ role: "user", content: prompt }]
+          output_config: { effort },
+          system,
+          messages
         })
       });
     } catch (err) {
@@ -1418,6 +2326,105 @@ const AI = (() => {
     return lines.join("\n");
   }
 
+  /* ------------------------------------- spiegare a una bambina di sei anni */
+
+  /**
+   * Il sistema di Nina. Il punto pedagogico è tutto qui: Nina conosce il libro,
+   * ma fa finta di no. Se chi racconta usa una parola difficile, lei chiede che
+   * cosa vuol dire — e chi racconta è costretto a capirla davvero per spiegarla.
+   * È il metodo di Feynman, travestito da bambina.
+   */
+  function childSystem(dossier) {
+    const lines = [
+      "Sei Nina, hai sei anni e stai ascoltando una persona più grande che ti racconta un libro che ha letto.",
+      "",
+      "Come parli:",
+      "- Frasi corte e parole semplici, quelle che usa davvero una bambina di sei anni.",
+      "- Al massimo 60 parole in tutto. Mai di più.",
+      "- Curiosa e sincera. Se una cosa non l'hai capita, lo dici: «non ho capito perché…».",
+      "- Niente markdown, niente elenchi. Al massimo una faccina, e solo se ci sta.",
+      "",
+      "Che cosa fai ogni volta:",
+      "1. Ripeti con parole tue la cosa che hai capito, corta corta.",
+      "2. Fai una o due domande vere, quelle che verrebbero a una bambina: «ma perché?», «e poi come fa a mangiare?», «era triste?».",
+      "3. Se senti una parola difficile, chiedi che cosa vuol dire, senza vergogna.",
+      "",
+      "Regole importanti:",
+      "- Non fare la maestra. Niente voti, niente «bravo», niente spiegazioni da grande.",
+      "- Tu conosci già la storia perché te l'hanno letta, ma fai finta di no: vuoi che sia l'altra persona a raccontartela.",
+      "- Se ti dice una cosa che non torna con la storia vera, non correggerla come farebbe un adulto: stupisciti. «Ah sì? Io pensavo che…», «sei sicuro?».",
+      "- Non raccontare tu la storia e non dire come va a finire. Chi racconta sei non sei tu."
+    ];
+    if (dossier) {
+      lines.push("", "Questa è la storia vera, per sapere se quello che ti raccontano torna. Non ripeterla e non citarla:", dossier);
+    }
+    return lines.join("\n");
+  }
+
+  /** Fuori personaggio: la valutazione di come è andato il racconto. */
+  function coachSystem(dossier) {
+    const lines = [
+      "Valuti quanto bene una persona ha spiegato un libro a una bambina di sei anni.",
+      "Chi spiega una cosa con parole semplici l'ha capita; chi si rifugia in parole difficili di solito no.",
+      "",
+      "Rispondi in italiano, dando del tu, in questo formato esatto:",
+      "- prima riga: «Chiarezza: N/5», dove N è un numero da 1 a 5 e nient'altro su quella riga;",
+      "- poi al massimo 130 parole di testo normale, senza markdown e senza elenchi.",
+      "",
+      "Nel testo dici tre cose, in quest'ordine: che cosa è arrivato chiaro; che cosa è rimasto confuso o troppo difficile per una bambina;",
+      "quale parte del libro sembra non essere stata capita fino in fondo, se ce n'è una.",
+      "Chiudi con una sola cosa concreta da fare al prossimo tentativo.",
+      "Niente complimenti di cortesia: il voto serve solo se è onesto."
+    ];
+    if (dossier) {
+      lines.push("", "Il libro di cui si parla, per confronto:", dossier);
+    }
+    return lines.join("\n");
+  }
+
+  const childOpening = (book) =>
+    `Ciao Nina! Ti racconto «${book.title}»${book.author ? " di " + book.author : ""}.`;
+
+  const coachRequest = "Fermiamoci un momento. Guardando tutto quello che ho raccontato qui sopra, come sono andato?";
+
+  /** Estrae il voto dalla prima riga, se c'è. */
+  function parseScore(text) {
+    const match = String(text || "").match(/chiarezza:\s*([1-5])\s*\/\s*5/i);
+    if (!match) return { score: null, body: String(text || "").trim() };
+    return {
+      score: Number(match[1]),
+      body: String(text).replace(/^.*chiarezza:\s*[1-5]\s*\/\s*5.*$/im, "").trim()
+    };
+  }
+
+  /* ------------------------------------------------ dubbi e trame mancanti */
+
+  /** Una spiegazione costruita sul dossier raccolto in rete, non sui ricordi. */
+  function doubtPrompt({ dossier, doubt }) {
+    return [
+      "Sto leggendo questo libro e c'è una cosa che non ho capito.",
+      "",
+      dossier,
+      "",
+      "La mia domanda è questa:",
+      doubt.trim(),
+      "",
+      "Rispondi in non più di 150 parole, con parole semplici e concrete, basandoti sul materiale qui sopra.",
+      "Se il materiale non basta a rispondere, dillo apertamente invece di inventare, e spiegami che cosa sappiamo di sicuro."
+    ].join("\n");
+  }
+
+  /** Quando nessuna fonte in rete ha una trama da mostrare. */
+  function plotPrompt(book) {
+    return [
+      `Raccontami di che cosa parla ${bookLabel(book.title, book.author)}${book.year ? `, uscito nel ${book.year}` : ""}.`,
+      "",
+      "Massimo 150 parole: la situazione di partenza, chi è il protagonista e qual è la spinta della storia.",
+      "Non rivelare il finale e non anticipare i colpi di scena: serve a decidere se leggerlo.",
+      "Se non conosci questo libro con sicurezza, dillo in una riga invece di inventare una trama."
+    ].join("\n");
+  }
+
   /** Da una risposta a righe libere alle domande vere e proprie. */
   function parseQuestions(text, limit = 3) {
     return String(text || "")
@@ -1435,11 +2442,18 @@ const AI = (() => {
     ask,
     explain,
     parseQuestions,
+    parseScore,
     formatQA,
+    childSystem,
+    coachSystem,
+    childOpening,
+    coachRequest,
     prompts: {
       questions: questionsPrompt,
       feedback: feedbackPrompt,
-      recap: recapPrompt
+      recap: recapPrompt,
+      doubt: doubtPrompt,
+      plot: plotPrompt
     }
   };
 })();
@@ -1448,7 +2462,8 @@ const AI = (() => {
 /**
  * Leggi di più — interfaccia.
  *
- * Tre schermate: accesso (solo username), form nuova lettura, diario e profilo.
+ * Accesso con il solo nome utente, poi libreria, nuova lettura, diario e
+ * profilo; più la scheda di un libro e la conversazione con Nina.
  * Nessuna dipendenza esterna: il DOM viene costruito a mano con h().
  */
 (() => {
@@ -1701,7 +2716,9 @@ const AI = (() => {
     $("#screen-app").hidden = false;
     resetForm();
     renderAll();
-    switchView("nuova");
+    // Chi non ha ancora letto niente parte dalla libreria; chi legge già,
+    // dal form: è il gesto che ripete ogni giorno.
+    switchView(Store.entries().length ? "nuova" : "libreria");
   }
 
   function doLogin(name) {
@@ -1715,6 +2732,9 @@ const AI = (() => {
   }
 
   function switchView(name) {
+    // La vista attiva finisce sul body: la striscia di «Oggi» riguarda la
+    // lettura, non la libreria, e in libreria si toglie di mezzo.
+    document.body.dataset.view = name;
     for (const tab of $$(".tab")) {
       const active = tab.dataset.view === name;
       tab.classList.toggle("is-active", active);
@@ -2098,6 +3118,10 @@ const AI = (() => {
           type: "button", class: "btn ghost small", onClick: () => aiFeedback(entry),
           text: entry.aiComment ? "Chiedi di nuovo" : "Commento di Claude"
         }),
+        h("button", {
+          type: "button", class: "btn ghost small",
+          onClick: () => ninaFromEntry(entry), text: "Racconta a Nina"
+        }),
         h("button", { type: "button", class: "btn ghost small danger", onClick: () => removeEntry(entry), text: "Elimina" })
       )
     );
@@ -2254,11 +3278,39 @@ const AI = (() => {
     $("#ai-body").append(h("p", { class: "ai-loading", text: message }));
   }
 
-  function dialogAnswer(text) {
+  function dialogAnswer(text, sources) {
     clear($("#ai-body"));
     $("#ai-body").append(h("p", { class: "ai-answer", text: text }));
+    if (sources && sources.length) {
+      const line = h("p", { class: "muted small" }, "Costruita su: ");
+      sources.forEach((source, i) => {
+        if (i) line.append(document.createTextNode(" · "));
+        line.append(h("a", { href: source.url, target: "_blank", rel: "noopener noreferrer", text: source.name }));
+      });
+      $("#ai-body").append(line);
+    }
     clear($("#ai-actions"));
     $("#ai-actions").append(h("button", { type: "button", class: "btn", onClick: closeDialog, text: "Chiudi" }));
+  }
+
+  /** Chiede prima qualcosa all'utente, poi passa il testo a chi ha chiamato. */
+  function dialogCompose(label, placeholder, onSubmit) {
+    const field = h("textarea", { rows: "3", maxlength: "600", placeholder, "aria-label": label });
+    clear($("#ai-body"));
+    $("#ai-body").append(h("p", { class: "compose-label", text: label }), field);
+    clear($("#ai-actions"));
+    $("#ai-actions").append(
+      h("button", {
+        type: "button", class: "btn primary", text: "Chiedi",
+        onClick: () => {
+          const value = field.value.trim();
+          if (!value) { toast("Scrivi prima la tua domanda."); field.focus(); return; }
+          onSubmit(value);
+        }
+      }),
+      h("button", { type: "button", class: "btn ghost", onClick: closeDialog, text: "Annulla" })
+    );
+    field.focus();
   }
 
   /**
@@ -2334,19 +3386,30 @@ const AI = (() => {
    * Il giro completo di una richiesta: chiave presente → chiama l'API;
    * altrimenti, o se la chiamata fallisce, mostra il prompt da copiare.
    */
-  async function askClaude({ title, note, prompt, onText, onPaste }) {
-    openDialog(title, note);
+  async function askClaude({ title, note, prompt, onText, onPaste, sources, quiet }) {
     if (!AI.hasKey()) {
+      openDialog(title, note);
       dialogManual(prompt, "Non hai una chiave API di Claude: copia la domanda qui sotto e incollala in Claude.", onPaste);
       return;
     }
-    dialogLoading("Sto chiedendo a Claude…");
+
+    // Con «quiet» il risultato non si legge nel dialogo ma finisce nella
+    // pagina: aprirlo e richiuderlo subito sarebbe solo un lampo fastidioso.
+    if (quiet) toast("Chiedo a Claude…");
+    else {
+      openDialog(title, note);
+      dialogLoading("Sto chiedendo a Claude…");
+    }
+
     const result = await AI.ask(prompt);
+
     if (result.ok) {
       if (onText) onText(result.text);
-      else dialogAnswer(result.text);
+      else dialogAnswer(result.text, sources);
       return;
     }
+
+    openDialog(title, note);
     dialogManual(prompt, `${AI.explain(result)} Intanto puoi copiare la domanda e incollarla in Claude.`, onPaste);
   }
 
@@ -2394,6 +3457,7 @@ const AI = (() => {
       title: "Domande su misura",
       note: `Per «${title}».`,
       prompt,
+      quiet: true,          // le domande compaiono nel form, non nel dialogo
       onText: useQuestions,
       onPaste: useQuestions
     });
@@ -2446,6 +3510,455 @@ const AI = (() => {
       field.placeholder = "sk-ant-…";
       state.textContent = "Nessuna chiave: l'app prepara la domanda da copiare in Claude.";
     }
+  }
+
+  /* ============================================================== LIBRERIA */
+
+  const SUGGERIMENTI = ["Italo Calvino", "Il piccolo principe", "Roald Dahl", "Harry Potter", "Primo Levi", "Jules Verne"];
+
+  let currentBook = null;
+  let currentDossier = null;
+  let searchToken = 0;
+
+  function hashString(text) {
+    let hash = 0;
+    const s = String(text || "");
+    for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+    return hash;
+  }
+
+  /**
+   * La copertina vera se c'è e si carica, altrimenti una disegnata col titolo.
+   * Serve davvero: moltissimi libri non hanno copertina, e in certe pagine le
+   * immagini esterne non vengono caricate affatto.
+   */
+  function coverNode(book, size) {
+    const wrap = h("div", { class: `cover cover-${size}` });
+    const drawCover = () => {
+      clear(wrap);
+      wrap.classList.remove("is-loading");
+      wrap.classList.add("is-drawn", "pattern-" + (hashString(book.title) % 4));
+      wrap.append(
+        h("span", { class: "cover-title", text: book.title }),
+        h("span", { class: "cover-author", text: (book.author || "").split(",")[0] })
+      );
+    };
+    if (book.cover) {
+      // L'ascoltatore va agganciato prima di src: se il caricamento fallisce
+      // subito, l'evento parte prima ancora che si faccia in tempo ad ascoltarlo.
+      const img = h("img", { alt: "", loading: "lazy", decoding: "async" });
+      // Una richiesta che non fallisce ma resta appesa lascerebbe un buco
+      // vuoto per sempre: dopo qualche secondo si disegna la copertina.
+      const giveUp = setTimeout(drawCover, 3500);
+      wrap.classList.add("is-loading");
+      img.addEventListener("load", () => {
+        clearTimeout(giveUp);
+        wrap.classList.remove("is-loading");
+        if (!img.naturalWidth) drawCover(); // immagine servita ma vuota
+      });
+      img.addEventListener("error", () => {
+        clearTimeout(giveUp);
+        drawCover();
+      });
+      wrap.append(img);
+      img.src = book.cover;
+    } else {
+      drawCover();
+    }
+    return wrap;
+  }
+
+  function bookCard(book) {
+    const open = () => openBookSheet(book);
+    return h("article", { class: "book-card" },
+      h("button", { type: "button", class: "book-card-btn", onClick: open, "aria-label": `Apri ${book.title}` },
+        coverNode(book, "md"),
+        h("span", { class: "book-card-text" },
+          h("strong", { class: "book-card-title", text: book.title }),
+          h("span", { class: "book-card-author", text: book.author || "autore sconosciuto" }),
+          book.year ? h("span", { class: "book-card-year", text: String(book.year) }) : null
+        )
+      )
+    );
+  }
+
+  function renderSuggestions() {
+    const box = $("#lib-suggerimenti");
+    clear(box);
+    for (const word of SUGGERIMENTI) {
+      box.append(h("button", {
+        type: "button", class: "chip", text: word,
+        onClick: () => { $("#f-cerca").value = word; runSearch(word); }
+      }));
+    }
+  }
+
+  async function runSearch(query) {
+    const clean = String(query || "").trim();
+    if (clean.length < 2) {
+      toast("Scrivi almeno due lettere.");
+      return;
+    }
+    const token = ++searchToken;
+    const box = $("#lib-risultati");
+    $("#lib-stato").textContent = "Cerco…";
+    clear(box);
+    for (let i = 0; i < 6; i++) box.append(h("div", { class: "book-card is-skeleton" }));
+
+    const result = await Books.search(clean);
+    if (token !== searchToken) return; // è già partita una ricerca più recente
+
+    clear(box);
+    if (!result.books.length) {
+      $("#lib-stato").textContent = "";
+      box.append(emptyState(
+        "Nessun libro trovato.",
+        result.online
+          ? "Prova con il titolo esatto, o solo con il cognome dell'autore."
+          : "Da questa pagina non riesco a raggiungere il catalogo online: restano i libri che l'app porta con sé."
+      ));
+      return;
+    }
+
+    $("#lib-stato").textContent = result.online
+      ? (result.total > result.books.length
+          ? `I primi ${result.books.length} di ${result.total}.`
+          : plural(result.books.length, "libro trovato", "libri trovati") + ".")
+      : `${plural(result.books.length, "libro", "libri")} dal catalogo interno: il catalogo online non è raggiungibile da qui.`;
+
+    for (const book of result.books) box.append(bookCard(book));
+  }
+
+  /* ------------------------------------------------------ scheda del libro */
+
+  async function openBookSheet(book) {
+    currentBook = book;
+    currentDossier = null;
+
+    $("#sheet-title").textContent = book.title;
+    $("#sheet-author").textContent = book.author || "Autore sconosciuto";
+    $("#sheet-meta").textContent = [
+      book.year ? String(book.year) : "",
+      book.pages ? plural(book.pages, "pagina", "pagine") : ""
+    ].filter(Boolean).join(" · ");
+
+    clear($("#sheet-cover"));
+    $("#sheet-cover").append(coverNode(book, "lg"));
+    clear($("#sheet-temi"));
+    clear($("#sheet-body"));
+    $("#sheet-sources").textContent = "";
+    $("#sheet-body").append(h("p", { class: "ai-loading", text: "Cerco di che cosa parla…" }));
+
+    const sheet = $("#book-sheet");
+    if (!sheet.open) sheet.showModal();
+
+    const dossier = await Books.research(book);
+    if (currentBook !== book) return; // l'utente ha già aperto un altro libro
+    currentDossier = dossier;
+    renderSheetBody(dossier);
+  }
+
+  function renderSheetBody(dossier) {
+    const book = dossier.book;
+    const body = $("#sheet-body");
+    clear(body);
+
+    const opening = dossier.intro || book.blurb;
+    if (opening) {
+      body.append(
+        h("h4", { class: "sheet-h", text: "Di che cosa parla" }),
+        h("p", { class: "sheet-text", text: trimTo(opening, 700) })
+      );
+    }
+
+    if (dossier.plot) {
+      // La trama enciclopedica racconta anche il finale: sta dietro un clic.
+      body.append(
+        h("details", { class: "plot" },
+          h("summary", { text: "Leggi la trama completa" }),
+          h("p", { class: "plot-warning", text: "Attenzione: una trama completa di solito racconta anche come va a finire." }),
+          h("p", { class: "sheet-text", text: dossier.plot }),
+          h("p", { class: "muted small", text: "Fonte: " + dossier.plotSource })
+        )
+      );
+    } else if (!opening) {
+      body.append(
+        h("p", { class: "muted", text: dossier.online
+          ? "Nessuna delle fonti pubbliche racconta questo libro."
+          : "Da questa pagina non riesco a consultare le fonti online." }),
+        h("button", {
+          type: "button", class: "btn small", text: "Chiedi a Claude di che cosa parla",
+          onClick: () => askClaude({
+            title: "Di che cosa parla",
+            note: `«${book.title}»`,
+            prompt: AI.prompts.plot(book)
+          })
+        })
+      );
+    }
+
+    clear($("#sheet-temi"));
+    for (const tema of dossier.subjects.slice(0, 6)) {
+      $("#sheet-temi").append(h("span", { class: "chip is-static", text: tema }));
+    }
+
+    const sources = $("#sheet-sources");
+    clear(sources);
+    if (dossier.sources.length) {
+      sources.append(document.createTextNode("Fonti consultate: "));
+      dossier.sources.forEach((source, i) => {
+        if (i) sources.append(document.createTextNode(" · "));
+        sources.append(h("a", { href: source.url, target: "_blank", rel: "noopener noreferrer", text: source.name }));
+      });
+    }
+  }
+
+  function trimTo(text, max) {
+    const clean = String(text || "").trim();
+    if (clean.length <= max) return clean;
+    const cut = clean.slice(0, max);
+    const stop = cut.lastIndexOf(". ");
+    return (stop > max * 0.5 ? cut.slice(0, stop + 1) : cut) + " […]";
+  }
+
+  function closeSheet() {
+    if ($("#book-sheet").open) $("#book-sheet").close();
+  }
+
+  /** Dalla scheda al diario: il libro scelto entra nel form già compilato. */
+  function startReading(book) {
+    resetForm();
+    $("#f-titolo").value = book.title;
+    $("#f-autore").value = book.author || "";
+    const known = groupByBook(Store.entries()).find(
+      (b) => Books.normalize(b.title) === Books.normalize(book.title)
+    );
+    if (known && known.lastPage > 0) $("#f-da").value = String(known.lastPage + 1);
+    closeSheet();
+    switchView("nuova");
+    ($("#f-da").value ? $("#f-a") : $("#f-pagine")).focus();
+    toast(`«${book.title}» è pronto nel diario.`);
+  }
+
+  /** Il dubbio dell'utente, sciolto con il materiale raccolto in rete. */
+  function askDoubt(book, dossier) {
+    openDialog("Non ho capito una cosa", `Su «${book.title}».`);
+    dialogCompose(
+      "Che cosa non ti torna?",
+      "es. perché il padre si arrabbia così tanto per un piatto di lumache?",
+      (doubt) => {
+        const material = dossier && !dossier.empty
+          ? Books.dossierText(dossier)
+          : `Libro: «${book.title}»${book.author ? " di " + book.author : ""}. Non ho trovato materiale in rete su questo libro.`;
+        askClaude({
+          title: "La spiegazione",
+          note: `Su «${book.title}».`,
+          prompt: AI.prompts.doubt({ dossier: material, doubt }),
+          sources: dossier ? dossier.sources : []
+        });
+      }
+    );
+  }
+
+  /* ============================================= RACCONTA A UNA BAMBINA */
+
+  const nina = { book: null, material: "", messages: [], busy: false };
+
+  function openNina(book, dossier) {
+    nina.book = book;
+    nina.material = dossier && !dossier.empty ? Books.dossierText(dossier, { maxPlot: 2000 }) : "";
+    nina.messages = [];
+    nina.busy = false;
+
+    $("#nina-libro").textContent = book.title;
+    clear($("#nina-chat"));
+    ninaBubble("nina", "Ciao! Che cosa hai letto? Raccontamelo tutto. Però parla facile, che io ho sei anni.");
+    $("#nina-hint").textContent = nina.material
+      ? "Nina conosce la storia, ma fa finta di no."
+      : "Non ho trovato materiale su questo libro: Nina ti ascolta e basta.";
+    $("#nina-input").value = "";
+
+    closeSheet();
+    $("#nina").hidden = false;
+    document.body.classList.add("is-locked");
+    $("#nina-input").focus();
+  }
+
+  /**
+   * Da una lettura del diario a Nina. Il libro qui è solo un titolo scritto a
+   * mano: va prima ritrovato nel catalogo, se possibile, per dare a Nina la
+   * storia vera. Intanto la conversazione è già aperta.
+   */
+  async function ninaFromEntry(entry) {
+    const book = { title: entry.title, author: entry.author || "", subjects: [], cover: null, blurb: "" };
+    openNina(book, null);
+    $("#nina-hint").textContent = "Cerco la storia vera…";
+
+    const found = await Books.search(`${entry.title} ${entry.author || ""}`.trim(), { limit: 4 });
+    if (nina.book !== book) return;
+
+    const wanted = Books.normalize(entry.title);
+    const match = (found.books || []).find((b) => Books.normalize(b.title) === wanted) || (found.books || [])[0];
+    if (!match) {
+      $("#nina-hint").textContent = "Non ho trovato materiale su questo libro: Nina ti ascolta e basta.";
+      return;
+    }
+
+    const dossier = await Books.research(match);
+    if (nina.book !== book) return;
+    nina.material = dossier.empty ? "" : Books.dossierText(dossier, { maxPlot: 2000 });
+    $("#nina-hint").textContent = nina.material
+      ? "Nina conosce la storia, ma fa finta di no."
+      : "Non ho trovato materiale su questo libro: Nina ti ascolta e basta.";
+  }
+
+  function closeNina() {
+    stopDictation();
+    $("#nina").hidden = true;
+    document.body.classList.remove("is-locked");
+  }
+
+  function ninaBubble(who, text, extra) {
+    const bubble = h("div", { class: "bubble bubble-" + who },
+      extra ? h("span", { class: "bubble-badge", text: extra }) : null,
+      h("p", { text: text })
+    );
+    $("#nina-chat").append(bubble);
+    bubble.scrollIntoView({ block: "end", behavior: "smooth" });
+    return bubble;
+  }
+
+  function ninaTyping(on) {
+    const existing = $("#nina-typing");
+    if (existing) existing.remove();
+    if (!on) return;
+    const dots = h("div", { class: "bubble bubble-nina is-typing", id: "nina-typing" },
+      h("p", { text: "Nina sta pensando…" }));
+    $("#nina-chat").append(dots);
+    dots.scrollIntoView({ block: "end", behavior: "smooth" });
+  }
+
+  async function ninaSend(text) {
+    const clean = String(text || "").trim();
+    if (!clean || nina.busy) return;
+    ninaBubble("me", clean);
+    nina.messages.push({ role: "user", content: clean });
+    $("#nina-input").value = "";
+    await ninaAnswer(AI.childSystem(nina.material), "nina");
+  }
+
+  async function ninaCoach() {
+    if (nina.busy) return;
+    if (!nina.messages.some((m) => m.role === "user")) {
+      toast("Prima raccontale qualcosa.");
+      return;
+    }
+    const messages = nina.messages.concat([{ role: "user", content: AI.coachRequest }]);
+    await ninaAnswer(AI.coachSystem(nina.material), "coach", messages);
+  }
+
+  /**
+   * Un turno di conversazione. In «coach» il risultato non entra nella
+   * cronologia: è un commento sul racconto, non una battuta del racconto.
+   */
+  async function ninaAnswer(system, kind, messagesOverride) {
+    const messages = messagesOverride || nina.messages;
+
+    if (!AI.hasKey()) {
+      ninaManual(system, messages, kind);
+      return;
+    }
+
+    nina.busy = true;
+    $("#nina-send").disabled = true;
+    ninaTyping(true);
+
+    const result = await AI.ask(messages, { system, maxTokens: kind === "coach" ? 1200 : 700 });
+
+    ninaTyping(false);
+    nina.busy = false;
+    $("#nina-send").disabled = false;
+
+    if (!result.ok) {
+      ninaManual(system, messages, kind, AI.explain(result));
+      return;
+    }
+    receiveNina(result.text, kind);
+  }
+
+  function receiveNina(text, kind) {
+    if (kind === "coach") {
+      const { score, body } = AI.parseScore(text);
+      ninaBubble("coach", body, score ? `Chiarezza ${score}/5` : null);
+      return;
+    }
+    nina.messages.push({ role: "assistant", content: text });
+    ninaBubble("nina", text);
+  }
+
+  /** Senza chiave: la conversazione continua passando dal copia e incolla. */
+  function ninaManual(system, messages, kind, why) {
+    const transcript = messages
+      .map((m) => (m.role === "user" ? "IO: " : "NINA: ") + m.content)
+      .join("\n\n");
+    const prompt = `${system}\n\n---\n\nLa conversazione fino a qui:\n\n${transcript}\n\n---\n\nScrivi ora la tua risposta, e soltanto quella.`;
+
+    openDialog(
+      kind === "coach" ? "Come sto andando?" : "La risposta di Nina",
+      `Su «${nina.book.title}».`
+    );
+    dialogManual(
+      prompt,
+      (why ? why + " " : "") + "Copia tutto questo in Claude e riporta qui la risposta.",
+      (answer) => receiveNina(answer, kind)
+    );
+  }
+
+  /* ---- dettatura: spiegare a voce è più naturale che scrivere ---- */
+
+  let recognition = null;
+
+  function stopDictation() {
+    if (!recognition) return;
+    try { recognition.stop(); } catch (err) { /* già ferma */ }
+    recognition = null;
+    $("#nina-mic").classList.remove("is-recording");
+  }
+
+  function setupDictation() {
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const mic = $("#nina-mic");
+    if (!Recognition) return; // il bottone resta nascosto dove non funziona
+    mic.hidden = false;
+
+    mic.addEventListener("click", () => {
+      if (recognition) { stopDictation(); return; }
+      recognition = new Recognition();
+      recognition.lang = "it-IT";
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      const field = $("#nina-input");
+      const before = field.value;
+
+      recognition.addEventListener("result", (event) => {
+        let said = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) said += event.results[i][0].transcript;
+        field.value = (before ? before + " " : "") + said.trim();
+      });
+      recognition.addEventListener("error", () => {
+        stopDictation();
+        toast("Non riesco a sentirti. Controlla il permesso del microfono.");
+      });
+      recognition.addEventListener("end", () => stopDictation());
+
+      try {
+        recognition.start();
+        mic.classList.add("is-recording");
+        toast("Ti ascolto: parla pure.");
+      } catch (err) {
+        stopDictation();
+      }
+    });
   }
 
   /* --------------------------------------------------------- import/export */
@@ -2536,6 +4049,34 @@ const AI = (() => {
     $("#btn-ai-domande").addEventListener("click", aiSuggestQuestions);
     $("#ai-close").addEventListener("click", closeDialog);
 
+    // ---- libreria
+    $("#form-cerca").addEventListener("submit", (e) => {
+      e.preventDefault();
+      runSearch($("#f-cerca").value);
+    });
+    $("#sheet-close").addEventListener("click", closeSheet);
+    $("#btn-leggi").addEventListener("click", () => currentBook && startReading(currentBook));
+    $("#btn-nina").addEventListener("click", () => currentBook && openNina(currentBook, currentDossier));
+    $("#btn-dubbio").addEventListener("click", () => currentBook && askDoubt(currentBook, currentDossier));
+
+    // ---- racconta a Nina
+    $("#nina-close").addEventListener("click", closeNina);
+    $("#nina-coach").addEventListener("click", ninaCoach);
+    $("#nina-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      ninaSend($("#nina-input").value);
+    });
+    // Invio manda, a capo con maiuscolo: come in una chat.
+    $("#nina-input").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        ninaSend($("#nina-input").value);
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !$("#nina").hidden) closeNina();
+    });
+
     $("#btn-ai-key").addEventListener("click", () => {
       const value = $("#ai-key").value.trim();
       if (!value) { toast("Incolla prima la chiave."); return; }
@@ -2568,6 +4109,8 @@ const AI = (() => {
 
   function init() {
     buildQuestionFields();
+    renderSuggestions();
+    setupDictation();
     wire();
     if (Store.current()) enterApp();
     else showLogin();

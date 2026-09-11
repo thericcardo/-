@@ -50,8 +50,16 @@ js = js.replace(/<\/script/gi, "<\\/script");
 const style = `<style>\n${css}\n</style>`;
 const script = `<script>\n${js}\n</script>`;
 
+// I <link> ai font stanno nel <head> di index.html: in una pagina senza <head>
+// vanno portati dentro il contenuto, altrimenti resta solo il fallback di sistema.
+const fonts = Array.from(
+  html.matchAll(/<link rel="(?:preconnect|stylesheet)" href="https:\/\/fonts\.[^"]+"[^>]*>/g),
+  (m) => m[0]
+).join("\n");
+if (!fonts) throw new Error("Build: non trovo i <link> ai font in index.html. Aggiorna build.mjs.");
+
 // L'host degli artifact avvolge lui il contenuto in <html>/<head>/<body>.
-const inner = [`<title>${TITLE}</title>`, style, body, script].join("\n\n");
+const inner = [`<title>${TITLE}</title>`, fonts, style, body, script].join("\n\n");
 
 const standalone = `<!DOCTYPE html>
 <html lang="it">
