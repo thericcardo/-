@@ -300,6 +300,7 @@
       : "nessuna lettura ancora";
 
     renderToday(stats);
+    renderMyShelves();
     renderDatalists(list);
     renderDiario(list);
     renderProfilo(list, stats, user);
@@ -1053,11 +1054,21 @@
 
   /* ============================================================== LIBRERIA */
 
-  const SUGGERIMENTI = ["Italo Calvino", "Il piccolo principe", "Roald Dahl", "Harry Potter", "Primo Levi", "Jules Verne"];
+  /** Lo stato della libreria: che cosa si sta cercando e come. */
+  const lib = {
+    query: "",
+    mode: "tutto",
+    language: "",
+    sort: "pertinenza",
+    page: 1,
+    total: 0,
+    books: [],
+    busy: false,
+    token: 0
+  };
 
   let currentBook = null;
   let currentDossier = null;
-  let searchToken = 0;
 
   function hashString(text) {
     let hash = 0;
@@ -1065,6 +1076,10 @@
     for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
     return hash;
   }
+
+  const formatNumber = (n) => new Intl.NumberFormat("it-IT").format(n);
+
+  /* ------------------------------------------------------------ copertine */
 
   /**
    * La copertina vera se c'è e si carica, altrimenti una disegnata col titolo.
@@ -1082,12 +1097,13 @@
         h("span", { class: "cover-author", text: (book.author || "").split(",")[0] })
       );
     };
+
     if (book.cover) {
       // L'ascoltatore va agganciato prima di src: se il caricamento fallisce
       // subito, l'evento parte prima ancora che si faccia in tempo ad ascoltarlo.
       const img = h("img", { alt: "", loading: "lazy", decoding: "async" });
-      // Una richiesta che non fallisce ma resta appesa lascerebbe un buco
-      // vuoto per sempre: dopo qualche secondo si disegna la copertina.
+      // Una richiesta che non fallisce ma resta appesa lascerebbe un buco vuoto
+      // per sempre: dopo qualche secondo si disegna la copertina.
       const giveUp = setTimeout(drawCover, 3500);
       wrap.classList.add("is-loading");
       img.addEventListener("load", () => {
@@ -1107,65 +1123,304 @@
     return wrap;
   }
 
-  function bookCard(book) {
-    const open = () => openBookSheet(book);
-    return h("article", { class: "book-card" },
-      h("button", { type: "button", class: "book-card-btn", onClick: open, "aria-label": `Apri ${book.title}` },
-        coverNode(book, "md"),
+  function bookCard(book, { compact = false } = {}) {
+    const shelf = Store.shelfOf(book);
+    const shelfLabel = shelf ? (Store.SHELVES.find((s) => s.id === shelf) || {}).label : "";
+    return h("article", { class: "book-card" + (compact ? " is-compact" : "") },
+      h("button", {
+        type: "button", class: "book-card-btn",
+        onClick: () => openBookSheet(book),
+        "aria-label": `Apri ${book.title}${book.author ? ", " + book.author : ""}`
+      },
+        h("span", { class: "book-card-cover" },
+          coverNode(book, compact ? "sm" : "md"),
+          shelf ? h("span", { class: "book-card-flag", text: shelfLabel }) : null
+        ),
         h("span", { class: "book-card-text" },
           h("strong", { class: "book-card-title", text: book.title }),
           h("span", { class: "book-card-author", text: book.author || "autore sconosciuto" }),
-          book.year ? h("span", { class: "book-card-year", text: String(book.year) }) : null
+          !compact && book.year ? h("span", { class: "book-card-year", text: String(book.year) }) : null
         )
       )
     );
   }
 
-  function renderSuggestions() {
-    const box = $("#lib-suggerimenti");
-    clear(box);
-    for (const word of SUGGERIMENTI) {
-      box.append(h("button", {
-        type: "button", class: "chip", text: word,
-        onClick: () => { $("#f-cerca").value = word; runSearch(word); }
+  /* -------------------------------------------------- comandi di ricerca */
+
+  function renderSearchControls() {
+    const modi = $("#lib-modi");
+    clear(modi);
+    for (const [id, spec] of Object.entries(Books.MODES)) {
+      modi.append(h("button", {
+        type: "button",
+        class: "mode" + (lib.mode === id ? " is-active" : ""),
+        "aria-pressed": lib.mode === id ? "true" : "false",
+        text: spec.label,
+        onClick: () => {
+          lib.mode = id;
+          renderSearchControls();
+          if (lib.query) runSearch();
+        }
       }));
     }
+
+    const lingua = $("#f-lingua");
+    if (!lingua.options.length) {
+      for (const l of Books.LANGUAGES) lingua.append(h("option", { value: l.code, text: l.label }));
+    }
+    lingua.value = lib.language;
+
+    const ordine = $("#f-ordine");
+    if (!ordine.options.length) {
+      for (const [id, spec] of Object.entries(Books.SORTS)) {
+        ordine.append(h("option", { value: id, text: spec.label }));
+      }
+    }
+    ordine.value = lib.sort;
+
+    $("#btn-azzera").hidden = !(lib.query || lib.language || lib.sort !== "pertinenza" || lib.mode !== "tutto");
   }
 
-  async function runSearch(query) {
-    const clean = String(query || "").trim();
-    if (clean.length < 2) {
-      toast("Scrivi almeno due lettere.");
-      return;
+  function resetSearch() {
+    lib.query = "";
+    lib.mode = "tutto";
+    lib.language = "";
+    lib.sort = "pertinenza";
+    lib.books = [];
+    lib.total = 0;
+    lib.page = 1;
+    lib.token++;
+    $("#f-cerca").value = "";
+    renderSearchControls();
+    showBrowse();
+  }
+
+  function showBrowse() {
+    $("#lib-risultati-box").hidden = true;
+    $("#lib-sfoglia").hidden = false;
+  }
+
+  function showResults() {
+    $("#lib-sfoglia").hidden = true;
+    $("#lib-risultati-box").hidden = false;
+  }
+
+  /* ---------------------------------------------------------- la ricerca */
+
+  async function runSearch(nextPage = false) {
+    const clean = $("#f-cerca").value.trim();
+    if (!nextPage) {
+      if (clean.length < 2) {
+        toast("Scrivi almeno due lettere.");
+        return;
+      }
+      lib.query = clean;
+      lib.page = 1;
+      lib.books = [];
     }
-    const token = ++searchToken;
+
+    const token = ++lib.token;
+    lib.busy = true;
+    showResults();
+    renderSearchControls();
+    $("#btn-altri").disabled = true;
+
+    if (!nextPage) {
+      const box = $("#lib-risultati");
+      clear(box);
+      for (let i = 0; i < 8; i++) box.append(h("div", { class: "book-card is-skeleton" }));
+      $("#lib-stato").textContent = "Cerco…";
+      $("#lib-autore").hidden = true;
+    }
+
+    const result = await Books.search({
+      query: lib.query,
+      mode: lib.mode,
+      language: lib.language,
+      sort: lib.sort,
+      page: lib.page
+    });
+
+    if (token !== lib.token) return; // è già partita una ricerca più recente
+
+    lib.busy = false;
+    $("#btn-altri").disabled = false;
+    lib.total = result.total;
+    lib.books = nextPage ? lib.books.concat(result.books) : result.books;
+
+    renderResults(result);
+    if (!nextPage) lookUpAuthor(token);
+  }
+
+  function renderResults(result) {
     const box = $("#lib-risultati");
-    $("#lib-stato").textContent = "Cerco…";
     clear(box);
-    for (let i = 0; i < 6; i++) box.append(h("div", { class: "book-card is-skeleton" }));
 
-    const result = await Books.search(clean);
-    if (token !== searchToken) return; // è già partita una ricerca più recente
-
-    clear(box);
-    if (!result.books.length) {
+    if (!lib.books.length) {
       $("#lib-stato").textContent = "";
+      $("#btn-altri").hidden = true;
       box.append(emptyState(
         "Nessun libro trovato.",
         result.online
-          ? "Prova con il titolo esatto, o solo con il cognome dell'autore."
+          ? "Prova con il titolo esatto, con il solo cognome dell'autore, o cambia la modalità di ricerca."
           : "Da questa pagina non riesco a raggiungere il catalogo online: restano i libri che l'app porta con sé."
       ));
       return;
     }
 
+    const shown = lib.books.length;
     $("#lib-stato").textContent = result.online
-      ? (result.total > result.books.length
-          ? `I primi ${result.books.length} di ${result.total}.`
-          : plural(result.books.length, "libro trovato", "libri trovati") + ".")
-      : `${plural(result.books.length, "libro", "libri")} dal catalogo interno: il catalogo online non è raggiungibile da qui.`;
+      ? `${formatNumber(lib.total)} ${lib.total === 1 ? "risultato" : "risultati"} per «${lib.query}» — ne vedi ${formatNumber(shown)}.`
+      : `${plural(shown, "libro", "libri")} dal catalogo interno: il catalogo online non è raggiungibile da qui.`;
 
-    for (const book of result.books) box.append(bookCard(book));
+    for (const book of lib.books) box.append(bookCard(book));
+    $("#btn-altri").hidden = !result.hasMore;
+  }
+
+  async function loadMore() {
+    if (lib.busy) return;
+    lib.page++;
+    await runSearch(true);
+  }
+
+  /* ------------------------------------------------------------- autori */
+
+  /**
+   * «calvino» deve bastare per riconoscere Italo Calvino: si confrontano le
+   * parole, non le stringhe intere, così basta il cognome o il nome completo.
+   */
+  function nameMatches(name, query) {
+    const words = new Set(Books.normalize(name).split(" ").filter(Boolean));
+    const asked = Books.normalize(query).split(" ").filter(Boolean);
+    if (!asked.length) return false;
+    return asked.every((word) => words.has(word));
+  }
+
+  /** Se la ricerca somiglia al nome di un autore, la scheda dell'autore aiuta. */
+  async function lookUpAuthor(token) {
+    const card = $("#lib-autore");
+    card.hidden = true;
+    if (lib.mode === "isbn" || lib.mode === "argomento") return;
+
+    const found = await Books.findAuthors(lib.query);
+    if (token !== lib.token || !found.ok || !found.authors.length) return;
+
+    const author = found.authors[0];
+    if (lib.mode !== "autore" && !nameMatches(author.name, lib.query)) return;
+
+    const profile = await Books.authorProfile(author);
+    if (token !== lib.token) return;
+
+    clear(card);
+    const dates = [author.birth, author.death].filter(Boolean).join(" – ");
+    card.append(
+      h("div", { class: "author-head" },
+        h("div", {},
+          h("h3", { text: profile ? profile.name : author.name }),
+          h("p", { class: "muted small", text: [dates, plural(author.works, "opera", "opere")].filter(Boolean).join(" · ") })
+        ),
+        lib.mode !== "autore"
+          ? h("button", { type: "button", class: "btn small", text: "Tutte le opere", onClick: () => searchByAuthor(author.name) })
+          : null
+      ),
+      profile && profile.bio
+        ? h("p", { class: "author-bio", text: trimTo(profile.bio, 420) })
+        : null,
+      profile
+        ? h("p", { class: "muted small" }, h("a", { href: profile.url, target: "_blank", rel: "noopener noreferrer", text: "Scheda su Open Library" }))
+        : null
+    );
+    card.hidden = false;
+  }
+
+  function searchByAuthor(name) {
+    lib.mode = "autore";
+    $("#f-cerca").value = name;
+    switchView("libreria");
+    runSearch();
+  }
+
+  /* ---------------------------------------------------------- gli scaffali */
+
+  /**
+   * Gli scaffali da sfogliare. Dodici richieste tutte insieme sarebbero uno
+   * spreco: ogni scaffale si carica quando sta per entrare nello schermo.
+   */
+  function renderBrowseShelves() {
+    const box = $("#lib-scaffali");
+    clear(box);
+    box.append(h("h3", { class: "browse-title", text: "Sfoglia gli scaffali" }));
+
+    const observer = "IntersectionObserver" in window
+      ? new IntersectionObserver((entries, self) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            self.unobserve(entry.target);
+            fillShelf(entry.target);
+          }
+        }, { rootMargin: "300px" })
+      : null;
+
+    for (const spec of Books.SHELVES) {
+      const row = h("section", { class: "shelf", dataset: { key: spec.key } },
+        h("div", { class: "shelf-head" },
+          h("h4", { text: spec.label }),
+          h("button", {
+            type: "button", class: "btn ghost small", text: "Vedi tutto",
+            onClick: () => {
+              lib.mode = "argomento";
+              $("#f-cerca").value = spec.key.replace(/_/g, " ");
+              runSearch();
+            }
+          })
+        ),
+        h("div", { class: "shelf-row" },
+          ...Array.from({ length: 6 }, () => h("div", { class: "book-card is-compact is-skeleton" }))
+        )
+      );
+      box.append(row);
+      if (observer) observer.observe(row);
+      else fillShelf(row);
+    }
+  }
+
+  async function fillShelf(row) {
+    const key = row.dataset.key;
+    const result = await Books.shelf(key);
+    const strip = $(".shelf-row", row);
+    clear(strip);
+    if (!result.ok || !result.books.length) {
+      row.remove(); // uno scaffale vuoto è peggio di uno scaffale assente
+      return;
+    }
+    const head = $(".shelf-head h4", row);
+    if (result.total) head.append(h("span", { class: "shelf-count", text: formatNumber(result.total) }));
+    for (const book of result.books) strip.append(bookCard(book, { compact: true }));
+  }
+
+  /* ------------------------------------------------------ i miei scaffali */
+
+  function renderMyShelves() {
+    const box = $("#lib-miei");
+    clear(box);
+    const counts = Store.shelfCounts();
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    if (!total) return;
+
+    box.append(h("h3", { class: "browse-title", text: "I miei scaffali" }));
+    for (const spec of Store.SHELVES) {
+      const books = Store.shelfBooks(spec.id);
+      if (!books.length) continue;
+      box.append(
+        h("section", { class: "shelf" },
+          h("div", { class: "shelf-head" },
+            h("h4", { text: spec.label }),
+            h("span", { class: "shelf-count", text: String(books.length) })
+          ),
+          h("div", { class: "shelf-row" }, books.map((book) => bookCard(book, { compact: true })))
+        )
+      );
+    }
   }
 
   /* ------------------------------------------------------ scheda del libro */
@@ -1176,20 +1431,31 @@
 
     $("#sheet-title").textContent = book.title;
     $("#sheet-author").textContent = book.author || "Autore sconosciuto";
-    $("#sheet-meta").textContent = [
-      book.year ? String(book.year) : "",
-      book.pages ? plural(book.pages, "pagina", "pagine") : ""
-    ].filter(Boolean).join(" · ");
+
+    const meta = $("#sheet-meta");
+    clear(meta);
+    const bits = [book.year ? String(book.year) : "", book.pages ? plural(book.pages, "pagina", "pagine") : ""].filter(Boolean);
+    if (bits.length) meta.append(document.createTextNode(bits.join(" · ")));
+    if (book.author) {
+      if (bits.length) meta.append(document.createTextNode(" · "));
+      meta.append(h("button", {
+        type: "button", class: "link-button", text: "altri libri di " + book.author.split(",")[0],
+        onClick: () => { closeSheet(); searchByAuthor(book.author.split(",")[0]); }
+      }));
+    }
 
     clear($("#sheet-cover"));
     $("#sheet-cover").append(coverNode(book, "lg"));
     clear($("#sheet-temi"));
+    clear($("#sheet-facts"));
     clear($("#sheet-body"));
     $("#sheet-sources").textContent = "";
     $("#sheet-body").append(h("p", { class: "ai-loading", text: "Cerco di che cosa parla…" }));
+    renderShelfPicker(book);
 
     const sheet = $("#book-sheet");
     if (!sheet.open) sheet.showModal();
+    sheet.scrollTop = 0;
 
     const dossier = await Books.research(book);
     if (currentBook !== book) return; // l'utente ha già aperto un altro libro
@@ -1197,16 +1463,37 @@
     renderSheetBody(dossier);
   }
 
+  function renderShelfPicker(book) {
+    const box = $("#sheet-scaffale");
+    clear(box);
+    const here = Store.shelfOf(book);
+    for (const spec of Store.SHELVES) {
+      const active = here === spec.id;
+      box.append(h("button", {
+        type: "button",
+        class: "shelf-chip" + (active ? " is-active" : ""),
+        "aria-pressed": active ? "true" : "false",
+        text: spec.label,
+        onClick: () => {
+          Store.setShelf(book, active ? null : spec.id);
+          renderShelfPicker(book);
+          renderMyShelves();
+          toast(active ? `Tolto dagli scaffali.` : `«${book.title}» → ${spec.label}.`);
+        }
+      }));
+    }
+  }
+
   function renderSheetBody(dossier) {
     const book = dossier.book;
     const body = $("#sheet-body");
     clear(body);
 
-    const opening = dossier.intro || book.blurb;
+    const opening = dossier.intro || book.blurb || book.firstSentence;
     if (opening) {
       body.append(
         h("h4", { class: "sheet-h", text: "Di che cosa parla" }),
-        h("p", { class: "sheet-text", text: trimTo(opening, 700) })
+        h("p", { class: "sheet-text", text: trimTo(opening, 760) })
       );
     }
 
@@ -1227,19 +1514,17 @@
           : "Da questa pagina non riesco a consultare le fonti online." }),
         h("button", {
           type: "button", class: "btn small", text: "Chiedi a Claude di che cosa parla",
-          onClick: () => askClaude({
-            title: "Di che cosa parla",
-            note: `«${book.title}»`,
-            prompt: AI.prompts.plot(book)
-          })
+          onClick: () => askClaude({ title: "Di che cosa parla", note: `«${book.title}»`, prompt: AI.prompts.plot(book) })
         })
       );
     }
 
     clear($("#sheet-temi"));
-    for (const tema of dossier.subjects.slice(0, 6)) {
+    for (const tema of dossier.subjects) {
       $("#sheet-temi").append(h("span", { class: "chip is-static", text: tema }));
     }
+
+    renderFacts(dossier);
 
     const sources = $("#sheet-sources");
     clear(sources);
@@ -1249,6 +1534,28 @@
         if (i) sources.append(document.createTextNode(" · "));
         sources.append(h("a", { href: source.url, target: "_blank", rel: "noopener noreferrer", text: source.name }));
       });
+    }
+  }
+
+  /** La scheda catalografica: quello che rende un record un record. */
+  function renderFacts(dossier) {
+    const box = $("#sheet-facts");
+    clear(box);
+    const book = dossier.book;
+    const editions = dossier.editions;
+
+    const rows = [];
+    if (book.year) rows.push(["Prima pubblicazione", String(book.year)]);
+    if (dossier.pages) rows.push(["Pagine", String(dossier.pages)]);
+    if (editions && editions.count) rows.push(["Edizioni", formatNumber(editions.count)]);
+    if (editions && editions.publishers.length) rows.push(["Editori", editions.publishers.join(", ")]);
+    if (dossier.languages.length) {
+      rows.push(["Lingue", dossier.languages.slice(0, 6).map(Books.languageName).join(", ")]);
+    }
+    if (editions && editions.isbn.length) rows.push(["ISBN", editions.isbn.join(" · ")]);
+
+    for (const [label, value] of rows) {
+      box.append(h("dt", { text: label }), h("dd", { text: value }));
     }
   }
 
@@ -1273,6 +1580,8 @@
       (b) => Books.normalize(b.title) === Books.normalize(book.title)
     );
     if (known && known.lastPage > 0) $("#f-da").value = String(known.lastPage + 1);
+    if (!Store.shelfOf(book)) Store.setShelf(book, "in-lettura");
+    renderMyShelves();
     closeSheet();
     switchView("nuova");
     ($("#f-da").value ? $("#f-a") : $("#f-pagine")).focus();
@@ -1298,6 +1607,7 @@
       }
     );
   }
+
 
   /* ============================================= RACCONTA A UNA BAMBINA */
 
@@ -1591,7 +1901,21 @@
     // ---- libreria
     $("#form-cerca").addEventListener("submit", (e) => {
       e.preventDefault();
-      runSearch($("#f-cerca").value);
+      runSearch();
+    });
+    $("#btn-altri").addEventListener("click", loadMore);
+    $("#btn-azzera").addEventListener("click", resetSearch);
+    $("#f-lingua").addEventListener("change", (e) => {
+      lib.language = e.target.value;
+      if (lib.query) runSearch(); else renderSearchControls();
+    });
+    $("#f-ordine").addEventListener("change", (e) => {
+      lib.sort = e.target.value;
+      if (lib.query) runSearch(); else renderSearchControls();
+    });
+    // Svuotare il campo riporta agli scaffali, senza dover premere «Azzera».
+    $("#f-cerca").addEventListener("input", (e) => {
+      if (!e.target.value.trim() && lib.query) resetSearch();
     });
     $("#sheet-close").addEventListener("click", closeSheet);
     $("#btn-leggi").addEventListener("click", () => currentBook && startReading(currentBook));
@@ -1648,7 +1972,8 @@
 
   function init() {
     buildQuestionFields();
-    renderSuggestions();
+    renderSearchControls();
+    renderBrowseShelves();
     setupDictation();
     wire();
     if (Store.current()) enterApp();

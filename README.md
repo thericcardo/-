@@ -33,33 +33,61 @@ Puoi aggiungerne di tue con **+ Aggiungi una tua domanda**.
 
 ## La libreria
 
-La scheda **Libreria** cerca fra i libri del mondo. Scrivi un titolo, un autore o
-un argomento e per ogni libro trovi copertina, anno, numero di pagine, temi e —
-soprattutto — **di che cosa parla**.
+La scheda **Libreria** è un catalogo mondiale vero: oltre quaranta milioni di
+opere da Open Library, con trame, copertine, edizioni e autori.
 
-Le fonti sono tre, pubbliche e senza chiavi, interrogate direttamente dal browser:
+**Cercare.** Cinque modalità — Tutto, Titolo, Autore, Argomento, ISBN — con
+filtro di lingua (sette lingue) e quattro ordinamenti: più pertinenti, più
+celebri (cioè con più edizioni pubblicate), più recenti, più antichi. Il
+conteggio è quello reale del catalogo, e **Carica altri** scorre pagina per
+pagina: da «calvino» arrivano millecinquecento risultati veri, non i primi venti.
+
+**Sfogliare.** Quando non stai cercando niente trovi dodici scaffali da
+scorrere di lato — Classici, Per ragazzi, Avventura, Fantasy, Fantascienza,
+Gialli, Storia, Biografie, Poesia, Umorismo, Filosofia, Scienza. Ogni scaffale
+si carica quando sta per entrare nello schermo, non tutti insieme all'avvio.
+
+**Gli autori.** Se quello che cerchi è il nome di un autore, sopra i risultati
+compare la sua scheda: date, numero di opere, biografia, e un pulsante per
+vedere tutto quello che ha scritto. Lo stesso collegamento è dentro la scheda
+di ogni libro.
+
+**La scheda di un libro.** Copertina, di che cosa parla, la trama completa
+dietro un clic, i temi in italiano, e una scheda catalografica vera: prima
+pubblicazione, pagine, numero di edizioni, editori, lingue in cui esiste, ISBN.
+
+**I tuoi scaffali.** Ogni libro può stare su *Da leggere*, *Sto leggendo*,
+*Letti* o *Abbandonati*. Gli scaffali restano nel profilo, compaiono in cima
+alla libreria e finiscono nell'export insieme al diario. Una bandierina sulla
+copertina dice dove sta un libro che hai già sistemato.
+
+### Da dove vengono i dati
 
 | Fonte | Che cosa dà |
 |---|---|
-| [Open Library](https://openlibrary.org) | catalogo, copertine, scheda dell'opera |
+| [Open Library](https://openlibrary.org) | catalogo, copertine, scaffali per argomento, autori, edizioni |
 | [Wikipedia italiana](https://it.wikipedia.org) | la trama vera, presa dalla sezione «Trama» della voce |
 | [Google Books](https://books.google.com) | la descrizione dell'editore, come ripiego |
 
-La trama completa sta dietro un clic, con un avviso: una trama enciclopedica di
-solito racconta anche come va a finire. L'introduzione, che non svela il finale,
-è invece subito leggibile.
+Tutte e tre rispondono con `access-control-allow-origin: *`, quindi la pagina le
+interroga direttamente, senza chiavi e senza un server in mezzo.
 
-Due accortezze che contano:
+### Perché regge
 
-- **Wikipedia viene accettata solo se il titolo della voce corrisponde davvero**
-  al libro. Meglio nessuna trama che la trama di un altro libro.
-- Se una fonte non risponde, le altre lavorano lo stesso; se non risponde
-  nessuna, resta il **catalogo interno** di una cinquantina di titoli che viaggia
-  dentro il file, e la ricerca funziona comunque.
-
-Da ogni scheda: **Comincia a leggerlo** porta il libro nel diario già compilato,
-**Non ho capito una cosa** apre la spiegazione, **Raccontalo a Nina** apre quello
-che segue.
+- **Cache.** Ogni risposta resta in memoria e in `sessionStorage` per mezz'ora:
+  tornare su una ricerca già fatta non produce nessuna chiamata.
+- **Ritentativi.** Open Library limita le richieste. Un 429 o una connessione
+  chiusa vengono ritentati con attesa crescente invece di diventare una
+  schermata vuota.
+- **Richieste in volo deduplicate.** Due domande identiche contemporanee
+  diventano una sola.
+- **La trama giusta o nessuna.** La voce di Wikipedia viene accettata solo se il
+  titolo corrisponde davvero al libro: meglio niente che la trama di un altro
+  libro.
+- **Copertine.** Se l'immagine non arriva — o resta appesa — dopo tre secondi e
+  mezzo ne viene disegnata una col titolo dentro.
+- **Senza rete.** Resta un catalogo interno di cinquanta titoli e la ricerca
+  continua a funzionare.
 
 ## Raccontalo a Nina
 

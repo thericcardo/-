@@ -73,17 +73,44 @@
     <section id="view-libreria" class="view" role="tabpanel" tabindex="-1">
       <div class="lib-hero">
         <h2>Tutti i libri del mondo</h2>
-        <p class="lede">Cerca un titolo o un autore, scopri di che cosa parla, poi comincia a leggerlo.</p>
+        <p class="lede">Oltre quaranta milioni di opere. Cerca, scopri di che cosa parlano, mettile sui tuoi scaffali.</p>
+
         <form id="form-cerca" class="search-bar" autocomplete="off" novalidate>
           <input id="f-cerca" type="search" aria-label="Cerca un libro"
-                 placeholder="Un titolo, un autore, un argomento…" maxlength="120">
+                 placeholder="Titolo, autore, argomento, ISBN…" maxlength="140">
           <button type="submit" class="btn primary" id="btn-cerca">Cerca</button>
         </form>
-        <div class="chips" id="lib-suggerimenti"></div>
+
+        <div class="search-modes" id="lib-modi" role="group" aria-label="Come cercare"></div>
+
+        <div class="search-filters">
+          <label class="mini-field">
+            <span>Lingua</span>
+            <select id="f-lingua"></select>
+          </label>
+          <label class="mini-field">
+            <span>Ordina per</span>
+            <select id="f-ordine"></select>
+          </label>
+          <button type="button" class="btn ghost small" id="btn-azzera" hidden>Azzera</button>
+        </div>
       </div>
 
-      <p class="hint" id="lib-stato" role="status" aria-live="polite"></p>
-      <div id="lib-risultati" class="book-grid"></div>
+      <!-- risultati di una ricerca -->
+      <div id="lib-risultati-box" hidden>
+        <div id="lib-autore" class="author-card" hidden></div>
+        <p class="lib-stato" id="lib-stato" role="status" aria-live="polite"></p>
+        <div id="lib-risultati" class="book-grid"></div>
+        <div class="lib-more">
+          <button type="button" class="btn" id="btn-altri" hidden>Carica altri</button>
+        </div>
+      </div>
+
+      <!-- sfogliare, quando non si sta cercando niente -->
+      <div id="lib-sfoglia">
+        <div id="lib-miei"></div>
+        <div id="lib-scaffali"></div>
+      </div>
     </section>
 
     <!-- ---- NUOVA LETTURA ---- -->
@@ -242,7 +269,10 @@
     </div>
   </div>
 
+  <div class="shelf-picker" id="sheet-scaffale" role="group" aria-label="Metti su uno scaffale"></div>
+
   <div class="sheet-body" id="sheet-body"></div>
+  <dl class="sheet-facts" id="sheet-facts"></dl>
 
   <div class="sheet-actions">
     <button type="button" class="btn primary" id="btn-leggi">Comincia a leggerlo</button>

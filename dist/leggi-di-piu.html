@@ -690,20 +690,46 @@ body[data-view="libreria"] .today { display: none; }
 
 /* ------------------------------------------------------------ libreria --- */
 
-.lib-hero { margin-bottom: 1.2rem; }
-.lib-hero h2 { font-size: clamp(1.6rem, 6vw, 2.1rem); text-wrap: balance; }
-.lib-hero .lede { color: var(--muted); margin-top: .35rem; max-width: 34rem; }
+.lib-hero { margin-bottom: 1.4rem; }
+.lib-hero h2 { font-size: clamp(1.7rem, 6.5vw, 2.3rem); text-wrap: balance; }
+.lib-hero .lede { color: var(--muted); margin-top: .35rem; max-width: 36rem; }
 
-.search-bar {
-  display: flex;
-  gap: .5rem;
-  margin-top: 1rem;
-}
-.search-bar input { flex: 1 1 auto; padding: .75rem .9rem; font-size: 1rem; }
+.search-bar { display: flex; gap: .5rem; margin-top: 1.1rem; }
+.search-bar input { flex: 1 1 auto; padding: .78rem .95rem; font-size: 1rem; }
 .search-bar .btn { flex: 0 0 auto; }
 
-.chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .7rem; }
+/* Le modalita di ricerca: dove guardare, prima di che cosa cercare. */
+.search-modes { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .7rem; }
+.mode {
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .28rem .78rem;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.mode:hover { color: var(--ink); border-color: var(--chip-hover-border); }
+.mode.is-active { background: var(--yellow); color: var(--accent-ink); border-color: var(--yellow); }
 
+.search-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .6rem; margin-top: .8rem; }
+.mini-field { display: flex; flex-direction: column; gap: .2rem; }
+.mini-field > span {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.mini-field select { width: auto; min-width: 9.5rem; padding: .4rem .6rem; font-size: .88rem; }
+
+.lib-stato { font-size: .88rem; color: var(--muted); margin-bottom: .9rem; }
+.lib-more { display: flex; justify-content: center; margin-top: 1.4rem; }
+
+.chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .7rem; }
 .chip {
   font: inherit;
   font-size: .82rem;
@@ -713,17 +739,43 @@ body[data-view="libreria"] .today { display: none; }
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: .26rem .7rem;
-  cursor: pointer;
-  transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
-.chip:hover { background: var(--chip-hover-bg); border-color: var(--chip-hover-border); color: var(--ink); }
-.chip.is-static { cursor: default; background: var(--surface-alt); }
-.chip.is-static:hover { background: var(--surface-alt); border-color: var(--line); color: var(--muted); }
+.chip.is-static { background: var(--surface-alt); }
+
+.link-button {
+  font: inherit;
+  font-size: inherit;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.link-button:hover { color: var(--yellow-deep); }
+
+/* ---- la scheda dell'autore sopra i risultati ---- */
+
+.author-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--yellow);
+  border-radius: var(--radius);
+  padding: .95rem 1.1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-soft);
+}
+.author-head { display: flex; align-items: flex-start; justify-content: space-between; gap: .8rem; }
+.author-head h3 { font-size: 1.15rem; }
+.author-bio { margin-top: .55rem; font-size: .92rem; line-height: 1.55; }
+
+/* ---- griglia dei risultati ---- */
 
 .book-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
-  gap: 1rem .8rem;
+  gap: 1.2rem .8rem;
 }
 
 .book-card { min-width: 0; }
@@ -740,6 +792,20 @@ body[data-view="libreria"] .today { display: none; }
   border: 0;
   cursor: pointer;
 }
+.book-card-cover { position: relative; display: block; }
+.book-card-flag {
+  position: absolute;
+  left: .35rem;
+  bottom: .35rem;
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--accent-ink);
+  background: var(--yellow);
+  border-radius: 999px;
+  padding: .12rem .45rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
+}
 .book-card-text { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
 .book-card-title {
   font-family: var(--serif);
@@ -754,7 +820,49 @@ body[data-view="libreria"] .today { display: none; }
 .book-card-author { font-size: .8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .book-card-year { font-size: .74rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-/* Copertina: quella vera se c'è, altrimenti disegnata col titolo dentro. */
+.book-card.is-compact .book-card-title { font-size: .86rem; -webkit-line-clamp: 2; }
+.book-card.is-compact .book-card-author { font-size: .74rem; }
+
+/* ---- gli scaffali da sfogliare ---- */
+
+.browse-title {
+  font-family: var(--sans);
+  font-size: .76rem;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 1.8rem 0 .8rem;
+}
+#lib-miei .browse-title:first-child { margin-top: .4rem; }
+
+.shelf { margin-bottom: 1.6rem; }
+.shelf-head { display: flex; align-items: baseline; justify-content: space-between; gap: .7rem; margin-bottom: .6rem; }
+.shelf-head h4 { font-size: 1.12rem; }
+.shelf-count {
+  margin-left: .45rem;
+  font-family: var(--sans);
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Uno scaffale si scorre di lato, come davanti a una libreria vera. */
+.shelf-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 104px;
+  gap: .7rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: .5rem;
+  scrollbar-width: thin;
+}
+.shelf-row > * { scroll-snap-align: start; }
+
+/* ---- copertine ---- */
+
 .cover {
   position: relative;
   display: flex;
@@ -777,7 +885,7 @@ body[data-view="libreria"] .today { display: none; }
 }
 .book-card-btn:hover .cover { transform: translateY(-3px); box-shadow: var(--shadow); }
 
-/* Senza immagine la copertina è composta come una vera: titolo al centro,
+/* Senza immagine la copertina e composta come una vera: titolo al centro,
    un filetto, l'autore sotto. Meglio di un rettangolo vuoto. */
 .cover.is-drawn {
   justify-content: center;
@@ -820,12 +928,17 @@ body[data-view="libreria"] .today { display: none; }
 .cover.is-drawn.pattern-2 { background: linear-gradient(200deg, var(--green) 40%, #3C4E3F); }
 .cover.is-drawn.pattern-3 { background: var(--green-soft); border-left-color: var(--yellow); }
 
+.cover-sm.is-drawn { padding: .6rem .4rem; gap: .3rem; }
+.cover-sm.is-drawn .cover-title { font-size: .74rem; -webkit-line-clamp: 5; hyphens: auto; }
+.cover-sm.is-drawn .cover-title::after { width: 18px; margin-top: .3rem; }
+.cover-sm.is-drawn .cover-author { font-size: .62rem; }
+
 .cover-lg { width: 108px; flex: 0 0 108px; border-radius: 10px; }
 .cover-lg.is-drawn { padding: .7rem .5rem .7rem .7rem; }
 .cover-lg.is-drawn .cover-title {
   font-size: .82rem;
   -webkit-line-clamp: 7;
-  hyphens: auto;         /* «rampante» non deve spezzarsi a metà parola */
+  hyphens: auto;         /* «rampante» non deve spezzarsi a meta parola */
 }
 .cover-lg.is-drawn .cover-title::after { margin-top: .4rem; }
 
@@ -859,6 +972,41 @@ body[data-view="libreria"] .today { display: none; }
 .sheet-id { min-width: 0; display: flex; flex-direction: column; gap: .25rem; }
 .sheet-id h3 { font-size: 1.4rem; text-wrap: balance; }
 .sheet-author { font-size: 1rem; color: var(--muted); }
+
+/* Su quale scaffale sta questo libro: la prima cosa che si decide. */
+.shelf-picker { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: 1.1rem; }
+.shelf-chip {
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .3rem .8rem;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.shelf-chip:hover { color: var(--ink); border-color: var(--chip-hover-border); }
+.shelf-chip.is-active { background: var(--green); color: var(--yellow); border-color: var(--green); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .shelf-chip.is-active { background: var(--yellow); color: var(--green); border-color: var(--yellow); }
+}
+:root[data-theme="dark"] .shelf-chip.is-active { background: var(--yellow); color: var(--green); border-color: var(--yellow); }
+
+/* La scheda catalografica: due colonne, numeri allineati. */
+.sheet-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .3rem .9rem;
+  margin: 1.1rem 0 0;
+  padding-top: .9rem;
+  border-top: 1px solid var(--line);
+  font-size: .87rem;
+}
+.sheet-facts:empty { display: none; }
+.sheet-facts dt { color: var(--muted); white-space: nowrap; }
+.sheet-facts dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 
 .sheet-body { margin-top: 1.2rem; display: flex; flex-direction: column; gap: .6rem; }
 .sheet-h {
@@ -1147,17 +1295,44 @@ body.is-locked { overflow: hidden; }
     <section id="view-libreria" class="view" role="tabpanel" tabindex="-1">
       <div class="lib-hero">
         <h2>Tutti i libri del mondo</h2>
-        <p class="lede">Cerca un titolo o un autore, scopri di che cosa parla, poi comincia a leggerlo.</p>
+        <p class="lede">Oltre quaranta milioni di opere. Cerca, scopri di che cosa parlano, mettile sui tuoi scaffali.</p>
+
         <form id="form-cerca" class="search-bar" autocomplete="off" novalidate>
           <input id="f-cerca" type="search" aria-label="Cerca un libro"
-                 placeholder="Un titolo, un autore, un argomento…" maxlength="120">
+                 placeholder="Titolo, autore, argomento, ISBN…" maxlength="140">
           <button type="submit" class="btn primary" id="btn-cerca">Cerca</button>
         </form>
-        <div class="chips" id="lib-suggerimenti"></div>
+
+        <div class="search-modes" id="lib-modi" role="group" aria-label="Come cercare"></div>
+
+        <div class="search-filters">
+          <label class="mini-field">
+            <span>Lingua</span>
+            <select id="f-lingua"></select>
+          </label>
+          <label class="mini-field">
+            <span>Ordina per</span>
+            <select id="f-ordine"></select>
+          </label>
+          <button type="button" class="btn ghost small" id="btn-azzera" hidden>Azzera</button>
+        </div>
       </div>
 
-      <p class="hint" id="lib-stato" role="status" aria-live="polite"></p>
-      <div id="lib-risultati" class="book-grid"></div>
+      <!-- risultati di una ricerca -->
+      <div id="lib-risultati-box" hidden>
+        <div id="lib-autore" class="author-card" hidden></div>
+        <p class="lib-stato" id="lib-stato" role="status" aria-live="polite"></p>
+        <div id="lib-risultati" class="book-grid"></div>
+        <div class="lib-more">
+          <button type="button" class="btn" id="btn-altri" hidden>Carica altri</button>
+        </div>
+      </div>
+
+      <!-- sfogliare, quando non si sta cercando niente -->
+      <div id="lib-sfoglia">
+        <div id="lib-miei"></div>
+        <div id="lib-scaffali"></div>
+      </div>
     </section>
 
     <!-- ---- NUOVA LETTURA ---- -->
@@ -1316,7 +1491,10 @@ body.is-locked { overflow: hidden; }
     </div>
   </div>
 
+  <div class="shelf-picker" id="sheet-scaffale" role="group" aria-label="Metti su uno scaffale"></div>
+
   <div class="sheet-body" id="sheet-body"></div>
+  <dl class="sheet-facts" id="sheet-facts"></dl>
 
   <div class="sheet-actions">
     <button type="button" class="btn primary" id="btn-leggi">Comincia a leggerlo</button>
@@ -1416,7 +1594,8 @@ const Store = (() => {
           createdAt: u.createdAt || new Date().toISOString(),
           lastActive: u.lastActive || u.createdAt || new Date().toISOString(),
           dailyGoal: Number(u.dailyGoal) > 0 ? Number(u.dailyGoal) : DEFAULT_GOAL,
-          entries: Array.isArray(u.entries) ? u.entries.filter(isEntry) : []
+          entries: Array.isArray(u.entries) ? u.entries.filter(isEntry) : [],
+          shelves: (u.shelves && typeof u.shelves === "object") ? u.shelves : {}
         };
       }
       const currentUser = typeof parsed.currentUser === "string" && users[parsed.currentUser]
@@ -1495,7 +1674,8 @@ const Store = (() => {
         createdAt: now,
         lastActive: now,
         dailyGoal: DEFAULT_GOAL,
-        entries: []
+        entries: [],
+        shelves: {}
       };
     } else {
       state.users[k].lastActive = now;
@@ -1578,6 +1758,86 @@ const Store = (() => {
     return true;
   }
 
+  /* ------------------------------------------------------------- scaffali */
+
+  /** Gli scaffali personali. L'ordine è quello in cui appaiono nell'app. */
+  const SHELVES = [
+    { id: "da-leggere", label: "Da leggere" },
+    { id: "in-lettura", label: "Sto leggendo" },
+    { id: "letti", label: "Letti" },
+    { id: "abbandonati", label: "Abbandonati" }
+  ];
+
+  const shelfIds = SHELVES.map((s) => s.id);
+
+  /** La chiave di un libro: l'id del catalogo, o titolo e autore se manca. */
+  function bookKey(book) {
+    if (book && book.id) return String(book.id);
+    return "t:" + String((book && book.title) || "").trim().toLowerCase()
+      + "|" + String((book && book.author) || "").trim().toLowerCase();
+  }
+
+  function shelves() {
+    const u = current();
+    if (!u) return {};
+    if (!u.shelves || typeof u.shelves !== "object") u.shelves = {};
+    return u.shelves;
+  }
+
+  /** In quale scaffale si trova questo libro, se in uno. */
+  function shelfOf(book) {
+    const all = shelves();
+    const key = bookKey(book);
+    for (const id of shelfIds) {
+      if ((all[id] || []).some((entry) => entry.key === key)) return id;
+    }
+    return null;
+  }
+
+  /**
+   * Sposta un libro su uno scaffale, o lo toglie da tutti con shelfId null.
+   * Un libro sta su un solo scaffale alla volta: è una posizione, non un'etichetta.
+   */
+  function setShelf(book, shelfId) {
+    const u = current();
+    if (!u) return false;
+    if (shelfId !== null && !shelfIds.includes(shelfId)) return false;
+
+    const all = shelves();
+    const key = bookKey(book);
+    for (const id of shelfIds) {
+      all[id] = (all[id] || []).filter((entry) => entry.key !== key);
+    }
+    if (shelfId) {
+      all[shelfId] = all[shelfId] || [];
+      all[shelfId].unshift({
+        key,
+        id: book.id || null,
+        title: book.title || "",
+        author: book.author || "",
+        year: book.year || null,
+        pages: book.pages || null,
+        cover: book.cover || null,
+        blurb: book.blurb || "",
+        addedAt: new Date().toISOString()
+      });
+    }
+    u.lastActive = new Date().toISOString();
+    save();
+    return true;
+  }
+
+  function shelfBooks(shelfId) {
+    return (shelves()[shelfId] || []).slice();
+  }
+
+  function shelfCounts() {
+    const all = shelves();
+    const counts = {};
+    for (const id of shelfIds) counts[id] = (all[id] || []).length;
+    return counts;
+  }
+
   /* -------------------------------------------------------- esporta/importa */
 
   function exportCurrent() {
@@ -1588,7 +1848,8 @@ const Store = (() => {
       version: 1,
       exportedAt: new Date().toISOString(),
       user: { username: u.username, createdAt: u.createdAt, dailyGoal: u.dailyGoal },
-      entries: u.entries
+      entries: u.entries,
+      shelves: u.shelves || {}
     };
   }
 
@@ -1614,6 +1875,16 @@ const Store = (() => {
       u.entries.push(entry);
       added++;
     }
+    // Gli scaffali arrivano interi: sono una posizione, non una cronologia.
+    if (payload.shelves && typeof payload.shelves === "object") {
+      const all = shelves();
+      for (const id of shelfIds) {
+        const incoming = Array.isArray(payload.shelves[id]) ? payload.shelves[id] : [];
+        const known = new Set((all[id] || []).map((e) => e.key));
+        all[id] = (all[id] || []).concat(incoming.filter((e) => e && e.key && !known.has(e.key)));
+      }
+    }
+
     save();
     return { ok: true, added, skipped };
   }
@@ -1628,6 +1899,12 @@ const Store = (() => {
     logout,
     deleteCurrentUser,
     setGoal,
+    SHELVES,
+    bookKey,
+    shelfOf,
+    setShelf,
+    shelfBooks,
+    shelfCounts,
     entries,
     getEntry,
     addEntry,
@@ -1640,19 +1917,25 @@ const Store = (() => {
 
 
 /**
- * Leggi di più — la libreria.
+ * Leggi di più — il catalogo mondiale.
  *
- * Cerca fra i libri del mondo e ne ricostruisce la trama, mettendo insieme tre
- * fonti pubbliche che si possono interrogare da un browser senza chiavi:
+ * Parla con tre fonti pubbliche, tutte interrogabili da un browser senza chiavi
+ * perché rispondono con `access-control-allow-origin: *`:
  *
- *   Open Library   catalogo e copertine
+ *   Open Library   ~40 milioni di opere: ricerca, scaffali per argomento,
+ *                  autori, edizioni, copertine
  *   Wikipedia (it) la trama vera, dalla sezione «Trama» della voce
- *   Google Books   descrizione dell'editore, come ripiego
+ *   Google Books   la descrizione dell'editore, come ripiego
  *
- * Tutte e tre rispondono con `access-control-allow-origin: *`, quindi la pagina
- * può chiamarle direttamente. Dove la rete non c'è — o dove la pagina non ha il
- * permesso di uscire — resta il catalogo di partenza qui sotto, che vive dentro
- * il file: la ricerca funziona comunque, solo su meno libri.
+ * Tre accortezze che fanno la differenza fra una demo e un catalogo usabile:
+ *
+ *   - **cache**: ogni risposta resta in memoria e in sessionStorage, così
+ *     tornare indietro è istantaneo e non si ripete la stessa domanda;
+ *   - **ritentativi**: Open Library limita le richieste, e un 429 o una
+ *     connessione chiusa non devono diventare una schermata vuota;
+ *   - **catalogo di scorta**: dove la rete non c'è — o dove la pagina non ha il
+ *     permesso di uscire — la ricerca continua a funzionare sui titoli che
+ *     viaggiano dentro il file.
  */
 const Books = (() => {
   "use strict";
@@ -1662,18 +1945,108 @@ const Books = (() => {
   const GOOGLE_BOOKS = "https://www.googleapis.com/books/v1/volumes";
   const WIKIPEDIA = "https://it.wikipedia.org/w/api.php";
 
-  /** null finché non si sa, poi true/false: serve a spiegare all'utente che cosa succede. */
+  const PAGE_SIZE = 24;
+  const CACHE_TTL = 30 * 60 * 1000;
+  const CACHE_PREFIX = "leggidipiu.cache.v2:";
+
+  /** null finché non si sa; poi true/false, per spiegare all'utente che succede. */
   let reachable = null;
 
+  /* =========================================================== la rete === */
+
+  const memory = new Map();
+  const inFlight = new Map();
+
+  function cacheRead(key) {
+    const hit = memory.get(key);
+    if (hit && Date.now() - hit.at < CACHE_TTL) return hit.data;
+    try {
+      const raw = sessionStorage.getItem(CACHE_PREFIX + key);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (Date.now() - parsed.at >= CACHE_TTL) return null;
+      memory.set(key, parsed);
+      return parsed.data;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function cacheWrite(key, data) {
+    const entry = { at: Date.now(), data };
+    memory.set(key, entry);
+    try {
+      sessionStorage.setItem(CACHE_PREFIX + key, JSON.stringify(entry));
+    } catch (err) {
+      // Spazio finito o storage negato: la cache in memoria basta.
+    }
+  }
+
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
   /**
-   * Il catalogo che viaggia dentro il file. Non pretende di essere completo:
-   * serve a dare risultati immediati e a far funzionare l'app anche offline.
-   * La ricerca online, quando c'è, aggiunge tutto il resto.
+   * Una GET con cache, deduplica delle richieste identiche in volo, timeout e
+   * ritentativi su tutto quello che vale la pena ritentare (429, 5xx, rete).
    */
+  async function getJSON(url, { timeout = 10000, retries = 2, cache = true } = {}) {
+    if (cache) {
+      const hit = cacheRead(url);
+      if (hit) return { ok: true, data: hit, cached: true };
+      const pending = inFlight.get(url);
+      if (pending) return pending;
+    }
+
+    const attempt = (async () => {
+      for (let tryNumber = 0; ; tryNumber++) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeout);
+        try {
+          const response = await fetch(url, { signal: controller.signal });
+          reachable = true;
+          if (response.ok) {
+            const data = await response.json();
+            if (cache) cacheWrite(url, data);
+            return { ok: true, data };
+          }
+          const worthRetrying = response.status === 429 || response.status >= 500;
+          if (!worthRetrying || tryNumber >= retries) {
+            return { ok: false, reason: response.status === 429 ? "rate-limit" : "http", status: response.status };
+          }
+        } catch (err) {
+          if (reachable !== true) reachable = false;
+          if (tryNumber >= retries) {
+            return { ok: false, reason: err && err.name === "AbortError" ? "timeout" : "network" };
+          }
+        } finally {
+          clearTimeout(timer);
+        }
+        await sleep(600 * Math.pow(2, tryNumber)); // 600ms, poi 1,2s
+      }
+    })().finally(() => inFlight.delete(url));
+
+    if (cache) inFlight.set(url, attempt);
+    return attempt;
+  }
+
+  const isReachable = () => reachable;
+
+  /* ====================================================== normalizzazione = */
+
+  const normalize = (s) => String(s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  /* ======================================= il catalogo che sta nel file === */
+
   const SEED = [
     { title: "Il barone rampante", author: "Italo Calvino", year: 1957, pages: 275, blurb: "Un ragazzo di dodici anni sale su un albero dopo un litigio a tavola e decide di non scendere mai più. Da lassù si costruisce una vita intera." },
     { title: "Il visconte dimezzato", author: "Italo Calvino", year: 1952, pages: 120, blurb: "Una palla di cannone taglia in due un visconte. Le due metà tornano a casa separate: una cattivissima, l'altra buonissima." },
     { title: "Le città invisibili", author: "Italo Calvino", year: 1972, pages: 164, blurb: "Marco Polo descrive a Kublai Khan decine di città impossibili. Ogni città è un modo diverso di guardare la vita." },
+    { title: "Marcovaldo", author: "Italo Calvino", year: 1963, pages: 128, blurb: "Venti racconti su un manovale di città che continua a cercare la natura fra cemento, semafori e supermercati." },
     { title: "Il piccolo principe", author: "Antoine de Saint-Exupéry", year: 1943, pages: 96, blurb: "Un aviatore precipita nel deserto e incontra un bambino arrivato da un piccolo pianeta, che gli fa domande a cui i grandi non sanno rispondere." },
     { title: "Pinocchio", author: "Carlo Collodi", year: 1883, pages: 180, blurb: "Un burattino di legno vuole diventare un bambino vero, ma ogni volta che può scegliere sceglie la strada sbagliata." },
     { title: "Cuore", author: "Edmondo De Amicis", year: 1886, pages: 250, blurb: "Il diario di un anno di scuola nella Torino dell'Ottocento, fra compagni, maestri e racconti mensili." },
@@ -1687,6 +2060,7 @@ const Books = (() => {
     { title: "Novecento", author: "Alessandro Baricco", year: 1994, pages: 62, blurb: "Un pianista nato su una nave non scende mai a terra in tutta la vita. Un monologo breve sul coraggio e sui limiti che scegliamo." },
     { title: "L'amica geniale", author: "Elena Ferrante", year: 2011, pages: 331, blurb: "Due bambine crescono in un rione povero di Napoli negli anni Cinquanta, legate da un'amicizia che le spinge e le ferisce per tutta la vita." },
     { title: "Io non ho paura", author: "Niccolò Ammaniti", year: 2001, pages: 219, blurb: "In un'estate rovente del Sud, un bambino di nove anni scopre un segreto che riguarda gli adulti del suo paese." },
+    { title: "Il nome della rosa", author: "Umberto Eco", year: 1980, pages: 512, blurb: "In un'abbazia medievale i monaci muoiono uno dopo l'altro. Un frate inglese indaga usando la logica." },
     { title: "Le avventure di Tom Sawyer", author: "Mark Twain", year: 1876, pages: 274, blurb: "Un ragazzo del Mississippi salta la scuola, cerca tesori e finisce testimone di un delitto." },
     { title: "L'isola del tesoro", author: "Robert Louis Stevenson", year: 1883, pages: 292, blurb: "Un ragazzo trova una mappa in un baule e parte per un'isola, su una nave dove metà equipaggio ha altri piani." },
     { title: "Il giro del mondo in ottanta giorni", author: "Jules Verne", year: 1873, pages: 256, blurb: "Un gentiluomo inglese scommette metà del suo patrimonio che riuscirà a fare il giro del mondo in ottanta giorni esatti." },
@@ -1715,45 +2089,13 @@ const Books = (() => {
     { title: "La storia infinita", author: "Michael Ende", year: 1979, pages: 448, blurb: "Un ragazzo ruba un libro e, leggendolo, si accorge che la storia dentro il libro sta parlando proprio di lui." },
     { title: "Il Grande Gigante Gentile", author: "Roald Dahl", year: 1982, pages: 208, blurb: "Una bambina viene rapita da un gigante che, a differenza degli altri giganti, non mangia i bambini: soffia sogni." },
     { title: "Matilde", author: "Roald Dahl", year: 1988, pages: 240, blurb: "Una bambina straordinariamente intelligente, con una famiglia che la ignora e una preside terrificante, scopre di avere un potere." },
+    { title: "La fabbrica di cioccolato", author: "Roald Dahl", year: 1964, pages: 176, blurb: "Cinque bambini vincono un biglietto d'oro ed entrano nella fabbrica di cioccolato più segreta del mondo." },
     { title: "Il buio oltre la siepe", author: "Harper Lee", year: 1960, pages: 281, blurb: "In una cittadina dell'Alabama degli anni Trenta, un avvocato difende un uomo nero accusato ingiustamente, e i suoi figli guardano." },
     { title: "Cent'anni di solitudine", author: "Gabriel García Márquez", year: 1967, pages: 417, blurb: "Sette generazioni della famiglia Buendía nel villaggio di Macondo, dove il meraviglioso è parte della vita quotidiana." },
-    { title: "Il nome della rosa", author: "Umberto Eco", year: 1980, pages: 512, blurb: "In un'abbazia medievale i monaci muoiono uno dopo l'altro. Un frate inglese indaga usando la logica." },
     { title: "Sapiens. Da animali a dèi", author: "Yuval Noah Harari", year: 2011, pages: 512, blurb: "Come una scimmia poco importante dell'Africa orientale sia arrivata a dominare il pianeta, in tre rivoluzioni." }
   ];
 
-  /* --------------------------------------------------------------- rete --- */
-
-  async function getJSON(url, { timeout = 9000 } = {}) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeout);
-    try {
-      const response = await fetch(url, { signal: controller.signal });
-      reachable = true; // ha risposto: la rete c'è, anche se lo stato è un errore
-      if (!response.ok) return { ok: false, reason: "http", status: response.status };
-      return { ok: true, data: await response.json() };
-    } catch (err) {
-      if (reachable !== true) reachable = false;
-      return { ok: false, reason: err && err.name === "AbortError" ? "timeout" : "network" };
-    } finally {
-      clearTimeout(timer);
-    }
-  }
-
-  const isReachable = () => reachable;
-
-  /* ------------------------------------------------------------ ricerca --- */
-
-  const normalize = (s) => String(s || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9 ]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  function seedId(book) {
-    return "seed:" + normalize(book.title + " " + book.author).replace(/ /g, "-");
-  }
+  const seedId = (book) => "seed:" + normalize(book.title + " " + book.author).replace(/ /g, "-");
 
   function searchSeed(query, limit) {
     const words = normalize(query).split(" ").filter(Boolean);
@@ -1771,13 +2113,43 @@ const Books = (() => {
       .filter((row) => row.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
-      .map((row) => Object.assign({
-        id: seedId(row.book),
-        source: "catalogo",
-        cover: null,
-        subjects: []
-      }, row.book));
+      .map((row) => Object.assign({ id: seedId(row.book), source: "catalogo", cover: null, subjects: [], languages: [] }, row.book));
   }
+
+  /* ============================================================ ricerca == */
+
+  /** Le modalità di ricerca, con il parametro che Open Library si aspetta. */
+  const MODES = {
+    tutto:     { label: "Tutto",     param: "q" },
+    titolo:    { label: "Titolo",    param: "title" },
+    autore:    { label: "Autore",    param: "author" },
+    argomento: { label: "Argomento", param: "subject" },
+    isbn:      { label: "ISBN",      param: "isbn" }
+  };
+
+  const LANGUAGES = [
+    { code: "", label: "Tutte le lingue" },
+    { code: "ita", label: "Italiano" },
+    { code: "eng", label: "Inglese" },
+    { code: "fre", label: "Francese" },
+    { code: "spa", label: "Spagnolo" },
+    { code: "ger", label: "Tedesco" },
+    { code: "por", label: "Portoghese" }
+  ];
+
+  /** «Più edizioni» è il modo più onesto di dire «più celebre». */
+  const SORTS = {
+    pertinenza: { label: "Più pertinenti", param: "" },
+    celebri:    { label: "Più celebri",    param: "editions" },
+    recenti:    { label: "Più recenti",    param: "new" },
+    antichi:    { label: "Più antichi",    param: "old" }
+  };
+
+  const SEARCH_FIELDS = [
+    "key", "title", "author_name", "author_key", "first_publish_year",
+    "cover_i", "number_of_pages_median", "language", "subject", "edition_count",
+    "publisher", "first_sentence", "ia"
+  ].join(",");
 
   function fromOpenLibrary(doc) {
     return {
@@ -1785,32 +2157,59 @@ const Books = (() => {
       source: "openlibrary",
       title: doc.title || "",
       author: (doc.author_name || []).slice(0, 2).join(", "),
+      authorKeys: doc.author_key || [],
       year: doc.first_publish_year || null,
       pages: doc.number_of_pages_median || null,
       cover: doc.cover_i ? `${COVERS}/${doc.cover_i}-M.jpg` : null,
       coverLarge: doc.cover_i ? `${COVERS}/${doc.cover_i}-L.jpg` : null,
-      subjects: (doc.subject || []).slice(0, 10),
+      subjects: (doc.subject || []).slice(0, 14),
       languages: doc.language || [],
       editions: doc.edition_count || 0,
+      publisher: (doc.publisher || [])[0] || "",
+      firstSentence: Array.isArray(doc.first_sentence) ? doc.first_sentence[0] : (doc.first_sentence || ""),
+      readable: Array.isArray(doc.ia) && doc.ia.length > 0,
+      blurb: ""
+    };
+  }
+
+  function fromSubjectWork(work) {
+    return {
+      id: work.key || null,
+      source: "openlibrary",
+      title: work.title || "",
+      author: (work.authors || []).map((a) => a.name).slice(0, 2).join(", "),
+      authorKeys: (work.authors || []).map((a) => String(a.key || "").split("/").pop()),
+      year: work.first_publish_year || null,
+      pages: null,
+      cover: work.cover_id ? `${COVERS}/${work.cover_id}-M.jpg` : null,
+      coverLarge: work.cover_id ? `${COVERS}/${work.cover_id}-L.jpg` : null,
+      subjects: (work.subject || []).slice(0, 14),
+      languages: [],
+      editions: work.edition_count || 0,
+      publisher: "",
+      firstSentence: "",
+      readable: Array.isArray(work.ia) && work.ia.length > 0,
       blurb: ""
     };
   }
 
   /**
-   * Open Library ordina per pertinenza testuale. Qui davanti vanno i libri che
-   * un lettore italiano cerca davvero: edizione italiana, tante ristampe,
-   * copertina disponibile.
+   * Open Library ordina per pertinenza testuale: davanti finisce spesso una
+   * ristampa oscura. Qui pesano anche la lingua che l'utente sta cercando, il
+   * numero di edizioni (quanto il libro è stato ripubblicato) e la copertina.
    */
-  function rank(books, query) {
+  function rank(books, query, language) {
     const words = normalize(query).split(" ").filter(Boolean);
+    const wanted = normalize(query);
     return books
       .map((book, index) => {
-        let score = -index * 0.4; // l'ordine di Open Library conta, ma non decide
         const title = normalize(book.title);
-        if (words.length && words.every((w) => title.includes(w))) score += 6;
-        if (title === normalize(query)) score += 10;
-        if ((book.languages || []).includes("ita")) score += 5;
-        if (book.cover) score += 2;
+        let score = -index * 0.35;
+        if (title === wanted) score += 12;
+        else if (words.length && words.every((w) => title.includes(w))) score += 6;
+        if (language && (book.languages || []).includes(language)) score += 5;
+        if (!language && (book.languages || []).includes("ita")) score += 2;
+        if (book.cover) score += 2.5;
         score += Math.min(4, Math.log10((book.editions || 0) + 1) * 2);
         return { book, score };
       })
@@ -1822,7 +2221,8 @@ const Books = (() => {
     const seen = new Set();
     const out = [];
     for (const book of books) {
-      const key = normalize(book.title) + "|" + normalize(book.author).split(" ").slice(-1)[0];
+      const author = normalize(book.author).split(" ").slice(-1)[0] || "";
+      const key = normalize(book.title) + "|" + author;
       if (seen.has(key)) continue;
       seen.add(key);
       out.push(book);
@@ -1831,43 +2231,138 @@ const Books = (() => {
   }
 
   /**
-   * Cerca prima nel catalogo interno (risposta immediata), poi online.
-   * Restituisce sempre qualcosa: se la rete manca, restano i risultati locali.
+   * La ricerca vera e propria.
+   * `page` parte da 1. Il risultato dice sempre se c'è dell'altro da caricare.
    */
-  async function search(query, { limit = 24 } = {}) {
+  async function search({ query, mode = "tutto", language = "", sort = "pertinenza", page = 1 } = {}) {
     const clean = String(query || "").trim();
-    if (clean.length < 2) return { ok: true, books: [], online: false };
+    if (clean.length < 2) return { ok: true, books: [], total: 0, page: 1, hasMore: false, online: reachable === true };
 
-    const local = searchSeed(clean, 6);
-    const fields = "key,title,author_name,first_publish_year,cover_i,number_of_pages_median,language,subject,edition_count";
-    const url = `${OPEN_LIBRARY}/search.json?q=${encodeURIComponent(clean)}&limit=${limit}&fields=${fields}`;
-    const result = await getJSON(url);
+    const modeSpec = MODES[mode] || MODES.tutto;
+    const sortSpec = SORTS[sort] || SORTS.pertinenza;
+
+    const params = new URLSearchParams();
+    params.set(modeSpec.param, mode === "isbn" ? clean.replace(/[^0-9Xx]/g, "") : clean);
+    params.set("limit", String(PAGE_SIZE));
+    params.set("page", String(page));
+    params.set("fields", SEARCH_FIELDS);
+    if (language) params.set("language", language);
+    if (sortSpec.param) params.set("sort", sortSpec.param);
+
+    const result = await getJSON(`${OPEN_LIBRARY}/search.json?${params}`);
 
     if (!result.ok) {
-      return { ok: local.length > 0, books: local, online: false, reason: result.reason };
+      // Niente rete: resta il catalogo interno, ma solo alla prima pagina.
+      const local = page === 1 ? searchSeed(clean, 12) : [];
+      return {
+        ok: local.length > 0,
+        books: local,
+        total: local.length,
+        page: 1,
+        hasMore: false,
+        online: false,
+        reason: result.reason
+      };
     }
 
-    const remote = rank((result.data.docs || []).map(fromOpenLibrary).filter((b) => b.title), clean);
+    const docs = (result.data.docs || []).map(fromOpenLibrary).filter((b) => b.title);
+    // L'ordinamento esplicito è una scelta dell'utente: non va scavalcato.
+    const ordered = sortSpec.param ? docs : rank(docs, clean, language);
 
-    // Il risultato online è più ricco (copertina, temi, scheda dell'opera):
-    // il catalogo interno non deve coprirlo, gli presta solo la presentazione.
-    for (const book of remote) {
+    for (const book of ordered) {
       const known = SEED.find((s) => normalize(s.title) === normalize(book.title));
       if (known && !book.blurb) book.blurb = known.blurb;
     }
-    const onlyLocal = local.filter(
-      (book) => !remote.some((r) => normalize(r.title) === normalize(book.title))
-    );
 
+    let books = dedupe(ordered);
+    if (page === 1) {
+      const local = searchSeed(clean, 6).filter(
+        (seed) => !books.some((b) => normalize(b.title) === normalize(seed.title))
+      );
+      books = dedupe(books.concat(local));
+    }
+
+    const total = result.data.numFound || books.length;
     return {
       ok: true,
-      books: dedupe(remote.concat(onlyLocal)).slice(0, limit),
+      books,
+      total,
+      page,
+      hasMore: page * PAGE_SIZE < total,
       online: true,
-      total: result.data.numFound || remote.length
+      cached: result.cached === true
     };
   }
 
-  /* ---------------------------------------------------------- Wikipedia --- */
+  /* ========================================================== scaffali === */
+
+  /**
+   * Gli scaffali della libreria. La chiave è il soggetto come lo conosce Open
+   * Library; l'etichetta è quella che legge l'utente.
+   */
+  const SHELVES = [
+    { key: "classic_literature", label: "Classici" },
+    { key: "juvenile_fiction", label: "Per ragazzi" },
+    { key: "adventure", label: "Avventura" },
+    { key: "fantasy", label: "Fantasy" },
+    { key: "science_fiction", label: "Fantascienza" },
+    { key: "detective_and_mystery_stories", label: "Gialli" },
+    { key: "history", label: "Storia" },
+    { key: "biography", label: "Biografie" },
+    { key: "poetry", label: "Poesia" },
+    { key: "humor", label: "Umorismo" },
+    { key: "philosophy", label: "Filosofia" },
+    { key: "science", label: "Scienza" }
+  ];
+
+  async function shelf(key, { limit = 14 } = {}) {
+    const result = await getJSON(`${OPEN_LIBRARY}/subjects/${encodeURIComponent(key)}.json?limit=${limit}`);
+    if (!result.ok) return { ok: false, books: [], reason: result.reason };
+    const works = (result.data.works || []).map(fromSubjectWork).filter((b) => b.title);
+    return {
+      ok: true,
+      books: dedupe(works),
+      total: result.data.work_count || works.length,
+      name: result.data.name || key
+    };
+  }
+
+  /* ============================================================ autori === */
+
+  async function findAuthors(name) {
+    const clean = String(name || "").trim();
+    if (clean.length < 2) return { ok: true, authors: [] };
+    const result = await getJSON(`${OPEN_LIBRARY}/search/authors.json?q=${encodeURIComponent(clean)}&limit=5`);
+    if (!result.ok) return { ok: false, authors: [], reason: result.reason };
+    const authors = (result.data.docs || [])
+      .filter((a) => a.name && (a.work_count || 0) > 0)
+      .map((a) => ({
+        key: a.key,
+        name: a.name,
+        works: a.work_count || 0,
+        topWork: a.top_work || "",
+        birth: a.birth_date || "",
+        death: a.death_date || ""
+      }))
+      .sort((a, b) => b.works - a.works);
+    return { ok: true, authors };
+  }
+
+  async function authorProfile(author) {
+    const result = await getJSON(`${OPEN_LIBRARY}/authors/${encodeURIComponent(author.key)}.json`);
+    if (!result.ok) return null;
+    let bio = result.data.bio;
+    if (bio && typeof bio === "object") bio = bio.value;
+    return {
+      name: result.data.name || author.name,
+      bio: String(bio || "").trim(),
+      birth: result.data.birth_date || author.birth || "",
+      death: result.data.death_date || author.death || "",
+      url: `${OPEN_LIBRARY}/authors/${author.key}`
+    };
+  }
+
+  /* ========================================================= Wikipedia === */
 
   const wikiApi = (params) =>
     `${WIKIPEDIA}?${new URLSearchParams(Object.assign({ format: "json", origin: "*" }, params))}`;
@@ -1877,9 +2372,9 @@ const Books = (() => {
       .replace(/<style[\s\S]*?<\/style>/gi, "")
       .replace(/<table[\s\S]*?<\/table>/gi, "")
       .replace(/<sup[\s\S]*?<\/sup>/gi, "");
-    const doc = document.createElement("div");
-    doc.innerHTML = cleaned;
-    return doc.textContent
+    const box = document.createElement("div");
+    box.innerHTML = cleaned;
+    return box.textContent
       .replace(/\[modifica[^\]]*\]/gi, "")
       .replace(/\[\d+\]/g, "")
       .replace(/\n{3,}/g, "\n\n")
@@ -1893,7 +2388,7 @@ const Books = (() => {
   function pickPage(hits, book) {
     const wanted = normalize(book.title);
     for (const hit of hits) {
-      const found = normalize(hit.title).replace(/ (romanzo|libro|film)$/, "");
+      const found = normalize(hit.title).replace(/ (romanzo|libro|film|racconto)$/, "");
       if (found === wanted) return hit.title;
     }
     for (const hit of hits) {
@@ -1903,7 +2398,7 @@ const Books = (() => {
     return null;
   }
 
-  const PLOT_SECTIONS = /^(trama|contenuto|sinossi|riassunto|argomento|contenuti)$/i;
+  const PLOT_SECTIONS = /^(trama|contenuto|sinossi|riassunto|argomento|contenuti|il libro)$/i;
 
   async function wikipedia(book) {
     const query = `${book.title} ${(book.author || "").split(",")[0]}`.trim();
@@ -1940,7 +2435,7 @@ const Books = (() => {
     };
   }
 
-  /* ------------------------------------------------- altre due fonti --- */
+  /* ============================================== le altre due fonti === */
 
   async function openLibraryWork(book) {
     if (!book.id || !book.id.startsWith("/works/")) return null;
@@ -1951,16 +2446,44 @@ const Books = (() => {
     return {
       url: `${OPEN_LIBRARY}${book.id}`,
       description: String(description || "").trim(),
-      subjects: (result.data.subjects || []).slice(0, 10)
+      subjects: (result.data.subjects || []).slice(0, 14)
+    };
+  }
+
+  /** Le edizioni danno quello che manca alla scheda: ISBN, editore, lingue. */
+  async function editions(book) {
+    if (!book.id || !book.id.startsWith("/works/")) return null;
+    const result = await getJSON(`${OPEN_LIBRARY}${book.id}/editions.json?limit=20`);
+    if (!result.ok) return null;
+    const list = result.data.entries || [];
+    const isbn = [];
+    const publishers = [];
+    const languages = [];
+    for (const edition of list) {
+      for (const value of (edition.isbn_13 || []).concat(edition.isbn_10 || [])) {
+        if (value && !isbn.includes(value)) isbn.push(value);
+      }
+      for (const value of edition.publishers || []) {
+        if (value && !publishers.includes(value)) publishers.push(value);
+      }
+      for (const value of edition.languages || []) {
+        const code = String(value.key || "").split("/").pop();
+        if (code && !languages.includes(code)) languages.push(code);
+      }
+    }
+    return {
+      count: result.data.size || list.length,
+      isbn: isbn.slice(0, 3),
+      publishers: publishers.slice(0, 3),
+      languages
     };
   }
 
   async function googleBooks(book) {
     const query = `intitle:${book.title}${book.author ? " inauthor:" + book.author.split(",")[0] : ""}`;
-    const result = await getJSON(`${GOOGLE_BOOKS}?q=${encodeURIComponent(query)}&maxResults=3`);
-    if (!result.ok) return null; // quota esaurita o rete: è solo un ripiego
-    const items = result.data.items || [];
-    for (const item of items) {
+    const result = await getJSON(`${GOOGLE_BOOKS}?q=${encodeURIComponent(query)}&maxResults=3`, { retries: 0 });
+    if (!result.ok) return null; // quota o rete: è solo un ripiego
+    for (const item of result.data.items || []) {
       const info = item.volumeInfo || {};
       if (info.description) {
         return {
@@ -1974,103 +2497,68 @@ const Books = (() => {
     return null;
   }
 
-  /* ------------------------------------------------------------- i temi --- */
+  /* ============================================================= temi === */
 
   /**
-   * I soggetti di Open Library sono in inglese e mescolano generi veri a
-   * rumore di catalogazione («Accessible book», «Readers»). Qui passa solo
-   * quello che un lettore italiano riconosce come un tema, tradotto.
+   * I soggetti di Open Library sono in inglese e mescolano generi veri a rumore
+   * di catalogazione («Accessible book», «Readers»). Passa solo quello che un
+   * lettore italiano riconosce come un tema, tradotto.
    */
   const TEMI = {
-    "fiction": "Narrativa",
-    "history": "Storia",
-    "historical fiction": "Romanzo storico",
-    "italian fiction": "Narrativa italiana",
-    "fantasy": "Fantasy",
-    "fantasy fiction": "Fantasy",
-    "science fiction": "Fantascienza",
-    "adventure": "Avventura",
-    "adventure stories": "Avventura",
-    "adventure and adventurers": "Avventura",
-    "juvenile fiction": "Per ragazzi",
-    "juvenile literature": "Per ragazzi",
-    "children's stories": "Per bambini",
-    "children's fiction": "Per bambini",
-    "young adult fiction": "Per ragazzi",
-    "love stories": "Storie d'amore",
-    "romance": "Romanzo d'amore",
-    "detective and mystery stories": "Giallo",
-    "mystery": "Giallo",
-    "mystery and detective stories": "Giallo",
-    "horror": "Horror",
-    "biography": "Biografia",
-    "autobiography": "Autobiografia",
-    "poetry": "Poesia",
-    "philosophy": "Filosofia",
-    "psychology": "Psicologia",
-    "travel": "Viaggi",
-    "voyages and travels": "Viaggi",
-    "war": "Guerra",
-    "world war, 1939-1945": "Seconda guerra mondiale",
-    "holocaust, jewish (1939-1945)": "Shoah",
-    "friendship": "Amicizia",
-    "family": "Famiglia",
-    "families": "Famiglia",
-    "fathers and sons": "Padri e figli",
-    "brothers": "Fratelli",
-    "mothers and daughters": "Madri e figlie",
-    "animals": "Animali",
-    "dogs": "Cani",
-    "wolves": "Lupi",
-    "magic": "Magia",
-    "wizards": "Maghi",
-    "witches": "Streghe",
-    "nobility": "Nobiltà",
-    "kings and rulers": "Re e sovrani",
-    "politics and government": "Politica",
-    "social conditions": "Società",
-    "coming of age": "Formazione",
-    "bildungsromans": "Romanzo di formazione",
-    "classic literature": "Classico",
-    "classics": "Classico",
-    "satire": "Satira",
-    "humor": "Umorismo",
-    "fairy tales": "Fiabe",
-    "folklore": "Folclore",
-    "islands": "Isole",
-    "pirates": "Pirati",
-    "sea stories": "Storie di mare",
-    "school stories": "Storie di scuola",
-    "orphans": "Orfani",
-    "utopias": "Utopie",
-    "dystopias": "Distopia",
-    "science": "Scienza",
-    "nature": "Natura",
-    "death": "Morte",
-    "religion": "Religione"
+    "fiction": "Narrativa", "history": "Storia", "historical fiction": "Romanzo storico",
+    "italian fiction": "Narrativa italiana", "italian literature": "Letteratura italiana",
+    "fantasy": "Fantasy", "fantasy fiction": "Fantasy", "science fiction": "Fantascienza",
+    "adventure": "Avventura", "adventure stories": "Avventura", "adventure and adventurers": "Avventura",
+    "juvenile fiction": "Per ragazzi", "juvenile literature": "Per ragazzi",
+    "children's stories": "Per bambini", "children's fiction": "Per bambini",
+    "young adult fiction": "Per ragazzi", "love stories": "Storie d'amore", "romance": "Romanzo d'amore",
+    "detective and mystery stories": "Giallo", "mystery": "Giallo", "mystery and detective stories": "Giallo",
+    "horror": "Horror", "horror tales": "Horror", "biography": "Biografia", "autobiography": "Autobiografia",
+    "poetry": "Poesia", "drama": "Teatro", "philosophy": "Filosofia", "psychology": "Psicologia",
+    "travel": "Viaggi", "voyages and travels": "Viaggi", "war": "Guerra",
+    "world war, 1939-1945": "Seconda guerra mondiale", "holocaust, jewish (1939-1945)": "Shoah",
+    "friendship": "Amicizia", "family": "Famiglia", "families": "Famiglia",
+    "fathers and sons": "Padri e figli", "brothers": "Fratelli", "mothers and daughters": "Madri e figlie",
+    "animals": "Animali", "dogs": "Cani", "wolves": "Lupi", "magic": "Magia", "wizards": "Maghi",
+    "witches": "Streghe", "nobility": "Nobiltà", "kings and rulers": "Re e sovrani",
+    "politics and government": "Politica", "social conditions": "Società",
+    "coming of age": "Formazione", "bildungsromans": "Romanzo di formazione",
+    "classic literature": "Classico", "classics": "Classico", "satire": "Satira", "humor": "Umorismo",
+    "fairy tales": "Fiabe", "folklore": "Folclore", "islands": "Isole", "pirates": "Pirati",
+    "sea stories": "Storie di mare", "school stories": "Storie di scuola", "orphans": "Orfani",
+    "utopias": "Utopie", "dystopias": "Distopia", "science": "Scienza", "nature": "Natura",
+    "death": "Morte", "religion": "Religione", "art": "Arte", "music": "Musica", "cooking": "Cucina"
   };
 
   function temiItaliani(raw) {
     const out = [];
     for (const subject of raw) {
-      const key = String(subject || "").trim().toLowerCase();
-      const tema = TEMI[key];
+      const tema = TEMI[String(subject || "").trim().toLowerCase()];
       if (tema && !out.includes(tema)) out.push(tema);
     }
     return out.slice(0, 6);
   }
 
-  /* --------------------------------------------------------- il dossier --- */
+  const LANGUAGE_NAMES = {
+    ita: "italiano", eng: "inglese", fre: "francese", spa: "spagnolo", ger: "tedesco",
+    por: "portoghese", rus: "russo", jpn: "giapponese", chi: "cinese", ara: "arabo",
+    dut: "olandese", swe: "svedese", pol: "polacco", gre: "greco", lat: "latino"
+  };
+
+  const languageName = (code) => LANGUAGE_NAMES[code] || code;
+
+  /* ========================================================== dossier === */
 
   /**
    * Tutto quello che si riesce a sapere del libro, in una volta sola: è il
-   * materiale che poi finisce sotto gli occhi di Claude quando deve spiegare
+   * materiale che finisce sotto gli occhi di Claude quando deve spiegare
    * qualcosa, e l'elenco delle fonti che l'utente può andare a controllare.
    */
   async function research(book) {
-    const [wiki, work, google] = await Promise.all([
+    const [wiki, work, editionInfo, google] = await Promise.all([
       wikipedia(book).catch(() => null),
       openLibraryWork(book).catch(() => null),
+      editions(book).catch(() => null),
       googleBooks(book).catch(() => null)
     ]);
 
@@ -2089,12 +2577,17 @@ const Books = (() => {
       [].concat(book.subjects || [], work ? work.subjects : [], google ? google.categories : []).filter(Boolean)
     );
 
+    const languages = Array.from(new Set([].concat(book.languages || [], editionInfo ? editionInfo.languages : [])));
+
     return {
       book,
       plot,
       plotSource,
       intro: wiki ? wiki.intro : "",
-      subjects: Array.from(new Set(subjects)).slice(0, 12),
+      subjects,
+      languages,
+      editions: editionInfo,
+      pages: book.pages || (google && google.pages) || null,
       sources,
       online: reachable === true,
       empty: !plot && !(wiki && wiki.intro) && !book.blurb
@@ -2113,7 +2606,12 @@ const Books = (() => {
     return parts.join("\n\n");
   }
 
-  return { SEED, search, research, wikipedia, dossierText, isReachable, normalize, seedId };
+  return {
+    SEED, MODES, LANGUAGES, SORTS, SHELVES, PAGE_SIZE,
+    search, shelf, findAuthors, authorProfile,
+    research, dossierText, wikipedia,
+    isReachable, normalize, seedId, languageName, temiItaliani
+  };
 })();
 
 
@@ -2761,6 +3259,7 @@ const AI = (() => {
       : "nessuna lettura ancora";
 
     renderToday(stats);
+    renderMyShelves();
     renderDatalists(list);
     renderDiario(list);
     renderProfilo(list, stats, user);
@@ -3514,11 +4013,21 @@ const AI = (() => {
 
   /* ============================================================== LIBRERIA */
 
-  const SUGGERIMENTI = ["Italo Calvino", "Il piccolo principe", "Roald Dahl", "Harry Potter", "Primo Levi", "Jules Verne"];
+  /** Lo stato della libreria: che cosa si sta cercando e come. */
+  const lib = {
+    query: "",
+    mode: "tutto",
+    language: "",
+    sort: "pertinenza",
+    page: 1,
+    total: 0,
+    books: [],
+    busy: false,
+    token: 0
+  };
 
   let currentBook = null;
   let currentDossier = null;
-  let searchToken = 0;
 
   function hashString(text) {
     let hash = 0;
@@ -3526,6 +4035,10 @@ const AI = (() => {
     for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
     return hash;
   }
+
+  const formatNumber = (n) => new Intl.NumberFormat("it-IT").format(n);
+
+  /* ------------------------------------------------------------ copertine */
 
   /**
    * La copertina vera se c'è e si carica, altrimenti una disegnata col titolo.
@@ -3543,12 +4056,13 @@ const AI = (() => {
         h("span", { class: "cover-author", text: (book.author || "").split(",")[0] })
       );
     };
+
     if (book.cover) {
       // L'ascoltatore va agganciato prima di src: se il caricamento fallisce
       // subito, l'evento parte prima ancora che si faccia in tempo ad ascoltarlo.
       const img = h("img", { alt: "", loading: "lazy", decoding: "async" });
-      // Una richiesta che non fallisce ma resta appesa lascerebbe un buco
-      // vuoto per sempre: dopo qualche secondo si disegna la copertina.
+      // Una richiesta che non fallisce ma resta appesa lascerebbe un buco vuoto
+      // per sempre: dopo qualche secondo si disegna la copertina.
       const giveUp = setTimeout(drawCover, 3500);
       wrap.classList.add("is-loading");
       img.addEventListener("load", () => {
@@ -3568,65 +4082,304 @@ const AI = (() => {
     return wrap;
   }
 
-  function bookCard(book) {
-    const open = () => openBookSheet(book);
-    return h("article", { class: "book-card" },
-      h("button", { type: "button", class: "book-card-btn", onClick: open, "aria-label": `Apri ${book.title}` },
-        coverNode(book, "md"),
+  function bookCard(book, { compact = false } = {}) {
+    const shelf = Store.shelfOf(book);
+    const shelfLabel = shelf ? (Store.SHELVES.find((s) => s.id === shelf) || {}).label : "";
+    return h("article", { class: "book-card" + (compact ? " is-compact" : "") },
+      h("button", {
+        type: "button", class: "book-card-btn",
+        onClick: () => openBookSheet(book),
+        "aria-label": `Apri ${book.title}${book.author ? ", " + book.author : ""}`
+      },
+        h("span", { class: "book-card-cover" },
+          coverNode(book, compact ? "sm" : "md"),
+          shelf ? h("span", { class: "book-card-flag", text: shelfLabel }) : null
+        ),
         h("span", { class: "book-card-text" },
           h("strong", { class: "book-card-title", text: book.title }),
           h("span", { class: "book-card-author", text: book.author || "autore sconosciuto" }),
-          book.year ? h("span", { class: "book-card-year", text: String(book.year) }) : null
+          !compact && book.year ? h("span", { class: "book-card-year", text: String(book.year) }) : null
         )
       )
     );
   }
 
-  function renderSuggestions() {
-    const box = $("#lib-suggerimenti");
-    clear(box);
-    for (const word of SUGGERIMENTI) {
-      box.append(h("button", {
-        type: "button", class: "chip", text: word,
-        onClick: () => { $("#f-cerca").value = word; runSearch(word); }
+  /* -------------------------------------------------- comandi di ricerca */
+
+  function renderSearchControls() {
+    const modi = $("#lib-modi");
+    clear(modi);
+    for (const [id, spec] of Object.entries(Books.MODES)) {
+      modi.append(h("button", {
+        type: "button",
+        class: "mode" + (lib.mode === id ? " is-active" : ""),
+        "aria-pressed": lib.mode === id ? "true" : "false",
+        text: spec.label,
+        onClick: () => {
+          lib.mode = id;
+          renderSearchControls();
+          if (lib.query) runSearch();
+        }
       }));
     }
+
+    const lingua = $("#f-lingua");
+    if (!lingua.options.length) {
+      for (const l of Books.LANGUAGES) lingua.append(h("option", { value: l.code, text: l.label }));
+    }
+    lingua.value = lib.language;
+
+    const ordine = $("#f-ordine");
+    if (!ordine.options.length) {
+      for (const [id, spec] of Object.entries(Books.SORTS)) {
+        ordine.append(h("option", { value: id, text: spec.label }));
+      }
+    }
+    ordine.value = lib.sort;
+
+    $("#btn-azzera").hidden = !(lib.query || lib.language || lib.sort !== "pertinenza" || lib.mode !== "tutto");
   }
 
-  async function runSearch(query) {
-    const clean = String(query || "").trim();
-    if (clean.length < 2) {
-      toast("Scrivi almeno due lettere.");
-      return;
+  function resetSearch() {
+    lib.query = "";
+    lib.mode = "tutto";
+    lib.language = "";
+    lib.sort = "pertinenza";
+    lib.books = [];
+    lib.total = 0;
+    lib.page = 1;
+    lib.token++;
+    $("#f-cerca").value = "";
+    renderSearchControls();
+    showBrowse();
+  }
+
+  function showBrowse() {
+    $("#lib-risultati-box").hidden = true;
+    $("#lib-sfoglia").hidden = false;
+  }
+
+  function showResults() {
+    $("#lib-sfoglia").hidden = true;
+    $("#lib-risultati-box").hidden = false;
+  }
+
+  /* ---------------------------------------------------------- la ricerca */
+
+  async function runSearch(nextPage = false) {
+    const clean = $("#f-cerca").value.trim();
+    if (!nextPage) {
+      if (clean.length < 2) {
+        toast("Scrivi almeno due lettere.");
+        return;
+      }
+      lib.query = clean;
+      lib.page = 1;
+      lib.books = [];
     }
-    const token = ++searchToken;
+
+    const token = ++lib.token;
+    lib.busy = true;
+    showResults();
+    renderSearchControls();
+    $("#btn-altri").disabled = true;
+
+    if (!nextPage) {
+      const box = $("#lib-risultati");
+      clear(box);
+      for (let i = 0; i < 8; i++) box.append(h("div", { class: "book-card is-skeleton" }));
+      $("#lib-stato").textContent = "Cerco…";
+      $("#lib-autore").hidden = true;
+    }
+
+    const result = await Books.search({
+      query: lib.query,
+      mode: lib.mode,
+      language: lib.language,
+      sort: lib.sort,
+      page: lib.page
+    });
+
+    if (token !== lib.token) return; // è già partita una ricerca più recente
+
+    lib.busy = false;
+    $("#btn-altri").disabled = false;
+    lib.total = result.total;
+    lib.books = nextPage ? lib.books.concat(result.books) : result.books;
+
+    renderResults(result);
+    if (!nextPage) lookUpAuthor(token);
+  }
+
+  function renderResults(result) {
     const box = $("#lib-risultati");
-    $("#lib-stato").textContent = "Cerco…";
     clear(box);
-    for (let i = 0; i < 6; i++) box.append(h("div", { class: "book-card is-skeleton" }));
 
-    const result = await Books.search(clean);
-    if (token !== searchToken) return; // è già partita una ricerca più recente
-
-    clear(box);
-    if (!result.books.length) {
+    if (!lib.books.length) {
       $("#lib-stato").textContent = "";
+      $("#btn-altri").hidden = true;
       box.append(emptyState(
         "Nessun libro trovato.",
         result.online
-          ? "Prova con il titolo esatto, o solo con il cognome dell'autore."
+          ? "Prova con il titolo esatto, con il solo cognome dell'autore, o cambia la modalità di ricerca."
           : "Da questa pagina non riesco a raggiungere il catalogo online: restano i libri che l'app porta con sé."
       ));
       return;
     }
 
+    const shown = lib.books.length;
     $("#lib-stato").textContent = result.online
-      ? (result.total > result.books.length
-          ? `I primi ${result.books.length} di ${result.total}.`
-          : plural(result.books.length, "libro trovato", "libri trovati") + ".")
-      : `${plural(result.books.length, "libro", "libri")} dal catalogo interno: il catalogo online non è raggiungibile da qui.`;
+      ? `${formatNumber(lib.total)} ${lib.total === 1 ? "risultato" : "risultati"} per «${lib.query}» — ne vedi ${formatNumber(shown)}.`
+      : `${plural(shown, "libro", "libri")} dal catalogo interno: il catalogo online non è raggiungibile da qui.`;
 
-    for (const book of result.books) box.append(bookCard(book));
+    for (const book of lib.books) box.append(bookCard(book));
+    $("#btn-altri").hidden = !result.hasMore;
+  }
+
+  async function loadMore() {
+    if (lib.busy) return;
+    lib.page++;
+    await runSearch(true);
+  }
+
+  /* ------------------------------------------------------------- autori */
+
+  /**
+   * «calvino» deve bastare per riconoscere Italo Calvino: si confrontano le
+   * parole, non le stringhe intere, così basta il cognome o il nome completo.
+   */
+  function nameMatches(name, query) {
+    const words = new Set(Books.normalize(name).split(" ").filter(Boolean));
+    const asked = Books.normalize(query).split(" ").filter(Boolean);
+    if (!asked.length) return false;
+    return asked.every((word) => words.has(word));
+  }
+
+  /** Se la ricerca somiglia al nome di un autore, la scheda dell'autore aiuta. */
+  async function lookUpAuthor(token) {
+    const card = $("#lib-autore");
+    card.hidden = true;
+    if (lib.mode === "isbn" || lib.mode === "argomento") return;
+
+    const found = await Books.findAuthors(lib.query);
+    if (token !== lib.token || !found.ok || !found.authors.length) return;
+
+    const author = found.authors[0];
+    if (lib.mode !== "autore" && !nameMatches(author.name, lib.query)) return;
+
+    const profile = await Books.authorProfile(author);
+    if (token !== lib.token) return;
+
+    clear(card);
+    const dates = [author.birth, author.death].filter(Boolean).join(" – ");
+    card.append(
+      h("div", { class: "author-head" },
+        h("div", {},
+          h("h3", { text: profile ? profile.name : author.name }),
+          h("p", { class: "muted small", text: [dates, plural(author.works, "opera", "opere")].filter(Boolean).join(" · ") })
+        ),
+        lib.mode !== "autore"
+          ? h("button", { type: "button", class: "btn small", text: "Tutte le opere", onClick: () => searchByAuthor(author.name) })
+          : null
+      ),
+      profile && profile.bio
+        ? h("p", { class: "author-bio", text: trimTo(profile.bio, 420) })
+        : null,
+      profile
+        ? h("p", { class: "muted small" }, h("a", { href: profile.url, target: "_blank", rel: "noopener noreferrer", text: "Scheda su Open Library" }))
+        : null
+    );
+    card.hidden = false;
+  }
+
+  function searchByAuthor(name) {
+    lib.mode = "autore";
+    $("#f-cerca").value = name;
+    switchView("libreria");
+    runSearch();
+  }
+
+  /* ---------------------------------------------------------- gli scaffali */
+
+  /**
+   * Gli scaffali da sfogliare. Dodici richieste tutte insieme sarebbero uno
+   * spreco: ogni scaffale si carica quando sta per entrare nello schermo.
+   */
+  function renderBrowseShelves() {
+    const box = $("#lib-scaffali");
+    clear(box);
+    box.append(h("h3", { class: "browse-title", text: "Sfoglia gli scaffali" }));
+
+    const observer = "IntersectionObserver" in window
+      ? new IntersectionObserver((entries, self) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            self.unobserve(entry.target);
+            fillShelf(entry.target);
+          }
+        }, { rootMargin: "300px" })
+      : null;
+
+    for (const spec of Books.SHELVES) {
+      const row = h("section", { class: "shelf", dataset: { key: spec.key } },
+        h("div", { class: "shelf-head" },
+          h("h4", { text: spec.label }),
+          h("button", {
+            type: "button", class: "btn ghost small", text: "Vedi tutto",
+            onClick: () => {
+              lib.mode = "argomento";
+              $("#f-cerca").value = spec.key.replace(/_/g, " ");
+              runSearch();
+            }
+          })
+        ),
+        h("div", { class: "shelf-row" },
+          ...Array.from({ length: 6 }, () => h("div", { class: "book-card is-compact is-skeleton" }))
+        )
+      );
+      box.append(row);
+      if (observer) observer.observe(row);
+      else fillShelf(row);
+    }
+  }
+
+  async function fillShelf(row) {
+    const key = row.dataset.key;
+    const result = await Books.shelf(key);
+    const strip = $(".shelf-row", row);
+    clear(strip);
+    if (!result.ok || !result.books.length) {
+      row.remove(); // uno scaffale vuoto è peggio di uno scaffale assente
+      return;
+    }
+    const head = $(".shelf-head h4", row);
+    if (result.total) head.append(h("span", { class: "shelf-count", text: formatNumber(result.total) }));
+    for (const book of result.books) strip.append(bookCard(book, { compact: true }));
+  }
+
+  /* ------------------------------------------------------ i miei scaffali */
+
+  function renderMyShelves() {
+    const box = $("#lib-miei");
+    clear(box);
+    const counts = Store.shelfCounts();
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    if (!total) return;
+
+    box.append(h("h3", { class: "browse-title", text: "I miei scaffali" }));
+    for (const spec of Store.SHELVES) {
+      const books = Store.shelfBooks(spec.id);
+      if (!books.length) continue;
+      box.append(
+        h("section", { class: "shelf" },
+          h("div", { class: "shelf-head" },
+            h("h4", { text: spec.label }),
+            h("span", { class: "shelf-count", text: String(books.length) })
+          ),
+          h("div", { class: "shelf-row" }, books.map((book) => bookCard(book, { compact: true })))
+        )
+      );
+    }
   }
 
   /* ------------------------------------------------------ scheda del libro */
@@ -3637,20 +4390,31 @@ const AI = (() => {
 
     $("#sheet-title").textContent = book.title;
     $("#sheet-author").textContent = book.author || "Autore sconosciuto";
-    $("#sheet-meta").textContent = [
-      book.year ? String(book.year) : "",
-      book.pages ? plural(book.pages, "pagina", "pagine") : ""
-    ].filter(Boolean).join(" · ");
+
+    const meta = $("#sheet-meta");
+    clear(meta);
+    const bits = [book.year ? String(book.year) : "", book.pages ? plural(book.pages, "pagina", "pagine") : ""].filter(Boolean);
+    if (bits.length) meta.append(document.createTextNode(bits.join(" · ")));
+    if (book.author) {
+      if (bits.length) meta.append(document.createTextNode(" · "));
+      meta.append(h("button", {
+        type: "button", class: "link-button", text: "altri libri di " + book.author.split(",")[0],
+        onClick: () => { closeSheet(); searchByAuthor(book.author.split(",")[0]); }
+      }));
+    }
 
     clear($("#sheet-cover"));
     $("#sheet-cover").append(coverNode(book, "lg"));
     clear($("#sheet-temi"));
+    clear($("#sheet-facts"));
     clear($("#sheet-body"));
     $("#sheet-sources").textContent = "";
     $("#sheet-body").append(h("p", { class: "ai-loading", text: "Cerco di che cosa parla…" }));
+    renderShelfPicker(book);
 
     const sheet = $("#book-sheet");
     if (!sheet.open) sheet.showModal();
+    sheet.scrollTop = 0;
 
     const dossier = await Books.research(book);
     if (currentBook !== book) return; // l'utente ha già aperto un altro libro
@@ -3658,16 +4422,37 @@ const AI = (() => {
     renderSheetBody(dossier);
   }
 
+  function renderShelfPicker(book) {
+    const box = $("#sheet-scaffale");
+    clear(box);
+    const here = Store.shelfOf(book);
+    for (const spec of Store.SHELVES) {
+      const active = here === spec.id;
+      box.append(h("button", {
+        type: "button",
+        class: "shelf-chip" + (active ? " is-active" : ""),
+        "aria-pressed": active ? "true" : "false",
+        text: spec.label,
+        onClick: () => {
+          Store.setShelf(book, active ? null : spec.id);
+          renderShelfPicker(book);
+          renderMyShelves();
+          toast(active ? `Tolto dagli scaffali.` : `«${book.title}» → ${spec.label}.`);
+        }
+      }));
+    }
+  }
+
   function renderSheetBody(dossier) {
     const book = dossier.book;
     const body = $("#sheet-body");
     clear(body);
 
-    const opening = dossier.intro || book.blurb;
+    const opening = dossier.intro || book.blurb || book.firstSentence;
     if (opening) {
       body.append(
         h("h4", { class: "sheet-h", text: "Di che cosa parla" }),
-        h("p", { class: "sheet-text", text: trimTo(opening, 700) })
+        h("p", { class: "sheet-text", text: trimTo(opening, 760) })
       );
     }
 
@@ -3688,19 +4473,17 @@ const AI = (() => {
           : "Da questa pagina non riesco a consultare le fonti online." }),
         h("button", {
           type: "button", class: "btn small", text: "Chiedi a Claude di che cosa parla",
-          onClick: () => askClaude({
-            title: "Di che cosa parla",
-            note: `«${book.title}»`,
-            prompt: AI.prompts.plot(book)
-          })
+          onClick: () => askClaude({ title: "Di che cosa parla", note: `«${book.title}»`, prompt: AI.prompts.plot(book) })
         })
       );
     }
 
     clear($("#sheet-temi"));
-    for (const tema of dossier.subjects.slice(0, 6)) {
+    for (const tema of dossier.subjects) {
       $("#sheet-temi").append(h("span", { class: "chip is-static", text: tema }));
     }
+
+    renderFacts(dossier);
 
     const sources = $("#sheet-sources");
     clear(sources);
@@ -3710,6 +4493,28 @@ const AI = (() => {
         if (i) sources.append(document.createTextNode(" · "));
         sources.append(h("a", { href: source.url, target: "_blank", rel: "noopener noreferrer", text: source.name }));
       });
+    }
+  }
+
+  /** La scheda catalografica: quello che rende un record un record. */
+  function renderFacts(dossier) {
+    const box = $("#sheet-facts");
+    clear(box);
+    const book = dossier.book;
+    const editions = dossier.editions;
+
+    const rows = [];
+    if (book.year) rows.push(["Prima pubblicazione", String(book.year)]);
+    if (dossier.pages) rows.push(["Pagine", String(dossier.pages)]);
+    if (editions && editions.count) rows.push(["Edizioni", formatNumber(editions.count)]);
+    if (editions && editions.publishers.length) rows.push(["Editori", editions.publishers.join(", ")]);
+    if (dossier.languages.length) {
+      rows.push(["Lingue", dossier.languages.slice(0, 6).map(Books.languageName).join(", ")]);
+    }
+    if (editions && editions.isbn.length) rows.push(["ISBN", editions.isbn.join(" · ")]);
+
+    for (const [label, value] of rows) {
+      box.append(h("dt", { text: label }), h("dd", { text: value }));
     }
   }
 
@@ -3734,6 +4539,8 @@ const AI = (() => {
       (b) => Books.normalize(b.title) === Books.normalize(book.title)
     );
     if (known && known.lastPage > 0) $("#f-da").value = String(known.lastPage + 1);
+    if (!Store.shelfOf(book)) Store.setShelf(book, "in-lettura");
+    renderMyShelves();
     closeSheet();
     switchView("nuova");
     ($("#f-da").value ? $("#f-a") : $("#f-pagine")).focus();
@@ -3759,6 +4566,7 @@ const AI = (() => {
       }
     );
   }
+
 
   /* ============================================= RACCONTA A UNA BAMBINA */
 
@@ -4052,7 +4860,21 @@ const AI = (() => {
     // ---- libreria
     $("#form-cerca").addEventListener("submit", (e) => {
       e.preventDefault();
-      runSearch($("#f-cerca").value);
+      runSearch();
+    });
+    $("#btn-altri").addEventListener("click", loadMore);
+    $("#btn-azzera").addEventListener("click", resetSearch);
+    $("#f-lingua").addEventListener("change", (e) => {
+      lib.language = e.target.value;
+      if (lib.query) runSearch(); else renderSearchControls();
+    });
+    $("#f-ordine").addEventListener("change", (e) => {
+      lib.sort = e.target.value;
+      if (lib.query) runSearch(); else renderSearchControls();
+    });
+    // Svuotare il campo riporta agli scaffali, senza dover premere «Azzera».
+    $("#f-cerca").addEventListener("input", (e) => {
+      if (!e.target.value.trim() && lib.query) resetSearch();
     });
     $("#sheet-close").addEventListener("click", closeSheet);
     $("#btn-leggi").addEventListener("click", () => currentBook && startReading(currentBook));
@@ -4109,7 +4931,8 @@ const AI = (() => {
 
   function init() {
     buildQuestionFields();
-    renderSuggestions();
+    renderSearchControls();
+    renderBrowseShelves();
     setupDictation();
     wire();
     if (Store.current()) enterApp();

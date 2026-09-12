@@ -35,7 +35,8 @@ const Store = (() => {
           createdAt: u.createdAt || new Date().toISOString(),
           lastActive: u.lastActive || u.createdAt || new Date().toISOString(),
           dailyGoal: Number(u.dailyGoal) > 0 ? Number(u.dailyGoal) : DEFAULT_GOAL,
-          entries: Array.isArray(u.entries) ? u.entries.filter(isEntry) : []
+          entries: Array.isArray(u.entries) ? u.entries.filter(isEntry) : [],
+          shelves: (u.shelves && typeof u.shelves === "object") ? u.shelves : {}
         };
       }
       const currentUser = typeof parsed.currentUser === "string" && users[parsed.currentUser]
@@ -114,7 +115,8 @@ const Store = (() => {
         createdAt: now,
         lastActive: now,
         dailyGoal: DEFAULT_GOAL,
-        entries: []
+        entries: [],
+        shelves: {}
       };
     } else {
       state.users[k].lastActive = now;
@@ -197,6 +199,86 @@ const Store = (() => {
     return true;
   }
 
+  /* ------------------------------------------------------------- scaffali */
+
+  /** Gli scaffali personali. L'ordine è quello in cui appaiono nell'app. */
+  const SHELVES = [
+    { id: "da-leggere", label: "Da leggere" },
+    { id: "in-lettura", label: "Sto leggendo" },
+    { id: "letti", label: "Letti" },
+    { id: "abbandonati", label: "Abbandonati" }
+  ];
+
+  const shelfIds = SHELVES.map((s) => s.id);
+
+  /** La chiave di un libro: l'id del catalogo, o titolo e autore se manca. */
+  function bookKey(book) {
+    if (book && book.id) return String(book.id);
+    return "t:" + String((book && book.title) || "").trim().toLowerCase()
+      + "|" + String((book && book.author) || "").trim().toLowerCase();
+  }
+
+  function shelves() {
+    const u = current();
+    if (!u) return {};
+    if (!u.shelves || typeof u.shelves !== "object") u.shelves = {};
+    return u.shelves;
+  }
+
+  /** In quale scaffale si trova questo libro, se in uno. */
+  function shelfOf(book) {
+    const all = shelves();
+    const key = bookKey(book);
+    for (const id of shelfIds) {
+      if ((all[id] || []).some((entry) => entry.key === key)) return id;
+    }
+    return null;
+  }
+
+  /**
+   * Sposta un libro su uno scaffale, o lo toglie da tutti con shelfId null.
+   * Un libro sta su un solo scaffale alla volta: è una posizione, non un'etichetta.
+   */
+  function setShelf(book, shelfId) {
+    const u = current();
+    if (!u) return false;
+    if (shelfId !== null && !shelfIds.includes(shelfId)) return false;
+
+    const all = shelves();
+    const key = bookKey(book);
+    for (const id of shelfIds) {
+      all[id] = (all[id] || []).filter((entry) => entry.key !== key);
+    }
+    if (shelfId) {
+      all[shelfId] = all[shelfId] || [];
+      all[shelfId].unshift({
+        key,
+        id: book.id || null,
+        title: book.title || "",
+        author: book.author || "",
+        year: book.year || null,
+        pages: book.pages || null,
+        cover: book.cover || null,
+        blurb: book.blurb || "",
+        addedAt: new Date().toISOString()
+      });
+    }
+    u.lastActive = new Date().toISOString();
+    save();
+    return true;
+  }
+
+  function shelfBooks(shelfId) {
+    return (shelves()[shelfId] || []).slice();
+  }
+
+  function shelfCounts() {
+    const all = shelves();
+    const counts = {};
+    for (const id of shelfIds) counts[id] = (all[id] || []).length;
+    return counts;
+  }
+
   /* -------------------------------------------------------- esporta/importa */
 
   function exportCurrent() {
@@ -207,7 +289,8 @@ const Store = (() => {
       version: 1,
       exportedAt: new Date().toISOString(),
       user: { username: u.username, createdAt: u.createdAt, dailyGoal: u.dailyGoal },
-      entries: u.entries
+      entries: u.entries,
+      shelves: u.shelves || {}
     };
   }
 
@@ -233,6 +316,16 @@ const Store = (() => {
       u.entries.push(entry);
       added++;
     }
+    // Gli scaffali arrivano interi: sono una posizione, non una cronologia.
+    if (payload.shelves && typeof payload.shelves === "object") {
+      const all = shelves();
+      for (const id of shelfIds) {
+        const incoming = Array.isArray(payload.shelves[id]) ? payload.shelves[id] : [];
+        const known = new Set((all[id] || []).map((e) => e.key));
+        all[id] = (all[id] || []).concat(incoming.filter((e) => e && e.key && !known.has(e.key)));
+      }
+    }
+
     save();
     return { ok: true, added, skipped };
   }
@@ -247,6 +340,12 @@ const Store = (() => {
     logout,
     deleteCurrentUser,
     setGoal,
+    SHELVES,
+    bookKey,
+    shelfOf,
+    setShelf,
+    shelfBooks,
+    shelfCounts,
     entries,
     getEntry,
     addEntry,
