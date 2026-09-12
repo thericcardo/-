@@ -585,10 +585,12 @@
       switchView("diario");
     } else {
       Store.addEntry(data);
+      const finito = segnalaSeFinito(data);
       const answered = Object.keys(answers).length + data.customQA.filter((qa) => qa.a).length;
       resetForm();
       renderAll();
-      toast(answered
+      if (finito) toast(`Hai finito «${data.title}». Spostato su «Letti».`);
+      else toast(answered
         ? `Segnate ${plural(pages, "pagina", "pagine")} e ${plural(answered, "risposta", "risposte")}.`
         : `Segnate ${plural(pages, "pagina", "pagine")}. La prossima volta prova a rispondere a una domanda.`);
     }
@@ -690,6 +692,9 @@
 
     return h("article", { class: "entry" },
       h("div", { class: "entry-head" },
+        h("div", { class: "entry-cover" },
+          coverNode({ title: entry.title, author: entry.author || "", cover: knownCover(entry.title) }, "xs")
+        ),
         h("div", { class: "entry-title" },
           h("h4", { text: entry.title }),
           entry.author && h("p", { class: "muted small", text: entry.author })
@@ -741,9 +746,15 @@
   function renderProfilo(entries, stats, user) {
     const box = $("#profilo-stats");
     clear(box);
+    const anno = new Date().getFullYear();
+    const finiti = Store.shelfBooks("letti").filter(
+      (b) => new Date(b.addedAt || 0).getFullYear() === anno
+    ).length;
+
     const cards = [
       ["Pagine lette", String(stats.pages), plural(stats.sessions, "lettura", "letture")],
       ["Giorni di fila", String(stats.streak), stats.streak ? "continua così" : "si riparte oggi"],
+      ["Libri finiti", String(finiti), "nel " + anno],
       ["Questa settimana", String(stats.pagesLast7), `obiettivo ${stats.goal * 7}`],
       ["Tempo di lettura", stats.minutes ? formatMinutes(stats.minutes) : "—", "quando lo segni"]
     ];
@@ -802,6 +813,9 @@
     for (const b of books) {
       box.append(
         h("div", { class: "book" },
+          h("div", { class: "book-mini" },
+            coverNode({ title: b.title, author: b.author, cover: knownCover(b.title) }, "xs")
+          ),
           h("div", { class: "book-text" },
             h("strong", { text: b.title }),
             h("span", { class: "muted small", text: [b.author, `${plural(b.pages, "pagina", "pagine")} in ${plural(b.sessions, "lettura", "letture")}`, b.lastDate ? `ultima: ${formatDay(b.lastDate).toLowerCase()}` : ""].filter(Boolean).join(" · ") })
@@ -1187,9 +1201,46 @@
     return wrap;
   }
 
-  function bookCard(book, { compact = false } = {}) {
+  /**
+   * A che punto sei di questo libro. È il collegamento fra le due metà
+   * dell'app: la libreria sa che cosa stai leggendo, il diario sa quanto.
+   */
+  function progressOf(book) {
+    const wanted = Books.normalize(book.title);
+    const letture = Store.entries().filter((e) => Books.normalize(e.title) === wanted);
+    if (!letture.length) return null;
+
+    // La pagina più avanti raggiunta è più onesta della somma: rileggere
+    // venti pagine non fa avanzare di venti.
+    const perPagina = letture.reduce((max, e) => Math.max(max, Number(e.pageTo) || 0), 0);
+    const sommate = letture.reduce((acc, e) => acc + (Number(e.pages) || 0), 0);
+    const read = Math.max(perPagina, perPagina ? 0 : sommate);
+    const total = Number(book.pages) || 0;
+    if (!read) return null;
+
+    return {
+      read,
+      total,
+      percent: total ? Math.min(100, Math.round((read / total) * 100)) : null,
+      sessions: letture.length
+    };
+  }
+
+  /** La copertina che l'app conosce già per un titolo, se l'ha vista in libreria. */
+  function knownCover(title) {
+    const wanted = Books.normalize(title);
+    for (const spec of Store.SHELVES) {
+      const found = Store.shelfBooks(spec.id).find((b) => Books.normalize(b.title) === wanted);
+      if (found && found.cover) return found.cover;
+    }
+    return null;
+  }
+
+  function bookCard(book, { compact = false, progress = false } = {}) {
     const shelf = Store.shelfOf(book);
     const shelfLabel = shelf ? (Store.SHELVES.find((s) => s.id === shelf) || {}).label : "";
+    const avanzamento = progress ? progressOf(book) : null;
+
     return h("article", { class: "book-card" + (compact ? " is-compact" : "") },
       h("button", {
         type: "button", class: "book-card-btn",
@@ -1198,11 +1249,20 @@
       },
         h("span", { class: "book-card-cover" },
           coverNode(book, compact ? "sm" : "md"),
-          shelf ? h("span", { class: "book-card-flag", text: shelfLabel }) : null
+          shelf && !progress ? h("span", { class: "book-card-flag", text: shelfLabel }) : null,
+          avanzamento && avanzamento.percent !== null
+            ? h("span", { class: "card-progress", title: `pagina ${avanzamento.read} di ${avanzamento.total}` },
+                h("span", { class: "card-progress-fill", style: `width:${avanzamento.percent}%` })
+              )
+            : null
         ),
         h("span", { class: "book-card-text" },
           h("strong", { class: "book-card-title", text: book.title }),
-          h("span", { class: "book-card-author", text: book.author || "autore sconosciuto" }),
+          avanzamento
+            ? h("span", { class: "book-card-author", text: avanzamento.percent !== null
+                ? `pagina ${avanzamento.read} di ${avanzamento.total}`
+                : `${plural(avanzamento.read, "pagina letta", "pagine lette")}` })
+            : h("span", { class: "book-card-author", text: book.author || "autore sconosciuto" }),
           !compact && book.year ? h("span", { class: "book-card-year", text: String(book.year) }) : null
         )
       )
@@ -1467,6 +1527,25 @@
     for (const book of result.books) strip.append(bookCard(book, { compact: true }));
   }
 
+  /**
+   * Arrivare all'ultima pagina è un traguardo: il libro passa da solo su
+   * «Letti». Si fa solo quando le pagine totali si conoscono davvero.
+   */
+  function segnalaSeFinito(data) {
+    const arrivato = Number(data.pageTo) || 0;
+    if (!arrivato) return false;
+
+    const wanted = Books.normalize(data.title);
+    for (const spec of Store.SHELVES) {
+      const book = Store.shelfBooks(spec.id).find((b) => Books.normalize(b.title) === wanted);
+      if (!book || !book.pages) continue;
+      if (spec.id === "letti" || arrivato < book.pages) return false;
+      Store.setShelf(book, "letti");
+      return true;
+    }
+    return false;
+  }
+
   /* ------------------------------------------------------ i miei scaffali */
 
   function renderMyShelves() {
@@ -1486,7 +1565,9 @@
             h("h4", { text: spec.label }),
             h("span", { class: "shelf-count", text: String(books.length) })
           ),
-          h("div", { class: "shelf-row" }, books.map((book) => bookCard(book, { compact: true })))
+          h("div", { class: "shelf-row" },
+            books.map((book) => bookCard(book, { compact: true, progress: spec.id === "in-lettura" }))
+          )
         )
       );
     }
@@ -1596,6 +1677,7 @@
       $("#sheet-temi").append(h("span", { class: "chip is-static", text: tema }));
     }
 
+    renderProgress(dossier.book);
     renderFacts(dossier);
 
     const sources = $("#sheet-sources");
@@ -1607,6 +1689,32 @@
         sources.append(h("a", { href: source.url, target: "_blank", rel: "noopener noreferrer", text: source.name }));
       });
     }
+  }
+
+  /** A che punto sei, se hai già segnato qualche lettura di questo libro. */
+  function renderProgress(book) {
+    const avanzamento = progressOf(Object.assign({}, book, { pages: book.pages || 0 }));
+    if (!avanzamento) return;
+
+    const testo = avanzamento.percent !== null
+      ? `Sei a pagina ${avanzamento.read} di ${avanzamento.total} — ${avanzamento.percent}%`
+      : `Hai letto ${plural(avanzamento.read, "pagina", "pagine")}`;
+
+    $("#sheet-body").append(
+      h("div", { class: "read-progress" },
+        h("div", { class: "read-progress-head" },
+          h("span", { text: testo }),
+          h("span", { class: "muted small", text: plural(avanzamento.sessions, "lettura", "letture") })
+        ),
+        avanzamento.percent !== null
+          ? h("div", { class: "bar", role: "progressbar",
+              "aria-valuenow": String(avanzamento.percent), "aria-valuemin": "0", "aria-valuemax": "100",
+              "aria-label": "Avanzamento nel libro" },
+              h("span", { class: "bar-fill", style: `width:${avanzamento.percent}%` })
+            )
+          : null
+      )
+    );
   }
 
   /** La scheda catalografica: quello che rende un record un record. */

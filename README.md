@@ -89,6 +89,27 @@ interroga direttamente, senza chiavi e senza un server in mezzo.
 - **Senza rete.** Resta un catalogo interno di cinquanta titoli e la ricerca
   continua a funzionare.
 
+## Il collegamento fra libreria e diario
+
+Le due metà si parlano, ed è quello che rende l'app una sola cosa.
+
+**Comincia a leggerlo**, dalla scheda di un libro, lo mette su *Sto leggendo* e
+apre il diario col titolo già compilato — e con la pagina di partenza giusta, se
+di quel libro hai già letto qualcosa.
+
+Da lì in poi l'app sa **a che punto sei**: sullo scaffale *Sto leggendo* le
+copertine hanno una riga di avanzamento e dicono «pagina 137 di 275»; la scheda
+del libro lo ripete con la percentuale. Il conto usa la pagina più avanti che
+hai raggiunto, non la somma delle pagine lette: rileggere venti pagine non fa
+avanzare di venti.
+
+Quando segni una lettura che arriva **all'ultima pagina**, il libro passa da solo
+su *Letti* e l'app te lo dice. Nel profilo compare fra i **libri finiti**
+dell'anno.
+
+Le copertine che la libreria ha già visto ricompaiono nel diario e nell'elenco
+dei libri del profilo: un libro ha la stessa faccia in tutta l'app.
+
 ## Raccontalo a Nina
 
 Nina ha sei anni e ti ascolta raccontare il libro che stai leggendo.
