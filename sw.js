@@ -12,6 +12,10 @@ const ASSETS = [
   "./js/ai.js",
   "./js/app.js",
   "./icon.svg",
+  "./icona-192.png",
+  "./icona-512.png",
+  "./icona-maskable-512.png",
+  "./icona-apple-180.png",
   "./manifest.webmanifest"
 ];
 

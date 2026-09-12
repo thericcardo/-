@@ -1,27 +1,25 @@
 {
-  "name": "Leggi di più — diario di lettura",
+  "name": "Leggi di più — libreria e diario di lettura",
   "short_name": "Leggi di più",
-  "description": "Segna titolo e pagine lette, rispondi alle domande sul contesto e guarda i tuoi progressi. Basta un nome utente.",
+  "description": "Cerca fra i libri del mondo, leggine la trama, tieni il conto di quello che leggi e mettiti alla prova raccontandolo a una bambina di sei anni.",
   "lang": "it",
   "dir": "ltr",
   "start_url": "./",
   "scope": "./",
+  "id": "/leggi-di-piu/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#F5F3EC",
   "theme_color": "#202B22",
+  "categories": ["books", "education", "productivity"],
   "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    }
+    { "src": "icona-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icona-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icona-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Cerca un libro", "url": "./?vai=libreria" },
+    { "name": "Segna una lettura", "url": "./?vai=nuova" }
   ]
 }

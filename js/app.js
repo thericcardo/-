@@ -208,6 +208,63 @@
     return fixed + custom;
   }
 
+  /* --------------------------------------------------- il tasto Indietro */
+
+  /**
+   * Ogni pannello a schermo intero lascia uno stato nella cronologia, così il
+   * tasto Indietro del telefono lo chiude invece di far uscire dall'app.
+   *
+   * Chiudere dall'app significa tornare indietro: la chiusura vera la fa
+   * sempre `popstate`, una strada sola, per non contarla due volte.
+   */
+  const layers = [];
+
+  function openLayer(name, onClose) {
+    let inHistory = false;
+    try {
+      history.pushState({ layer: name }, "");
+      inHistory = true;
+    } catch (err) {
+      // Aperta da file://, dove la cronologia non si può toccare.
+    }
+    layers.push({ name, onClose, inHistory });
+  }
+
+  function popLayer() {
+    const layer = layers.pop();
+    if (layer) layer.onClose();
+  }
+
+  /**
+   * Sostituisce il pannello in cima senza toccare la cronologia: dalla scheda
+   * di un libro si passa a Nina, e il tasto Indietro continua a chiudere una
+   * cosa sola. Chiudere e riaprire farebbe accavallare due operazioni sulla
+   * cronologia, e Nina si chiuderebbe da sola appena aperta.
+   */
+  function replaceLayer(name, onClose) {
+    if (!layers.length) return openLayer(name, onClose);
+    layers[layers.length - 1] = { name, onClose, inHistory: layers[layers.length - 1].inHistory };
+  }
+
+  /**
+   * Chiede la chiusura di un pannello. Vero se c'era qualcosa da chiudere.
+   *
+   * Il pannello viene segnato come «in chiusura» prima di toccare la
+   * cronologia: due chiamate ravvicinate — capita, perché chi chiude può
+   * chiamarla e poi richiamarla — farebbero altrimenti due passi indietro,
+   * e il secondo butterebbe fuori dall'app.
+   */
+  function requestCloseLayer(name) {
+    const layer = layers.find((l) => l.name === name && !l.closing);
+    if (!layer) return false;
+    layer.closing = true;
+    if (layer.inHistory) history.back();
+    else popLayer();
+    return true;
+  }
+
+  window.addEventListener("popstate", popLayer);
+
   /* ------------------------------------------------------------- schermate */
 
   function showLogin() {
@@ -255,9 +312,12 @@
     $("#screen-app").hidden = false;
     resetForm();
     renderAll();
-    // Chi non ha ancora letto niente parte dalla libreria; chi legge già,
-    // dal form: è il gesto che ripete ogni giorno.
-    switchView(Store.entries().length ? "nuova" : "libreria");
+    // Le scorciatoie dell'icona installata («Cerca un libro») arrivano qui.
+    // Altrimenti: chi non ha ancora letto niente parte dalla libreria, chi
+    // legge già dal form, che è il gesto che ripete ogni giorno.
+    const chiesta = new URLSearchParams(location.search).get("vai");
+    const valide = ["libreria", "nuova", "diario", "profilo"];
+    switchView(valide.includes(chiesta) ? chiesta : (Store.entries().length ? "nuova" : "libreria"));
   }
 
   function doLogin(name) {
@@ -810,7 +870,10 @@
     $("#ai-note").hidden = !note;
     clear($("#ai-body"));
     clear($("#ai-actions"));
-    if (!box.open) box.showModal();
+    if (!box.open) {
+      box.showModal();
+      openLayer("dialog", () => { if (box.open) box.close(); });
+    }
   }
 
   function dialogLoading(message) {
@@ -892,6 +955,7 @@
   }
 
   function closeDialog() {
+    if (requestCloseLayer("dialog")) return;
     if (dialog().open) dialog().close();
   }
 
@@ -1259,12 +1323,17 @@
     if (!lib.books.length) {
       $("#lib-stato").textContent = "";
       $("#btn-altri").hidden = true;
-      box.append(emptyState(
-        "Nessun libro trovato.",
-        result.online
-          ? "Prova con il titolo esatto, con il solo cognome dell'autore, o cambia la modalità di ricerca."
-          : "Da questa pagina non riesco a raggiungere il catalogo online: restano i libri che l'app porta con sé."
-      ));
+      box.append(result.online
+        ? emptyState(
+            "Nessun libro trovato.",
+            "Prova con il titolo esatto, con il solo cognome dell'autore, o cambia la modalità di ricerca."
+          )
+        : emptyState(
+            "Il catalogo non risponde.",
+            "Può essere la rete, o il catalogo che sta limitando le richieste. I libri che l'app porta con sé restano cercabili.",
+            "Riprova",
+            () => runSearch()
+          ));
       return;
     }
 
@@ -1454,7 +1523,10 @@
     renderShelfPicker(book);
 
     const sheet = $("#book-sheet");
-    if (!sheet.open) sheet.showModal();
+    if (!sheet.open) {
+      sheet.showModal();
+      openLayer("sheet", () => { if (sheet.open) sheet.close(); });
+    }
     sheet.scrollTop = 0;
 
     const dossier = await Books.research(book);
@@ -1568,6 +1640,7 @@
   }
 
   function closeSheet() {
+    if (requestCloseLayer("sheet")) return;
     if ($("#book-sheet").open) $("#book-sheet").close();
   }
 
@@ -1627,7 +1700,16 @@
       : "Non ho trovato materiale su questo libro: Nina ti ascolta e basta.";
     $("#nina-input").value = "";
 
-    closeSheet();
+    // Il rinomino viene prima della chiusura: così il gestore di «close» del
+    // dialogo non trova più un pannello «sheet» da chiudere a sua volta.
+    const sheet = $("#book-sheet");
+    if (sheet.open) {
+      replaceLayer("nina", hideNina);
+      sheet.close();
+    } else {
+      openLayer("nina", hideNina);
+    }
+
     $("#nina").hidden = false;
     document.body.classList.add("is-locked");
     $("#nina-input").focus();
@@ -1661,10 +1743,15 @@
       : "Non ho trovato materiale su questo libro: Nina ti ascolta e basta.";
   }
 
-  function closeNina() {
+  function hideNina() {
     stopDictation();
     $("#nina").hidden = true;
     document.body.classList.remove("is-locked");
+  }
+
+  function closeNina() {
+    if (requestCloseLayer("nina")) return;
+    hideNina();
   }
 
   function ninaBubble(who, text, extra) {
@@ -1938,6 +2025,23 @@
     });
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && !$("#nina").hidden) closeNina();
+    });
+
+    // Esc chiude un <dialog> da solo: qui si riallinea la cronologia.
+    $("#book-sheet").addEventListener("close", () => requestCloseLayer("sheet"));
+    $("#ai-dialog").addEventListener("close", () => requestCloseLayer("dialog"));
+
+    // «/» porta alla ricerca, come in ogni catalogo che si rispetti.
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
+      const tag = (e.target.tagName || "").toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select") return;
+      if (!$("#screen-app").hidden && layers.length === 0) {
+        e.preventDefault();
+        switchView("libreria");
+        $("#f-cerca").focus();
+        $("#f-cerca").select();
+      }
     });
 
     $("#btn-ai-key").addEventListener("click", () => {

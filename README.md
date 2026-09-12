@@ -157,6 +157,35 @@ Per avere tutto — catalogo mondiale, trame da Wikipedia e Claude dentro l'app 
 va aperta in locale (`index.html` o `dist/leggi-di-piu.html`) oppure pubblicata
 su GitHub Pages.
 
+## Installarla sul telefono
+
+L'app è installabile davvero: manifest completo, icone PNG nelle misure che
+Android e iOS si aspettano (192, 512, una maskable per il ritaglio circolare di
+Android, e una da 180 per iOS), e service worker che la fa funzionare offline.
+Da Chrome o Safari: *Aggiungi a schermata Home*. Le due scorciatoie dell'icona
+— «Cerca un libro» e «Segna una lettura» — aprono direttamente la sezione giusta.
+
+Le icone PNG sono generate dall'unico disegno, `icon.svg`:
+
+```
+node tools/genera-icone.mjs
+```
+
+Lo strumento usa Chromium via Playwright, che qui è una dipendenza da sviluppo e
+non dell'app: il sito resta statico e senza dipendenze.
+
+## Dettagli che si notano usandola
+
+- **Il tasto Indietro** del telefono chiude la scheda di un libro o la chat con
+  Nina, invece di far uscire dall'app. Anche `Esc` lo fa, e senza lasciare stati
+  orfani nella cronologia.
+- **`/`** porta alla ricerca da qualsiasi sezione.
+- **Quando il catalogo non risponde** compare un «Riprova», non un vicolo cieco.
+- **Le copertine** pulsano mentre arrivano e, se non arrivano entro tre secondi e
+  mezzo, ne viene disegnata una col titolo dentro.
+- **Chi non ha ancora letto niente** entra dalla libreria; chi legge già entra
+  dal diario, che è il gesto che ripete ogni giorno.
+
 ## Dove finiscono i dati
 
 Tutto resta nel `localStorage` del browser, su quel dispositivo: nessuna
@@ -208,6 +237,8 @@ sw.js                   cache offline
 manifest.webmanifest    installazione come app
 icon.svg                icona
 build.mjs               genera la versione a file unico in dist/
+tools/genera-icone.mjs  rifà le icone PNG da icon.svg
+icona-*.png             icone per l'installazione su telefono
 ```
 
 Nessuna dipendenza e nessuna compilazione per lavorarci: si modifica un file e si
