@@ -1392,8 +1392,10 @@
             "Prova con il titolo esatto, con il solo cognome dell'autore, o cambia la modalità di ricerca."
           )
         : emptyState(
-            "Il catalogo non risponde.",
-            "Può essere la rete, o il catalogo che sta limitando le richieste. I libri che l'app porta con sé restano cercabili.",
+            "Nessun libro trovato, e il catalogo online non risponde.",
+            `Da questa pagina posso cercare solo fra le ${formatNumber(Books.operePresenti())} opere ` +
+            `di ${formatNumber(Books.autoriPresenti())} autori che l'app si porta dietro. ` +
+            "Può essere la rete, oppure una pagina che non ha il permesso di chiamare servizi esterni.",
             "Riprova",
             () => runSearch()
           ));
@@ -1403,7 +1405,9 @@
     const shown = lib.books.length;
     $("#lib-stato").textContent = result.online
       ? `${formatNumber(lib.total)} ${lib.total === 1 ? "risultato" : "risultati"} per «${lib.query}» — ne vedi ${formatNumber(shown)}.`
-      : `${plural(shown, "libro", "libri")} dal catalogo interno: il catalogo online non è raggiungibile da qui.`;
+      : `${plural(shown, "libro", "libri")} fra le ${formatNumber(Books.operePresenti())} opere ` +
+        `di ${formatNumber(Books.autoriPresenti())} autori che l'app si porta dietro. ` +
+        `Il catalogo online, molto più grande, non è raggiungibile da questa pagina.`;
 
     for (const book of lib.books) box.append(bookCard(book));
     $("#btn-altri").hidden = !result.hasMore;
@@ -1526,7 +1530,11 @@
       return;
     }
     const head = $(".shelf-head h4", row);
-    if (result.total) head.append(h("span", { class: "shelf-count", text: formatNumber(result.total) }));
+    // Il totale è quello di Open Library. Senza rete lo scaffale è quello che
+    // l'app si porta dietro, e dire «14» accanto a «Fantasy» sarebbe falso.
+    if (result.total && result.online !== false) {
+      head.append(h("span", { class: "shelf-count", text: formatNumber(result.total) }));
+    }
     for (const book of result.books) strip.append(bookCard(book, { compact: true }));
   }
 
@@ -1778,6 +1786,10 @@
     const editions = dossier.editions;
 
     const rows = [];
+    // Molti libri girano con due nomi: «The Catcher in the Rye» in originale,
+    // «Il giovane Holden» in libreria. Vederli entrambi evita di comprare due
+    // volte lo stesso romanzo.
+    if (book.altTitle) rows.push(["Conosciuto anche come", book.altTitle]);
     if (book.year) rows.push(["Prima pubblicazione", String(book.year)]);
     if (dossier.pages) rows.push(["Pagine", String(dossier.pages)]);
     if (editions && editions.count) rows.push(["Edizioni", formatNumber(editions.count)]);

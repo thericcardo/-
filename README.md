@@ -37,7 +37,8 @@ La scheda **Libreria** è un catalogo mondiale vero: oltre quaranta milioni di
 opere da Open Library, con trame, copertine, edizioni e autori.
 
 **Cercare.** Cinque modalità — Tutto, Titolo, Autore, Argomento, ISBN — con
-filtro di lingua (sette lingue) e quattro ordinamenti: più pertinenti, più
+filtro di lingua (italiano, inglese, francese, spagnolo, tedesco, giapponese,
+oppure tutte) e quattro ordinamenti: più pertinenti, più
 celebri (cioè con più edizioni pubblicate), più recenti, più antichi. Il
 conteggio è quello reale del catalogo, e **Carica altri** scorre pagina per
 pagina: da «calvino» arrivano millecinquecento risultati veri, non i primi venti.
@@ -86,8 +87,8 @@ interroga direttamente, senza chiavi e senza un server in mezzo.
   libro.
 - **Copertine.** Se l'immagine non arriva — o resta appesa — dopo tre secondi e
   mezzo ne viene disegnata una col titolo dentro.
-- **Senza rete.** Resta un catalogo interno di cinquanta titoli e la ricerca
-  continua a funzionare.
+- **Senza rete.** Restano 9.630 opere di 685 autori dentro il file, e
+  continuano a funzionare la ricerca, i dodici scaffali e le schede.
 
 ## Il collegamento fra libreria e diario
 
@@ -173,6 +174,16 @@ Una pagina pubblicata come artifact su claude.ai non ha il permesso di chiamare
 servizi esterni. Lì la ricerca online, le trame e le chiamate all'API non
 possono funzionare: restano il catalogo interno e la strada del copia e incolla,
 e l'app lo dice invece di fallire in silenzio.
+
+Perché quel «resta il catalogo interno» volesse dire qualcosa, il catalogo è
+stato costruito sul serio: **9.630 opere di 685 autori**, con titolo, autore,
+anno, pagine, copertina e numero di edizioni, scaricate da Open Library con
+`tools/aggiorna-catalogo.mjs`. Cercando un autore escono i suoi libri ordinati
+per quante volte sono stati ristampati — di Stephen King prima *Carrie*,
+*Shining* e *It*, non gli atti di un convegno — e i dodici scaffali si
+riempiono lo stesso. Chi vuole allargarlo aggiunge nomi all'elenco dentro lo
+strumento e lo rilancia; `tools/controlla-catalogo.mjs` dice subito se qualche
+ricerca ha smesso di funzionare.
 
 Per avere tutto — catalogo mondiale, trame da Wikipedia e Claude dentro l'app —
 va aperta in locale (`index.html` o `dist/leggi-di-piu.html`) oppure pubblicata
@@ -277,6 +288,7 @@ sostituire, così non produce silenziosamente una versione monca.
 index.html              markup di tutte le schermate
 css/styles.css          stile (verde #202B22 + giallo #FFD85F, chiaro e scuro)
 js/storage.js           profili e letture su localStorage
+js/catalogo.js          il catalogo che viaggia dentro l'app (generato)
 js/books.js             catalogo, trame e dossier dalle fonti pubbliche
 js/ai.js                chiamate a Claude e costruzione dei prompt
 js/app.js               interfaccia, libreria, Nina, statistiche
@@ -285,6 +297,8 @@ manifest.webmanifest    installazione come app
 icon.svg                icona
 build.mjs               genera la versione a file unico in dist/
 tools/genera-icone.mjs  rifà le icone PNG da icon.svg
+tools/aggiorna-catalogo.mjs         rigenera js/catalogo.js da Open Library
+tools/controlla-catalogo.mjs        prova le ricerche sul catalogo interno
 tools/controlla-accessibilita.mjs   contrasti, nomi accessibili, alt
 icona-*.png             icone per l'installazione su telefono
 ```

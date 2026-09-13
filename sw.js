@@ -8,6 +8,7 @@ const ASSETS = [
   "./index.html",
   "./css/styles.css",
   "./js/storage.js",
+  "./js/catalogo.js",
   "./js/books.js",
   "./js/ai.js",
   "./js/app.js",
