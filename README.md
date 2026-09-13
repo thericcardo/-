@@ -206,6 +206,32 @@ non dell'app: il sito resta statico e senza dipendenze.
   mezzo, ne viene disegnata una col titolo dentro.
 - **Chi non ha ancora letto niente** entra dalla libreria; chi legge già entra
   dal diario, che è il gesto che ripete ogni giorno.
+- **«Stai leggendo»**, in cima al form, riempie titolo, autore e pagina di
+  partenza con un tocco: segnare le pagine della sera non richiede di
+  ridigitare il titolo che l'app già conosce.
+
+## Accessibilità
+
+```
+npx http-server -p 8124 -s          # in un altro terminale
+node tools/controlla-accessibilita.mjs
+```
+
+Su ognuna delle cinque schermate, in tema chiaro e in tema scuro, lo strumento
+verifica il contrasto di ogni testo visibile secondo le soglie WCAG AA, che ogni
+comando abbia un nome leggibile da uno screen reader, e che ogni immagine abbia
+un `alt`. Oggi passa tutto.
+
+Il calcolo del contrasto è la parte delicata, e due trappole producono allarmi
+falsi a decine: **l'alfa** — un giallo al 12% su verde scuro non è giallo su
+giallo, e va sovrapposto al colore sotto prima di misurare — e i **gradienti**,
+perché un elemento con solo un gradiente ha `backgroundColor` trasparente, e
+risalire l'albero porterebbe a confrontare il testo con lo sfondo della pagina.
+Per questo le copertine disegnate hanno un `background-color` esplicito sotto il
+gradiente: è più robusto, e rende il contrasto misurabile.
+
+Lo strumento dice anche quanti elementi ha valutato e quanti ha saltato: un
+risultato verde da un controllo che non controlla niente non vale niente.
 
 ## Dove finiscono i dati
 
@@ -259,6 +285,7 @@ manifest.webmanifest    installazione come app
 icon.svg                icona
 build.mjs               genera la versione a file unico in dist/
 tools/genera-icone.mjs  rifà le icone PNG da icon.svg
+tools/controlla-accessibilita.mjs   contrasti, nomi accessibili, alt
 icona-*.png             icone per l'installazione su telefono
 ```
 

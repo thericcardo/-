@@ -360,6 +360,7 @@
       : "nessuna lettura ancora";
 
     renderToday(stats);
+    renderContinua();
     renderMyShelves();
     renderDatalists(list);
     renderDiario(list);
@@ -471,6 +472,7 @@
     $("#btn-annulla").hidden = true;
     showError($("#form-error"), "");
     updateQuestionCount();
+    renderContinua();
   }
 
   function startEdit(id) {
@@ -495,6 +497,7 @@
     $("#btn-salva").textContent = "Salva modifiche";
     $("#btn-annulla").hidden = false;
     updateQuestionCount();
+    renderContinua();
     switchView("nuova");
   }
 
@@ -1544,6 +1547,56 @@
       return true;
     }
     return false;
+  }
+
+  /* -------------------------------------------------- continua a leggere */
+
+  /**
+   * Il gesto di ogni sera è sempre lo stesso: segnare le pagine del libro che
+   * si sta leggendo. Ridigitarne il titolo ogni volta è attrito inutile, e
+   * l'app quel titolo lo sa già.
+   */
+  function renderContinua() {
+    const box = $("#continua");
+    clear(box);
+    box.hidden = true;
+    if (editingId) return; // durante una modifica sarebbe solo confusione
+
+    const inLettura = Store.shelfBooks("in-lettura");
+    if (!inLettura.length) return;
+
+    // Il libro toccato più di recente: quello che con ogni probabilità si ha in mano.
+    const ultimo = Store.entries()[0];
+    const book = (ultimo && inLettura.find((b) => Books.normalize(b.title) === Books.normalize(ultimo.title)))
+      || inLettura[0];
+
+    const avanzamento = progressOf(book);
+    const daPagina = avanzamento && avanzamento.percent !== null ? avanzamento.read + 1 : null;
+
+    box.hidden = false;
+    box.append(
+      h("div", { class: "continua-cover" }, coverNode(book, "xs")),
+      h("div", { class: "continua-text" },
+        h("span", { class: "continua-label", text: "Stai leggendo" }),
+        h("strong", { class: "continua-title", text: book.title }),
+        avanzamento
+          ? h("span", { class: "muted small", text: avanzamento.percent !== null
+              ? `pagina ${avanzamento.read} di ${avanzamento.total} — ${avanzamento.percent}%`
+              : plural(avanzamento.read, "pagina letta", "pagine lette") })
+          : h("span", { class: "muted small", text: "non hai ancora segnato niente" })
+      ),
+      h("button", {
+        type: "button", class: "btn primary small",
+        text: daPagina ? `Riprendi da pag. ${daPagina}` : "Compila",
+        onClick: () => {
+          $("#f-titolo").value = book.title;
+          $("#f-autore").value = book.author || "";
+          if (daPagina) $("#f-da").value = String(daPagina);
+          ($("#f-da").value ? $("#f-a") : $("#f-pagine")).focus();
+          toast(`«${book.title}» nel form.`);
+        }
+      })
+    );
   }
 
   /* ------------------------------------------------------ i miei scaffali */

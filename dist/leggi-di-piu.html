@@ -533,6 +533,43 @@ body[data-view="libreria"] .today { display: none; }
 
 #view-nuova h2, #view-diario h2, #view-profilo h2 { margin-bottom: .9rem; }
 
+/* Il libro che hai in mano, a un tocco dal form. */
+.continua {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: .8rem .9rem;
+  margin-bottom: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--yellow);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+}
+.continua-cover { flex: 0 0 auto; }
+.continua-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: .1rem; }
+.continua-label {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.continua-title {
+  font-family: var(--serif);
+  font-size: 1.02rem;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.continua .btn { flex: 0 0 auto; }
+
+@media (max-width: 430px) {
+  .continua { flex-wrap: wrap; }
+  .continua .btn { width: 100%; }
+}
+
 /* ---- domande ---- */
 
 .questions { border: 1px solid var(--line); }
@@ -964,8 +1001,10 @@ body[data-view="libreria"] .today { display: none; }
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.cover.is-drawn.pattern-1 { background: linear-gradient(160deg, #2C3B2F, var(--green)); }
-.cover.is-drawn.pattern-2 { background: linear-gradient(200deg, var(--green) 40%, #3C4E3F); }
+/* Il colore di base viene prima del gradiente: se il gradiente non viene
+   disegnato, il testo giallo resta comunque su un fondo scuro. */
+.cover.is-drawn.pattern-1 { background-color: #2C3B2F; background-image: linear-gradient(160deg, #2C3B2F, var(--green)); }
+.cover.is-drawn.pattern-2 { background-color: #3C4E3F; background-image: linear-gradient(200deg, var(--green) 40%, #3C4E3F); }
 .cover.is-drawn.pattern-3 { background: var(--green-soft); border-left-color: var(--yellow); }
 
 .cover-sm.is-drawn { padding: .6rem .4rem; gap: .3rem; }
@@ -1408,6 +1447,8 @@ body.is-locked { overflow: hidden; }
     <!-- ---- NUOVA LETTURA ---- -->
     <section id="view-nuova" class="view" role="tabpanel" tabindex="-1" hidden>
       <h2 id="form-title">Nuova lettura</h2>
+
+      <div id="continua" class="continua" hidden></div>
 
       <form id="form-lettura" autocomplete="off" novalidate>
 
@@ -3389,6 +3430,7 @@ const AI = (() => {
       : "nessuna lettura ancora";
 
     renderToday(stats);
+    renderContinua();
     renderMyShelves();
     renderDatalists(list);
     renderDiario(list);
@@ -3500,6 +3542,7 @@ const AI = (() => {
     $("#btn-annulla").hidden = true;
     showError($("#form-error"), "");
     updateQuestionCount();
+    renderContinua();
   }
 
   function startEdit(id) {
@@ -3524,6 +3567,7 @@ const AI = (() => {
     $("#btn-salva").textContent = "Salva modifiche";
     $("#btn-annulla").hidden = false;
     updateQuestionCount();
+    renderContinua();
     switchView("nuova");
   }
 
@@ -4573,6 +4617,56 @@ const AI = (() => {
       return true;
     }
     return false;
+  }
+
+  /* -------------------------------------------------- continua a leggere */
+
+  /**
+   * Il gesto di ogni sera è sempre lo stesso: segnare le pagine del libro che
+   * si sta leggendo. Ridigitarne il titolo ogni volta è attrito inutile, e
+   * l'app quel titolo lo sa già.
+   */
+  function renderContinua() {
+    const box = $("#continua");
+    clear(box);
+    box.hidden = true;
+    if (editingId) return; // durante una modifica sarebbe solo confusione
+
+    const inLettura = Store.shelfBooks("in-lettura");
+    if (!inLettura.length) return;
+
+    // Il libro toccato più di recente: quello che con ogni probabilità si ha in mano.
+    const ultimo = Store.entries()[0];
+    const book = (ultimo && inLettura.find((b) => Books.normalize(b.title) === Books.normalize(ultimo.title)))
+      || inLettura[0];
+
+    const avanzamento = progressOf(book);
+    const daPagina = avanzamento && avanzamento.percent !== null ? avanzamento.read + 1 : null;
+
+    box.hidden = false;
+    box.append(
+      h("div", { class: "continua-cover" }, coverNode(book, "xs")),
+      h("div", { class: "continua-text" },
+        h("span", { class: "continua-label", text: "Stai leggendo" }),
+        h("strong", { class: "continua-title", text: book.title }),
+        avanzamento
+          ? h("span", { class: "muted small", text: avanzamento.percent !== null
+              ? `pagina ${avanzamento.read} di ${avanzamento.total} — ${avanzamento.percent}%`
+              : plural(avanzamento.read, "pagina letta", "pagine lette") })
+          : h("span", { class: "muted small", text: "non hai ancora segnato niente" })
+      ),
+      h("button", {
+        type: "button", class: "btn primary small",
+        text: daPagina ? `Riprendi da pag. ${daPagina}` : "Compila",
+        onClick: () => {
+          $("#f-titolo").value = book.title;
+          $("#f-autore").value = book.author || "";
+          if (daPagina) $("#f-da").value = String(daPagina);
+          ($("#f-da").value ? $("#f-a") : $("#f-pagine")).focus();
+          toast(`«${book.title}» nel form.`);
+        }
+      })
+    );
   }
 
   /* ------------------------------------------------------ i miei scaffali */
