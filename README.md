@@ -219,6 +219,30 @@ trame per singolo volume sono scritte in italiano; nelle altre cinque lingue la
 pagina di un volume porta la trama del suo arco — meno fine, ma completa, e con
 titolo, titolo originale e capitoli sempre esatti.
 
+### E si scarica come .epub
+
+**Scaricalo in .epub** costruisce un file EPUB 3 vero, sul momento, dentro il
+browser: si apre su un lettore di ebook, su un telefono, su un Kobo, e resta
+anche se questa pagina domani non c'è più. Indice navigabile con i volumi
+rientrati sotto il loro arco, metadati corretti, e la lingua scelta scritta nel
+file — così un lettore vocale lo legge con la pronuncia giusta.
+
+Lo ZIP è scritto byte per byte in `js/epub.js`, senza librerie, perché il
+progetto non ne ha nessuna. È la parte più facile da rompere in silenzio: un
+campo spostato di due byte produce un file che sembra a posto e che nessun
+lettore apre — è già successo due volte durante la scrittura.
+`tools/controlla-epub.mjs` lo verifica con `unzip`, cioè con un giudice che non
+usa il codice che l'ha scritto: 26 prove, sulle sei lingue.
+
+Nella versione pubblicata come artifact lo scaricamento è bloccato dal
+contenitore, non dall'app, e l'app lo dice invece di lasciare un bottone che
+non fa niente.
+
+I titoli seguono la lingua: in italiano quelli dell'edizione Star Comics, in
+giapponese gli originali, nelle altre quattro il romaji — perché le edizioni
+francese, spagnola, tedesca e inglese hanno titoli loro che non abbiamo, e
+mettere quello italiano sarebbe stato un errore travestito da dato.
+
 Non è il manga, e la prima pagina lo dice chiaramente in tutte e sei le lingue,
 col nome di chi ne detiene i diritti. È la cosa più vicina a un ebook che di
 questa serie si possa fare onestamente.
@@ -418,6 +442,7 @@ css/styles.css          stile (verde #202B22 + giallo #FFD85F, chiaro e scuro)
 js/storage.js           profili e letture su localStorage
 js/catalogo.js          il catalogo che viaggia dentro l'app (generato)
 js/onepiece.js          i 115 volumi di One Piece e la trama in sei lingue
+js/epub.js              genera un file .epub vero, ZIP compreso, senza librerie
 js/lettore.js           il lettore: trova il testo, lo impagina, tiene il segno
 js/books.js             catalogo, trame e dossier dalle fonti pubbliche
 js/ai.js                chiamate a Claude e costruzione dei prompt
@@ -430,6 +455,7 @@ tools/genera-icone.mjs  rifà le icone PNG da icon.svg
 tools/aggiorna-catalogo.mjs         rigenera js/catalogo.js da Open Library
 tools/controlla-catalogo.mjs        prova le ricerche sul catalogo interno
 tools/controlla-lettore.mjs         prova che i libri si aprano ancora (serve la rete)
+tools/controlla-epub.mjs            prova che l'.epub generato sia valido, con unzip
 tools/controlla-accessibilita.mjs   contrasti, nomi accessibili, alt
 icona-*.png             icone per l'installazione su telefono
 ```

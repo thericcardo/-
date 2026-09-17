@@ -513,6 +513,28 @@ const OnePiece = (() => {
   const conLingua = (lingua) => (lingueValide.has(lingua) ? lingua : "it");
 
   /**
+   * Il titolo di un volume nella lingua giusta.
+   *
+   * L'edizione italiana Star Comics traduce i titoli; il giapponese è quello
+   * originale. Per le altre quattro lingue non abbiamo i titoli delle rispettive
+   * edizioni, e mettere quello italiano sarebbe un errore travestito da dato:
+   * si usa il romaji, che è il titolo originale scritto in lettere latine ed è
+   * il modo in cui questi volumi vengono citati ovunque.
+   */
+  function titoloVolume(v, lingua) {
+    const l = conLingua(lingua);
+    if (l === "it") return v[1] || v[3] || v[2];
+    if (l === "ja") return v[2] || v[3] || v[1];
+    return v[3] || v[2] || v[1];
+  }
+
+  /** Gli altri titoli dello stesso volume, per la riga sotto. */
+  function altriTitoli(v, lingua) {
+    const usato = titoloVolume(v, lingua);
+    return [v[2], v[3], v[1]].filter((t) => t && t !== usato);
+  }
+
+  /**
    * La trama di un singolo volume, se è scritta in quella lingua.
    *
    * Per ora esistono in italiano. Nelle altre lingue la scheda di un volume
@@ -549,8 +571,8 @@ const OnePiece = (() => {
       return {
         id: "onepiece:" + v[0],
         source: "onepiece",
-        title: `One Piece ${v[0]} — ${v[1]}`,
-        altTitle: v[2] ? `${v[2]} (${v[3]})` : "",
+        title: `One Piece ${v[0]} — ${titoloVolume(v, l)}`,
+        altTitle: altriTitoli(v, l).join(" · "),
         author: "Eiichirō Oda",
         authorKeys: [],
         year: null,
@@ -735,7 +757,7 @@ const OnePiece = (() => {
       const fineCap = arco.cap[1] ? String(arco.cap[1]) : T.inCorso;
 
       pagine.push({
-        titolo: `${T.arco} ${i + 1} — ${arco.nome[l]}`,
+        titolo: `${T.arco.replace("{n}", i + 1)} — ${arco.nome[l]}`,
         righe: [
           l === "ja" ? "" : arco.nome.ja,
           `${T.volumi} ${arco.vol[0]}–${fineVol} · ${T.capitoli} ${arco.cap[0]}–${fineCap}`
@@ -746,8 +768,8 @@ const OnePiece = (() => {
       for (const v of volumi) {
         const suo = TRAME_VOLUMI[l] && TRAME_VOLUMI[l][v[0]];
         pagine.push({
-          titolo: `${T.volume} ${v[0]} — ${v[1]}`,
-          righe: [`${v[2]} · ${v[3]}`, `${T.capitoli} ${v[4]}–${v[5]} · ${arco.nome[l]}`],
+          titolo: `${T.volume.replace("{n}", v[0])} — ${titoloVolume(v, l)}`,
+          righe: [altriTitoli(v, l).join(" · "), `${T.capitoli} ${v[4]}–${v[5]} · ${arco.nome[l]}`],
           testo: suo || arco.trama[l]
         });
       }
@@ -768,27 +790,27 @@ const OnePiece = (() => {
 
   /** Le parole di servizio dell'ebook, nelle sei lingue. */
   const TESTI = {
-    it: { sottotitolo: "la storia, volume per volume", arco: "Arco", volume: "Volume",
+    it: { sottotitolo: "la storia, volume per volume", arco: "Arco {n}", volume: "Volume {n}",
           volumi: "volumi", capitoli: "capitoli", inCorso: "in corso",
           doveTitolo: "Dove leggerlo per davvero",
           avvertenza: "Questo non è il manga. One Piece è di Eiichirō Oda e della Shūeisha, e il suo testo non esiste in nessuna fonte libera: quello che leggi qui è la storia raccontata, scritta per questa app. I capitoli veri si leggono sui canali ufficiali elencati all'ultima pagina." },
-    en: { sottotitolo: "the story, volume by volume", arco: "Arc", volume: "Volume",
+    en: { sottotitolo: "the story, volume by volume", arco: "Arc {n}", volume: "Volume {n}",
           volumi: "volumes", capitoli: "chapters", inCorso: "ongoing",
           doveTitolo: "Where to read it for real",
           avvertenza: "This is not the manga. One Piece belongs to Eiichirō Oda and Shueisha, and its text exists in no free source: what you are reading is the story retold, written for this app. The actual chapters are on the official channels listed on the last page." },
-    ja: { sottotitolo: "物語を、巻ごとに", arco: "編", volume: "第",
+    ja: { sottotitolo: "物語を、巻ごとに", arco: "第{n}編", volume: "第{n}巻",
           volumi: "巻", capitoli: "話", inCorso: "連載中",
           doveTitolo: "公式に読める場所",
           avvertenza: "これは漫画本編ではありません。『ONE PIECE』は尾田栄一郎氏と集英社の作品であり、その本文は自由に使える形では存在しません。ここにあるのは、このアプリのために書き起こした物語のあらすじです。本編は最終ページの公式配信でお読みください。" },
-    fr: { sottotitolo: "l'histoire, volume par volume", arco: "Arc", volume: "Tome",
+    fr: { sottotitolo: "l'histoire, volume par volume", arco: "Arc {n}", volume: "Tome {n}",
           volumi: "tomes", capitoli: "chapitres", inCorso: "en cours",
           doveTitolo: "Où le lire pour de vrai",
           avvertenza: "Ceci n'est pas le manga. One Piece appartient à Eiichirō Oda et à Shueisha, et son texte n'existe dans aucune source libre : ce que vous lisez est l'histoire racontée, écrite pour cette application. Les vrais chapitres sont sur les canaux officiels listés à la dernière page." },
-    es: { sottotitolo: "la historia, volumen a volumen", arco: "Arco", volume: "Volumen",
+    es: { sottotitolo: "la historia, volumen a volumen", arco: "Arco {n}", volume: "Volumen {n}",
           volumi: "volúmenes", capitoli: "capítulos", inCorso: "en curso",
           doveTitolo: "Dónde leerlo de verdad",
           avvertenza: "Esto no es el manga. One Piece es de Eiichirō Oda y de Shueisha, y su texto no existe en ninguna fuente libre: lo que lees aquí es la historia contada, escrita para esta aplicación. Los capítulos reales están en los canales oficiales de la última página." },
-    de: { sottotitolo: "die Geschichte, Band für Band", arco: "Handlungsbogen", volume: "Band",
+    de: { sottotitolo: "die Geschichte, Band für Band", arco: "Bogen {n}", volume: "Band {n}",
           volumi: "Bände", capitoli: "Kapitel", inCorso: "laufend",
           doveTitolo: "Wo man es wirklich liest",
           avvertenza: "Dies ist nicht der Manga. One Piece gehört Eiichirō Oda und Shueisha, und sein Text existiert in keiner freien Quelle: Was Sie hier lesen, ist die nacherzählte Geschichte, geschrieben für diese App. Die echten Kapitel finden Sie auf den offiziellen Kanälen auf der letzten Seite." }
@@ -797,7 +819,7 @@ const OnePiece = (() => {
   return {
     LINGUE, STORIA, ARCHI, VOLUMI, DOVE, comeEbook,
     riguardaOnePiece, arcoDelVolume, volumiDellArco, comeLibri, conLingua,
-    tramaVolume, lingueConTrameVolumi,
+    tramaVolume, lingueConTrameVolumi, titoloVolume, altriTitoli,
     quantiVolumi: () => VOLUMI.length,
     ultimoCapitolo: () => VOLUMI[VOLUMI.length - 1][5]
   };

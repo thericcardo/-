@@ -2028,6 +2028,10 @@
         type: "button", class: "btn primary", text: SPIEGAZIONE_OP[lingua].leggi,
         onClick: leggiOnePieceComeLibro
       }),
+      h("button", {
+        type: "button", class: "btn", text: SPIEGAZIONE_OP[lingua].scarica,
+        onClick: () => scaricaOnePieceEpub(lingua)
+      }),
       h("span", { class: "hint", text: SPIEGAZIONE_OP[lingua].leggiNota })
     ));
 
@@ -2048,13 +2052,14 @@
         h("p", { class: "op-arco-trama", text: arco.trama[lingua] }),
         h("div", { class: "op-volumi" }, ...volumi.map((v) => h("button", {
           type: "button", class: "op-volume",
-          title: `${v[2]} — capitoli ${v[4]}-${v[5]}`,
+          title: `${OnePiece.altriTitoli(v, lingua).join(" · ")} — capitoli ${v[4]}-${v[5]}`,
           onClick: () => {
             requestCloseLayer("guida-op");
             const libro = OnePiece.comeLibri(lingua).find((b) => b.volume === v[0]);
             if (libro) openBookSheet(libro);
           }
-        }, h("b", { text: String(v[0]) }), document.createTextNode(" " + v[1]))))
+        }, h("b", { text: String(v[0]) }),
+           document.createTextNode(" " + OnePiece.titoloVolume(v, lingua)))))
       ));
     }
 
@@ -2080,27 +2085,33 @@
     it: { titolo: "Perché qui c'è la trama e non il manga.",
           testo: "One Piece è di Eiichirō Oda e della Shūeisha: il suo testo non esiste in nessuna fonte libera, e questa app non lo contiene. Le trame qui sotto sono scritte per l'app, arco per arco. Per leggere i capitoli ci sono i canali ufficiali in fondo alla pagina: su MANGA Plus, del suo editore, i primi tre e gli ultimi tre sono gratis.",
           dove: "Dove leggerlo, legalmente",
-          leggi: "Leggilo come un libro", leggiNota: "137 pagine che si sfogliano, col segno che si salva da solo." },
+          leggi: "Leggilo come un libro", leggiNota: "137 pagine che si sfogliano, col segno che si salva da solo.",
+          scarica: "Scaricalo in .epub" },
     en: { titolo: "Why the plot is here and the manga is not.",
           testo: "One Piece belongs to Eiichirō Oda and Shueisha: its text exists in no free source, and this app does not contain it. The summaries below were written for this app, arc by arc. To read the chapters, the official channels are at the foot of this page: on MANGA Plus, run by its own publisher, the first three and the latest three are free.",
           dove: "Where to read it, legally",
-          leggi: "Read it as a book", leggiNota: "137 pages to turn, with a bookmark that saves itself." },
+          leggi: "Read it as a book", leggiNota: "137 pages to turn, with a bookmark that saves itself.",
+          scarica: "Download as .epub" },
     ja: { titolo: "ここにあらすじがあり、漫画本文がない理由。",
           testo: "『ONE PIECE』は尾田栄一郎氏と集英社の作品であり、その本文は自由に使える形では存在せず、このアプリにも含まれていません。以下のあらすじは、このアプリのために章ごとに書き起こしたものです。本編を読むには、ページ下部の公式配信をご利用ください。出版社自身が運営する MANGA Plus では、最初の三話と最新の三話が無料です。",
           dove: "公式に読める場所",
-          leggi: "本のように読む", leggiNota: "137ページをめくって読める。しおりは自動で保存される。" },
+          leggi: "本のように読む", leggiNota: "137ページをめくって読める。しおりは自動で保存される。",
+          scarica: ".epub でダウンロード" },
     fr: { titolo: "Pourquoi l'intrigue est ici et le manga non.",
           testo: "One Piece appartient à Eiichirō Oda et à Shueisha : son texte n'existe dans aucune source libre, et cette application ne le contient pas. Les résumés ci-dessous ont été écrits pour cette application, arc par arc. Pour lire les chapitres, les canaux officiels sont en bas de page : sur MANGA Plus, géré par son propre éditeur, les trois premiers et les trois derniers sont gratuits.",
           dove: "Où le lire, légalement",
-          leggi: "Le lire comme un livre", leggiNota: "137 pages à tourner, avec un marque-page qui se sauvegarde seul." },
+          leggi: "Le lire comme un livre", leggiNota: "137 pages à tourner, avec un marque-page qui se sauvegarde seul.",
+          scarica: "Télécharger en .epub" },
     es: { titolo: "Por qué aquí está la trama y no el manga.",
           testo: "One Piece es de Eiichirō Oda y de Shueisha: su texto no existe en ninguna fuente libre, y esta aplicación no lo contiene. Los resúmenes de abajo se han escrito para esta aplicación, arco por arco. Para leer los capítulos están los canales oficiales al final de la página: en MANGA Plus, de su propia editorial, los tres primeros y los tres últimos son gratis.",
           dove: "Dónde leerlo, legalmente",
-          leggi: "Léelo como un libro", leggiNota: "137 páginas para pasar, con un marcador que se guarda solo." },
+          leggi: "Léelo como un libro", leggiNota: "137 páginas para pasar, con un marcador que se guarda solo.",
+          scarica: "Descárgalo en .epub" },
     de: { titolo: "Warum hier die Handlung steht und nicht der Manga.",
           testo: "One Piece gehört Eiichirō Oda und Shueisha: sein Text existiert in keiner freien Quelle, und diese App enthält ihn nicht. Die Zusammenfassungen unten wurden für diese App geschrieben, Bogen für Bogen. Um die Kapitel zu lesen, stehen die offiziellen Kanäle am Seitenende: auf MANGA Plus, betrieben vom eigenen Verlag, sind die ersten drei und die neuesten drei kostenlos.",
           dove: "Wo man es legal liest",
-          leggi: "Wie ein Buch lesen", leggiNota: "137 Seiten zum Blättern, mit einem Lesezeichen, das sich selbst speichert." }
+          leggi: "Wie ein Buch lesen", leggiNota: "137 Seiten zum Blättern, mit einem Lesezeichen, das sich selbst speichert.",
+          scarica: "Als .epub laden" }
   };
 
   function nascondiGuidaOnePiece() {
@@ -2290,6 +2301,45 @@
       freeUrl: "",
       blurb: ""
     });
+  }
+
+  /**
+   * Scarica One Piece come file .epub.
+   *
+   * È il gradino più in là del leggerlo qui dentro: un .epub si apre su un
+   * lettore di ebook, su un telefono, su un Kobo, e resta anche se questa
+   * pagina domani non c'è più. Il file viene costruito sul momento nel
+   * browser, senza passare da nessun server.
+   *
+   * Dove la pagina è ospitata dentro un'altra — la versione pubblicata come
+   * artifact — lo scaricamento è bloccato dal contenitore, non dall'app: in
+   * quel caso conviene dirlo invece di lasciare un bottone che non fa niente.
+   */
+  function scaricaOnePieceEpub(lingua) {
+    const l = Books.getLinguaTrame();
+    const libro = OnePiece.comeEbook(l);
+    const nome = `One Piece - ${l}.epub`;
+    try {
+      const byte = Epub.costruisci({
+        titolo: libro.titolo,
+        autore: libro.autore,
+        lingua: l,
+        pagine: libro.pagine,
+        nota: "La storia raccontata, scritta per l'app Leggi di più. Non è il manga, " +
+          "che è di Eiichirō Oda e della Shūeisha."
+      });
+      const indirizzo = URL.createObjectURL(new Blob([byte], { type: "application/epub+zip" }));
+      const a = h("a", { href: indirizzo, download: nome });
+      document.body.append(a);
+      a.click();
+      a.remove();
+      // L'indirizzo temporaneo si libera dopo, perché revocarlo subito
+      // interromperebbe lo scaricamento appena cominciato.
+      setTimeout(() => URL.revokeObjectURL(indirizzo), 60000);
+      toast(`«${nome}» — ${formatNumber(libro.pagine.length)} pagine. Se non lo trovi, guarda fra i download.`);
+    } catch (err) {
+      toast("Questo browser non lascia scaricare file da qui. Apri l'app in locale e riprova.");
+    }
   }
 
   /** Quanto testo c'è, sia che le pagine siano stringhe sia che siano composte. */

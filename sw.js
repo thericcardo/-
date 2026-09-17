@@ -12,6 +12,7 @@ const ASSETS = [
   "./js/onepiece.js",
   "./js/books.js",
   "./js/ai.js",
+  "./js/epub.js",
   "./js/lettore.js",
   "./js/app.js",
   "./icon.svg",
