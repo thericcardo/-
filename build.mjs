@@ -10,6 +10,13 @@
  *                            chiavetta): CSS, JS e icona sono dentro il file
  *   dist/artifact.html       lo stesso contenuto senza <html>/<head>/<body>,
  *                            per gli host che avvolgono loro la pagina
+ *   dist/catalogo.js         il catalogo, che per l'artifact viaggia a parte
+ *
+ * Il catalogo pesa qualche megabyte. Nella pagina autosufficiente ci sta
+ * dentro, perché quel file deve funzionare anche su una chiavetta senza
+ * niente accanto. Per l'artifact invece resta un file separato: così la
+ * pagina si apre subito, il catalogo arriva in parallelo e il browser lo
+ * tiene in cache invece di riscaricarlo a ogni visita.
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -42,13 +49,29 @@ const body = bodyMatch[1]
 // ---- script: gli stessi file, nello stesso ordine in cui li carica index.html
 const scripts = Array.from(html.matchAll(/<script src="([^"]+)"><\/script>/g), (m) => m[1]);
 if (!scripts.length) throw new Error("Build: nessuno <script src> in index.html.");
+// Il catalogo è il pezzo grosso: si tiene da parte, per poterlo servire come
+// file a sé nella versione pubblicata.
+const CATALOGO_SRC = "js/catalogo.js";
+if (!scripts.includes(CATALOGO_SRC)) {
+  throw new Error(`Build: non trovo ${CATALOGO_SRC} fra gli script di index.html. Aggiorna build.mjs.`);
+}
+const catalogo = read(CATALOGO_SRC);
+const scriptsSenzaCatalogo = scripts.filter((s) => s !== CATALOGO_SRC);
+
 let js = scripts.map(read).join("\n\n");
 // In un file unico non c'è nessun sw.js accanto alla pagina.
 js = replaceOnce(js, "    registerServiceWorker();", "    // file unico: nessun service worker da registrare", "la chiamata a registerServiceWorker");
 js = js.replace(/<\/script/gi, "<\\/script");
 
+// Lo stesso trattamento per la versione con il catalogo a parte.
+let jsSenzaCatalogo = scriptsSenzaCatalogo.map(read).join("\n\n");
+jsSenzaCatalogo = replaceOnce(jsSenzaCatalogo, "    registerServiceWorker();", "    // file unico: nessun service worker da registrare", "la chiamata a registerServiceWorker");
+jsSenzaCatalogo = jsSenzaCatalogo.replace(/<\/script/gi, "<\\/script");
+
 const style = `<style>\n${css}\n</style>`;
 const script = `<script>\n${js}\n</script>`;
+// Il catalogo prima del resto: books.js lo legge appena si carica.
+const scriptArtifact = `<script src="catalogo.js"></script>\n<script>\n${jsSenzaCatalogo}\n</script>`;
 
 // I <link> ai font stanno nel <head> di index.html: in una pagina senza <head>
 // vanno portati dentro il contenuto, altrimenti resta solo il fallback di sistema.
@@ -59,7 +82,7 @@ const fonts = Array.from(
 if (!fonts) throw new Error("Build: non trovo i <link> ai font in index.html. Aggiorna build.mjs.");
 
 // L'host degli artifact avvolge lui il contenuto in <html>/<head>/<body>.
-const inner = [`<title>${TITLE}</title>`, fonts, style, body, script].join("\n\n");
+const inner = [`<title>${TITLE}</title>`, fonts, style, body, scriptArtifact].join("\n\n");
 
 const standalone = `<!DOCTYPE html>
 <html lang="it">
@@ -83,7 +106,14 @@ ${script}
 mkdirSync(resolve(root, "dist"), { recursive: true });
 writeFileSync(resolve(root, "dist/leggi-di-piu.html"), standalone);
 writeFileSync(resolve(root, "dist/artifact.html"), inner + "\n");
+writeFileSync(resolve(root, "dist/catalogo.js"), catalogo);
 
-const kb = (s) => (Buffer.byteLength(s, "utf8") / 1024).toFixed(1) + " kB";
-console.log("dist/leggi-di-piu.html", kb(standalone));
-console.log("dist/artifact.html    ", kb(inner));
+const peso = (s) => {
+  const byte = Buffer.byteLength(s, "utf8");
+  return byte > 900 * 1024
+    ? (byte / 1024 / 1024).toFixed(2) + " MB"
+    : (byte / 1024).toFixed(1) + " kB";
+};
+console.log("dist/leggi-di-piu.html", peso(standalone), "(tutto dentro)");
+console.log("dist/artifact.html    ", peso(inner), "(+ catalogo.js a parte)");
+console.log("dist/catalogo.js      ", peso(catalogo));

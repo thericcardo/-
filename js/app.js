@@ -360,6 +360,7 @@
       : "nessuna lettura ancora";
 
     renderToday(stats);
+    renderRegistrate();
     renderContinua();
     renderMyShelves();
     renderDatalists(list);
@@ -1663,6 +1664,7 @@
     $("#sheet-sources").textContent = "";
     $("#sheet-body").append(h("p", { class: "ai-loading", text: "Cerco di che cosa parla…" }));
     renderShelfPicker(book);
+    $("#btn-apri-lettore").hidden = !puoLeggersi(book);
 
     const sheet = $("#book-sheet");
     if (!sheet.open) {
@@ -1854,6 +1856,299 @@
     );
   }
 
+
+  /* ============================================================ lettore == */
+
+  /**
+   * Il lettore.
+   *
+   * Legge davvero: il testo del libro arriva da Internet Archive e si sfoglia
+   * qui dentro. Quello che conta, oltre a mostrarlo, è non far perdere il
+   * segno a nessuno — quindi la posizione si salva da sola, ogni dieci
+   * secondi e ogni volta che si esce dalla pagina, e finisce nella sezione
+   * «Registrate dal lettore» senza che si debba annotare niente.
+   */
+  const lettore = {
+    book: null,
+    pagine: [],
+    pagina: 1,
+    corpo: 1.08,
+    /** Quale scansione stiamo leggendo, per poter chiedere la prossima. */
+    scansione: 0,
+    /** Da quando si è su questa pagina: serve a contare il tempo vero. */
+    dalle: 0,
+    /** Secondi già contati e non ancora salvati. */
+    daSalvare: 0,
+    timer: null,
+    token: 0
+  };
+
+  /** Ogni dieci secondi, come chiesto: né più spesso, né solo alla chiusura. */
+  const SALVA_OGNI = 10000;
+
+  const CORPO_MIN = 0.85;
+  const CORPO_MAX = 1.7;
+
+  async function openReader(book, scansione = 0) {
+    const token = ++lettore.token;
+    lettore.book = book;
+    lettore.pagine = [];
+    lettore.pagina = 1;
+    lettore.scansione = scansione;
+
+    $("#lettore-titolo").textContent = book.title;
+    $("#lettore-autore").textContent = book.author || "autore sconosciuto";
+    $("#lettore-foot").hidden = true;
+    $("#lettore-fonte").textContent = "";
+    clear($("#lettore-pagina"));
+    $("#lettore-stato").textContent = "Cerco il testo…";
+
+    // Come per Nina: il rinomino viene prima della chiusura, così il gestore
+    // di «close» del dialogo non trova più un pannello da chiudere a sua volta.
+    const sheet = $("#book-sheet");
+    if (sheet.open) {
+      replaceLayer("lettore", hideReader);
+      sheet.close();
+    } else {
+      openLayer("lettore", hideReader);
+    }
+    $("#lettore").hidden = false;
+    document.body.classList.add("is-locked");
+    applicaCorpo();
+
+    const esito = await Lettore.apri(book, (messaggio) => {
+      if (token === lettore.token) $("#lettore-stato").textContent = messaggio;
+    }, scansione);
+    if (token !== lettore.token) return;
+
+    if (!esito.ok) {
+      $("#lettore-cambio-box").hidden = true;
+      const altrove = Lettore.altroveDoveLeggere(book);
+      clear($("#lettore-pagina"));
+      $("#lettore-stato").textContent = "";
+      $("#lettore-pagina").append(emptyState(
+        esito.reason === "senza-altre"
+          ? "Ho finito le copie da provare."
+          : esito.reason === "non-trovato"
+          ? "Di questo libro non ho trovato il testo."
+          : "Ho trovato il libro, ma non una trascrizione leggibile.",
+        altrove
+          ? "Su Project Gutenberg però c'è, e si apre in una scheda nuova: da qui la pagina non ha il permesso di prenderne il testo."
+          : "Il testo completo si trova solo per le opere di dominio pubblico. Di questa esiste la scheda, non la scansione.",
+        altrove ? "Apri dove si può leggere" : "",
+        altrove ? () => window.open(altrove, "_blank", "noopener") : null
+      ));
+      return;
+    }
+
+    lettore.pagine = esito.pagine;
+    // Si riprende da dove si era arrivati, se c'è un segno.
+    const segno = Store.readingOf(book);
+    lettore.pagina = segno && segno.page && segno.page <= esito.pagine.length ? segno.page : 1;
+
+    $("#lettore-stato").textContent = "";
+    $("#lettore-foot").hidden = false;
+    $("#lettore-range").max = String(esito.pagine.length);
+
+    const lingua = esito.lingua ? ` · ${Books.languageName(abbreviaLingua(esito.lingua))}` : "";
+    clear($("#lettore-fonte"));
+    $("#lettore-fonte").append(
+      document.createTextNode("Scansione da "),
+      h("a", { href: esito.url, target: "_blank", rel: "noopener noreferrer", text: esito.fonte }),
+      document.createTextNode(`${lingua} · il testo è letto da una macchina, qualche parola può essere storta`)
+    );
+
+    // Il cambio si offre solo se c'è davvero un'altra copia da provare.
+    const altre = (esito.quante || 0) - (esito.provata || 0) - 1;
+    $("#lettore-cambio-box").hidden = altre <= 0;
+    if (altre > 0) {
+      $("#lettore-cambio").textContent = `Questa copia si legge male: provane un'altra (${altre} ancora)`;
+    }
+
+    Store.openedReading(book, {
+      page: lettore.pagina,
+      pages: esito.pagine.length,
+      chars: esito.caratteri,
+      source: esito.fonte
+    });
+    renderRegistrate();
+
+    mostraPagina();
+    avviaSalvataggio();
+  }
+
+  /**
+   * Se offrire «Leggi il libro».
+   *
+   * Il testo intero esiste per le opere di dominio pubblico. Quando il
+   * catalogo se lo porta già dietro non c'è dubbio; altrimenti si guarda
+   * l'anno, perché di un romanzo del 2019 la scansione non ci sarà, e
+   * promettere una lettura che finisce in «non l'ho trovato» è peggio che non
+   * prometterla.
+   */
+  function puoLeggersi(book) {
+    if (book.readable || book.freeUrl) return true;
+    return Boolean(book.year) && book.year < 1930;
+  }
+
+  /** Internet Archive scrive «Italian», Open Library «ita»: qui serve «ita». */
+  function abbreviaLingua(nome) {
+    const n = String(nome || "").toLowerCase();
+    if (n.startsWith("ita")) return "ita";
+    if (n.startsWith("eng")) return "eng";
+    if (n.startsWith("fre") || n.startsWith("fra")) return "fre";
+    if (n.startsWith("spa")) return "spa";
+    if (n.startsWith("ger") || n.startsWith("deu")) return "ger";
+    if (n.startsWith("jpn") || n.startsWith("jap")) return "jpn";
+    return n.slice(0, 3);
+  }
+
+  function mostraPagina() {
+    const box = $("#lettore-pagina");
+    clear(box);
+    box.textContent = lettore.pagine[lettore.pagina - 1] || "";
+    box.scrollTop = 0;
+    $("#lettore-conta").textContent =
+      `pagina ${formatNumber(lettore.pagina)} di ${formatNumber(lettore.pagine.length)}`;
+    $("#lettore-range").value = String(lettore.pagina);
+    $("#lettore-prec").disabled = lettore.pagina <= 1;
+    $("#lettore-succ").disabled = lettore.pagina >= lettore.pagine.length;
+    // Il tempo si conta per pagina: cambiare pagina chiude il conto di quella
+    // prima e apre quello della nuova.
+    chiudiConto();
+    lettore.dalle = Date.now();
+  }
+
+  function vaiA(numero) {
+    const n = Math.max(1, Math.min(lettore.pagine.length, Math.round(numero)));
+    if (n === lettore.pagina) return;
+    lettore.pagina = n;
+    mostraPagina();
+    salvaSegno();
+  }
+
+  function applicaCorpo() {
+    $("#lettore-pagina").style.setProperty("--lettura-corpo", lettore.corpo.toFixed(2) + "rem");
+    try { localStorage.setItem("leggidipiu.corpo", String(lettore.corpo)); } catch (err) { /* va bene */ }
+  }
+
+  function cambiaCorpo(delta) {
+    lettore.corpo = Math.min(CORPO_MAX, Math.max(CORPO_MIN, lettore.corpo + delta));
+    applicaCorpo();
+  }
+
+  /** Il tempo passato sulla pagina appena lasciata entra nel conto. */
+  function chiudiConto() {
+    if (!lettore.dalle) return;
+    const secondi = (Date.now() - lettore.dalle) / 1000;
+    // Una pagina aperta per un'ora vuol dire che qualcuno è andato a cena: si
+    // conta fino a cinque minuti, che è il massimo credibile per una pagina.
+    lettore.daSalvare += Math.min(300, secondi);
+    lettore.dalle = 0;
+  }
+
+  /**
+   * Scrive dove siamo arrivati. È l'unico punto che tocca il deposito, e
+   * viene chiamato dal timer, a ogni cambio pagina e quando si esce: se il
+   * browser chiude la pagina fra due battiti, si perde al massimo il conto di
+   * dieci secondi.
+   */
+  function salvaSegno() {
+    if (!lettore.book || !lettore.pagine.length) return;
+    chiudiConto();
+    const secondi = lettore.daSalvare;
+    lettore.daSalvare = 0;
+    lettore.dalle = Date.now();
+    Store.trackReading(lettore.book, {
+      page: lettore.pagina,
+      pages: lettore.pagine.length,
+      seconds: secondi
+    });
+    renderRegistrate();
+    festeggiaSeFinito();
+  }
+
+  /**
+   * Arrivare all'ultima pagina è finire il libro: lo scaffale si aggiorna da
+   * solo, una volta sola, senza chiedere niente.
+   */
+  function festeggiaSeFinito() {
+    if (!lettore.book || !lettore.pagine.length) return;
+    if (lettore.pagina < lettore.pagine.length) return;
+    if (Store.shelfOf(lettore.book) === "letti") return;
+    Store.setShelf(lettore.book, "letti");
+    toast(`Hai finito «${lettore.book.title}». Spostato su «Letti».`);
+  }
+
+  function avviaSalvataggio() {
+    fermaSalvataggio();
+    lettore.dalle = Date.now();
+    lettore.timer = setInterval(salvaSegno, SALVA_OGNI);
+  }
+
+  function fermaSalvataggio() {
+    if (lettore.timer) clearInterval(lettore.timer);
+    lettore.timer = null;
+  }
+
+  function hideReader() {
+    salvaSegno();
+    fermaSalvataggio();
+    lettore.token++;
+    lettore.dalle = 0;
+    $("#lettore").hidden = true;
+    document.body.classList.remove("is-locked");
+    renderRegistrate();
+    renderMyShelves();
+  }
+
+  function closeReader() {
+    if (requestCloseLayer("lettore")) return;
+    hideReader();
+  }
+
+  /* --------------------------------------- le letture registrate da sola */
+
+  function renderRegistrate() {
+    const box = $("#registrate-list");
+    const sezione = $("#registrate");
+    if (!box || !sezione) return;
+    const righe = Store.sessions().slice().sort((a, b) =>
+      String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
+
+    sezione.hidden = righe.length === 0;
+    if (!righe.length) return;
+    $("#registrate-count").textContent = plural(righe.length, "libro", "libri");
+
+    clear(box);
+    for (const riga of righe) {
+      const percento = riga.pages ? Math.round((riga.furthest / riga.pages) * 100) : null;
+      const minuti = Math.round((riga.seconds || 0) / 60);
+      const dettagli = [
+        riga.pages ? `pagina ${formatNumber(riga.furthest)} di ${formatNumber(riga.pages)}` : null,
+        minuti >= 1 ? `${plural(minuti, "minuto", "minuti")} di lettura` : "meno di un minuto",
+        riga.sessions > 1 ? `${riga.sessions} volte` : null
+      ].filter(Boolean).join(" · ");
+
+      box.append(h("article", { class: "registrata" },
+        h("div", { class: "registrata-text" },
+          h("strong", { text: riga.title }),
+          h("span", { class: "muted small", text: riga.author || "autore sconosciuto" }),
+          h("span", { class: "muted small", text: dettagli }),
+          percento !== null
+            ? h("span", { class: "bar" }, h("span", { class: "bar-fill", style: `width:${percento}%` }))
+            : null
+        ),
+        h("button", {
+          type: "button", class: "btn small", text: percento === 100 ? "Rileggi" : "Riprendi",
+          onClick: () => openReader({
+            id: riga.id, title: riga.title, author: riga.author,
+            cover: riga.cover, freeUrl: "", blurb: ""
+          })
+        })
+      ));
+    }
+  }
 
   /* ============================================= RACCONTA A UNA BAMBINA */
 
@@ -2122,6 +2417,12 @@
   /* --------------------------------------------------------------- avvio */
 
   function wire() {
+    // Il corpo del testo scelto nel lettore resta scelto.
+    try {
+      const salvato = Number(localStorage.getItem("leggidipiu.corpo"));
+      if (salvato >= CORPO_MIN && salvato <= CORPO_MAX) lettore.corpo = salvato;
+    } catch (err) { /* navigazione privata: si parte dal valore di partenza */ }
+
     $("#form-login").addEventListener("submit", (e) => {
       e.preventDefault();
       doLogin($("#login-username").value);
@@ -2178,7 +2479,52 @@
       if (!e.target.value.trim() && lib.query) resetSearch();
     });
     $("#sheet-close").addEventListener("click", closeSheet);
+    $("#btn-apri-lettore").addEventListener("click", () => currentBook && openReader(currentBook));
     $("#btn-leggi").addEventListener("click", () => currentBook && startReading(currentBook));
+
+    /* ---- il lettore ---- */
+
+    $("#lettore-close").addEventListener("click", closeReader);
+    $("#lettore-prec").addEventListener("click", () => vaiA(lettore.pagina - 1));
+    $("#lettore-succ").addEventListener("click", () => vaiA(lettore.pagina + 1));
+    // Un'altra scansione della stessa opera: si riparte dalla successiva,
+    // tenendo il segno, perché è lo stesso libro.
+    $("#lettore-cambio").addEventListener("click", () => {
+      if (!lettore.book) return;
+      salvaSegno();
+      openReader(lettore.book, lettore.scansione + 1);
+    });
+    $("#lettore-meno").addEventListener("click", () => cambiaCorpo(-0.09));
+    $("#lettore-piu").addEventListener("click", () => cambiaCorpo(0.09));
+    // Lo slider sfoglia mentre lo trascini, ma il segno si scrive quando lo
+    // lasci: salvare a ogni pixel riempirebbe il deposito di posizioni finte.
+    $("#lettore-range").addEventListener("input", (e) => {
+      const n = Math.max(1, Math.min(lettore.pagine.length, Number(e.target.value) || 1));
+      if (n === lettore.pagina) return;
+      lettore.pagina = n;
+      mostraPagina();
+    });
+    $("#lettore-range").addEventListener("change", salvaSegno);
+
+    // Le frecce sfogliano, come in un lettore vero.
+    $("#lettore-pagina").addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); vaiA(lettore.pagina + 1); }
+      if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); vaiA(lettore.pagina - 1); }
+    });
+
+    /**
+     * Uscire dalla pagina non deve costare il segno.
+     *
+     * «visibilitychange» scatta quando si passa a un'altra scheda o si mette
+     * via il telefono; «pagehide» quando la pagina viene chiusa per davvero.
+     * Sono i due momenti in cui il browser può non tornare più, e sono più
+     * affidabili di «beforeunload», che su mobile spesso non arriva.
+     */
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") salvaSegno();
+      else if (!$("#lettore").hidden && lettore.pagine.length) lettore.dalle = Date.now();
+    });
+    window.addEventListener("pagehide", salvaSegno);
     $("#btn-nina").addEventListener("click", () => currentBook && openNina(currentBook, currentDossier));
     $("#btn-dubbio").addEventListener("click", () => currentBook && askDoubt(currentBook, currentDossier));
 
@@ -2197,7 +2543,9 @@
       }
     });
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !$("#nina").hidden) closeNina();
+      if (e.key !== "Escape") return;
+      if (!$("#lettore").hidden) closeReader();
+      else if (!$("#nina").hidden) closeNina();
     });
 
     // Esc chiude un <dialog> da solo: qui si riallinea la cronologia.

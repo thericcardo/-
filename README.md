@@ -43,6 +43,14 @@ celebri (cioè con più edizioni pubblicate), più recenti, più antichi. Il
 conteggio è quello reale del catalogo, e **Carica altri** scorre pagina per
 pagina: da «calvino» arrivano millecinquecento risultati veri, non i primi venti.
 
+**Dove pesca il catalogo interno.** Tre fonti, perché da una sola escono sempre
+gli stessi nomi: il catalogo intero di Project Gutenberg (da cui vengono i
+**19.982 autori presenti con una sola opera** — il sommerso che nessuna
+classifica nomina, e tutte opere da leggere gratis), Open Library interrogata
+per autore (compresi i mangaka: di Tezuka 50 opere, di Oda 51, di Takahashi
+59), e Open Library interrogata per argomento scendendo fino alla quarta pagina,
+dove cominciano i libri che non stanno in vetrina.
+
 **Sfogliare.** Quando non stai cercando niente trovi dodici scaffali da
 scorrere di lato — Classici, Per ragazzi, Avventura, Fantasy, Fantascienza,
 Gialli, Storia, Biografie, Poesia, Umorismo, Filosofia, Scienza. Ogni scaffale
@@ -67,11 +75,16 @@ copertina dice dove sta un libro che hai già sistemato.
 | Fonte | Che cosa dà |
 |---|---|
 | [Open Library](https://openlibrary.org) | catalogo, copertine, scaffali per argomento, autori, edizioni |
+| [Internet Archive](https://archive.org) | il testo intero dei libri di dominio pubblico, da leggere nell'app |
+| [Project Gutenberg](https://www.gutenberg.org) | il catalogo del dominio pubblico: il grosso degli autori poco noti |
 | [Wikipedia italiana](https://it.wikipedia.org) | la trama vera, presa dalla sezione «Trama» della voce |
 | [Google Books](https://books.google.com) | la descrizione dell'editore, come ripiego |
 
-Tutte e tre rispondono con `access-control-allow-origin: *`, quindi la pagina le
-interroga direttamente, senza chiavi e senza un server in mezzo.
+Open Library, Internet Archive, Wikipedia e Google Books rispondono con
+`access-control-allow-origin: *`, quindi la pagina le interroga direttamente,
+senza chiavi e senza un server in mezzo. Project Gutenberg no: il suo catalogo
+viene scaricato una volta da `tools/aggiorna-catalogo.mjs` e finisce dentro
+l'app, e i suoi testi si aprono in una scheda nuova del browser.
 
 ### Perché regge
 
@@ -87,7 +100,7 @@ interroga direttamente, senza chiavi e senza un server in mezzo.
   libro.
 - **Copertine.** Se l'immagine non arriva — o resta appesa — dopo tre secondi e
   mezzo ne viene disegnata una col titolo dentro.
-- **Senza rete.** Restano 9.630 opere di 685 autori dentro il file, e
+- **Senza rete.** Restano 80.862 opere di 28.191 autori dentro il file, e
   continuano a funzionare la ricerca, i dodici scaffali e le schede.
 
 ## Il collegamento fra libreria e diario
@@ -110,6 +123,58 @@ dell'anno.
 
 Le copertine che la libreria ha già visto ricompaiono nel diario e nell'elenco
 dei libri del profilo: un libro ha la stessa faccia in tutta l'app.
+
+## Leggere i libri, non solo le trame
+
+Delle opere di dominio pubblico l'app non ha soltanto la scheda: ha il testo.
+**59.435** titoli del catalogo si possono aprire e leggere — dai *Promessi
+sposi* a *Frankenstein*, da *Pinocchio* a *Moby Dick*.
+
+Sulla scheda di un libro compare **Leggi il libro**. Il testo arriva da
+[Internet Archive](https://archive.org), che è l'unica delle fonti pubbliche a
+mandare `access-control-allow-origin: *` anche sui file scaricati — quindi
+l'unica da cui una pagina può prendere un libro intero e mostrarlo dentro di
+sé. Project Gutenberg quell'intestazione non la manda: i suoi testi si aprono,
+ma in una scheda nuova del browser.
+
+La strada è in tre passi, perché il nome del file non si può indovinare: si
+cerca l'opera fra i testi, si chiedono i metadati che elencano i file veri, si
+scarica il testo. Poi si impagina tagliando su una riga vuota o in fondo a una
+frase, mai a metà di una parola.
+
+Il testo delle scansioni è riconosciuto da una macchina e porta i suoi segni:
+numeri di pagina isolati, parole spezzate dal trattino, la copertina e il
+timbro della biblioteca nelle prime righe, ogni riga stampata presa per un
+paragrafo. Tutto questo viene ricucito prima di mostrarlo — ma qualche parola
+resta storta, e l'app lo dice invece di far finta. Della stessa opera ci sono
+molte copie e quale si legga meglio non si può sapere prima di aprirla: nessuna
+misura automatica le distingue in modo affidabile (le buone e le rovinate
+stanno tutte fra 0,99 e 1,00 di caratteri leggibili). Quindi la scelta resta a
+chi legge, e **provarne un'altra costa un tocco**.
+
+Le scansioni **in prestito** restano fuori: dichiarano il file di testo ma lo
+scaricano vuoto, e soprattutto non sono opere che si possono leggere
+liberamente. Senza quel filtro le prime cinque risposte erano tutte in prestito
+e il lettore tornava a mani vuote pur avendo il libro a due risposte di
+distanza.
+
+### Il segno si tiene da solo
+
+Nel lettore non c'è niente da annotare. La posizione si salva **ogni dieci
+secondi**, a ogni cambio pagina, e ogni volta che si esce dalla pagina — sia
+passando a un'altra scheda, sia chiudendo il browser. Se la pagina muore fra
+due battiti si perde al massimo il conto di dieci secondi.
+
+Quello che il lettore registra finisce nel diario in una sezione a parte,
+**Registrate dal lettore**: per ogni libro la pagina più avanti raggiunta, su
+quante, quanti minuti di lettura e quante volte l'hai ripreso. È tenuto separato
+dal diario scritto a mano di proposito: una cosa è quello che hai deciso di
+annotare, un'altra quello che è stato solo misurato. Arrivare all'ultima pagina
+sposta il libro su *Letti* da solo.
+
+Il tempo si conta per pagina e si fermano i conti a cinque minuti per pagina:
+una pagina aperta per un'ora vuol dire che qualcuno è andato a cena, non che ha
+letto per un'ora.
 
 ## Raccontalo a Nina
 
@@ -176,14 +241,18 @@ possono funzionare: restano il catalogo interno e la strada del copia e incolla,
 e l'app lo dice invece di fallire in silenzio.
 
 Perché quel «resta il catalogo interno» volesse dire qualcosa, il catalogo è
-stato costruito sul serio: **9.630 opere di 685 autori**, con titolo, autore,
-anno, pagine, copertina e numero di edizioni, scaricate da Open Library con
-`tools/aggiorna-catalogo.mjs`. Cercando un autore escono i suoi libri ordinati
-per quante volte sono stati ristampati — di Stephen King prima *Carrie*,
-*Shining* e *It*, non gli atti di un convegno — e i dodici scaffali si
-riempiono lo stesso. Chi vuole allargarlo aggiunge nomi all'elenco dentro lo
-strumento e lo rilancia; `tools/controlla-catalogo.mjs` dice subito se qualche
-ricerca ha smesso di funzionare.
+stato costruito sul serio: **80.862 opere di 28.191 autori**, di cui **59.435
+da leggere gratis**. Cercando un autore escono i suoi libri ordinati per quante
+volte sono stati ristampati — di Stephen King prima *Carrie*, *Shining* e *It*,
+non gli atti di un convegno — e i dodici scaffali si riempiono lo stesso.
+`tools/controlla-catalogo.mjs` dice subito se qualche ricerca ha smesso di
+funzionare.
+
+Nella versione pubblicata il catalogo viaggia come file a parte
+(`dist/catalogo.js`, 4,8 MB) invece che dentro la pagina: così la pagina si apre
+subito, il catalogo arriva in parallelo e il browser lo tiene in cache. La
+versione autosufficiente (`dist/leggi-di-piu.html`) se lo porta dentro, perché
+quel file deve funzionare anche da una chiavetta, senza niente accanto.
 
 Per avere tutto — catalogo mondiale, trame da Wikipedia e Claude dentro l'app —
 va aperta in locale (`index.html` o `dist/leggi-di-piu.html`) oppure pubblicata
@@ -289,6 +358,7 @@ index.html              markup di tutte le schermate
 css/styles.css          stile (verde #202B22 + giallo #FFD85F, chiaro e scuro)
 js/storage.js           profili e letture su localStorage
 js/catalogo.js          il catalogo che viaggia dentro l'app (generato)
+js/lettore.js           il lettore: trova il testo, lo impagina, tiene il segno
 js/books.js             catalogo, trame e dossier dalle fonti pubbliche
 js/ai.js                chiamate a Claude e costruzione dei prompt
 js/app.js               interfaccia, libreria, Nina, statistiche
@@ -299,6 +369,7 @@ build.mjs               genera la versione a file unico in dist/
 tools/genera-icone.mjs  rifà le icone PNG da icon.svg
 tools/aggiorna-catalogo.mjs         rigenera js/catalogo.js da Open Library
 tools/controlla-catalogo.mjs        prova le ricerche sul catalogo interno
+tools/controlla-lettore.mjs         prova che i libri si aprano ancora (serve la rete)
 tools/controlla-accessibilita.mjs   contrasti, nomi accessibili, alt
 icona-*.png             icone per l'installazione su telefono
 ```

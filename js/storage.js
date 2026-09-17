@@ -281,6 +281,90 @@ const Store = (() => {
 
   /* -------------------------------------------------------- esporta/importa */
 
+  /* ================================= le letture del lettore interno ====== */
+
+  /**
+   * Il diario lo scrive la persona. Questa sezione invece la scrive l'app,
+   * mentre si legge dentro il lettore: quante pagine, per quanto tempo, dove
+   * si è arrivati. Sta in un elenco a parte proprio per non mescolare quello
+   * che uno ha deciso di annotare con quello che è stato solo registrato.
+   *
+   * Una riga per libro, aggiornata sul posto: di una lettura interessa dove
+   * sei arrivato, non ogni volta che hai girato pagina.
+   */
+  function sessions() {
+    const u = current();
+    if (!u) return [];
+    if (!Array.isArray(u.sessions)) u.sessions = [];
+    return u.sessions;
+  }
+
+  function readingOf(book) {
+    const key = bookKey(book);
+    return sessions().find((s) => s.key === key) || null;
+  }
+
+  /**
+   * Registra dove si è arrivati. Viene chiamata dal salvataggio automatico
+   * del lettore, quindi deve essere a buon mercato e non deve mai perdere il
+   * punto più avanti raggiunto: si torna indietro a rileggere, ma il segno di
+   * quanto si è letto non deve tornare indietro con noi.
+   */
+  function trackReading(book, { page, pages, seconds = 0, chars = 0, source = "" } = {}) {
+    const u = current();
+    if (!u) return null;
+    const elenco = sessions();
+    const key = bookKey(book);
+    const now = new Date().toISOString();
+    let riga = elenco.find((s) => s.key === key);
+
+    if (!riga) {
+      riga = {
+        key,
+        id: book.id || null,
+        title: book.title || "",
+        author: book.author || "",
+        cover: book.cover || null,
+        source,
+        startedAt: now,
+        seconds: 0,
+        page: 0,
+        furthest: 0,
+        pages: 0,
+        chars: 0,
+        sessions: 0
+      };
+      elenco.unshift(riga);
+    }
+
+    riga.page = Math.max(1, Number(page) || 1);
+    riga.furthest = Math.max(riga.furthest || 0, riga.page);
+    if (pages) riga.pages = Number(pages) || riga.pages;
+    if (chars) riga.chars = Number(chars) || riga.chars;
+    if (seconds > 0) riga.seconds = (riga.seconds || 0) + Math.round(seconds);
+    if (source) riga.source = source;
+    riga.updatedAt = now;
+    u.lastActive = now;
+    save();
+    return riga;
+  }
+
+  /** Una sessione in più da contare: si chiama quando il lettore si apre. */
+  function openedReading(book, extra) {
+    const riga = trackReading(book, extra);
+    if (riga) { riga.sessions = (riga.sessions || 0) + 1; save(); }
+    return riga;
+  }
+
+  function deleteReading(book) {
+    const u = current();
+    if (!u) return false;
+    const key = bookKey(book);
+    u.sessions = sessions().filter((s) => s.key !== key);
+    save();
+    return true;
+  }
+
   function exportCurrent() {
     const u = current();
     if (!u) return null;
@@ -290,7 +374,8 @@ const Store = (() => {
       exportedAt: new Date().toISOString(),
       user: { username: u.username, createdAt: u.createdAt, dailyGoal: u.dailyGoal },
       entries: u.entries,
-      shelves: u.shelves || {}
+      shelves: u.shelves || {},
+      sessions: u.sessions || []
     };
   }
 
@@ -326,6 +411,20 @@ const Store = (() => {
       }
     }
 
+    // Le letture registrate dal lettore: per ogni libro resta quella arrivata
+    // più avanti, che è l'unica informazione che conta.
+    if (Array.isArray(payload.sessions)) {
+      const elenco = sessions();
+      for (const riga of payload.sessions) {
+        if (!riga || !riga.key) continue;
+        const mia = elenco.find((s) => s.key === riga.key);
+        if (!mia) { elenco.push(riga); continue; }
+        mia.furthest = Math.max(mia.furthest || 0, riga.furthest || 0);
+        mia.seconds = Math.max(mia.seconds || 0, riga.seconds || 0);
+        mia.page = Math.max(mia.page || 0, riga.page || 0);
+      }
+    }
+
     save();
     return { ok: true, added, skipped };
   }
@@ -347,6 +446,11 @@ const Store = (() => {
     shelfBooks,
     shelfCounts,
     entries,
+    sessions,
+    readingOf,
+    trackReading,
+    openedReading,
+    deleteReading,
     getEntry,
     addEntry,
     updateEntry,

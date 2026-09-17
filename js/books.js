@@ -223,15 +223,44 @@ const Books = (() => {
 
   /* ------------------------------------------- il catalogo che sta nel file */
 
-  /** Le colonne di ogni riga di CATALOGO. */
-  const T = 0, A = 1, ANNO = 2, PAGINE = 3, COPERTINA = 4, OPERA = 5, EDIZIONI = 6, ALTRO = 7;
+  /**
+   * Il catalogo arriva da js/catalogo.js in tre pezzi: l'elenco dei nomi degli
+   * autori, le schede di Open Library e le opere di dominio pubblico di
+   * Project Gutenberg. Il perché di due elenchi separati è scritto là.
+   */
+  const AUTORI = typeof CATALOGO_AUTORI !== "undefined" ? CATALOGO_AUTORI : [];
+  const SCHEDE = typeof CATALOGO !== "undefined" ? CATALOGO : [];
+  const LIBERI = typeof CATALOGO_LIBERI !== "undefined" ? CATALOGO_LIBERI : [];
 
-  const daCatalogo = (riga) => ({
-    id: riga[OPERA] ? "/works/" + riga[OPERA] : "locale:" + normalize(riga[T] + " " + riga[A]).replace(/ /g, "-"),
+  /** Le colonne di una scheda. */
+  const T = 0, A = 1, ANNO = 2, PAGINE = 3, COPERTINA = 4, OPERA = 5,
+        EDIZIONI = 6, ALTRO = 7, LETTURA = 8, SCAFFALE = 9;
+  /** Le colonne di un'opera libera: titolo, autore, numero, scaffale. */
+  const L_NUMERO = 2, L_SCAFFALE = 3;
+
+  const nomeAutore = (i) => AUTORI[i] || "";
+
+  /**
+   * Dove leggere gratis. «g» più un numero è Project Gutenberg, «a» più un
+   * codice è un volume scansionato da Internet Archive.
+   */
+  function doveLeggere(codice) {
+    const c = String(codice || "");
+    if (c[0] === "g") return `https://www.gutenberg.org/ebooks/${c.slice(1)}`;
+    if (c[0] === "a") return `https://archive.org/details/${c.slice(1)}`;
+    return "";
+  }
+
+  const idLocale = (titolo, autore) =>
+    "locale:" + normalize(titolo + " " + autore).replace(/ /g, "-");
+
+  /** Una scheda di Open Library diventa un libro come lo vede il resto dell'app. */
+  const daScheda = (riga) => ({
+    id: riga[OPERA] ? "/works/" + riga[OPERA] : idLocale(riga[T], nomeAutore(riga[A])),
     source: "catalogo",
     title: riga[T],
     altTitle: riga[ALTRO] || "",
-    author: riga[A],
+    author: nomeAutore(riga[A]),
     authorKeys: [],
     year: riga[ANNO] || null,
     pages: riga[PAGINE] || null,
@@ -242,23 +271,69 @@ const Books = (() => {
     editions: riga[EDIZIONI] || 0,
     publisher: "",
     firstSentence: "",
-    readable: false,
+    readable: Boolean(riga[LETTURA]),
+    freeUrl: doveLeggere(riga[LETTURA]),
     blurb: presentazioneDi(riga[T]) || presentazioneDi(riga[ALTRO])
   });
 
   /**
-   * Una parola cercata combacia con una parola del libro se è la stessa, o se
-   * il libro la comincia: si cerca a metà digitazione, e chi ha scritto
-   * «calvi» si aspetta già Calvino.
-   *
-   * Quello che invece non deve succedere è ritrovarsi la parola in mezzo a
-   * un'altra: cercando Stephen King arrivavano i libri di Stephen Hawking,
-   * perché «hawking» contiene «king».
+   * Un'opera di dominio pubblico. Di lei si sa poco — titolo, autore e dove
+   * leggerla — ma quel poco è la cosa che conta di più: si può aprire subito.
    */
-  const combaciaParola = (parole, cercata) => {
-    for (const p of parole) if (p === cercata || p.startsWith(cercata)) return true;
-    return false;
-  };
+  const daLibero = (riga) => ({
+    id: idLocale(riga[T], nomeAutore(riga[A])),
+    source: "gutenberg",
+    title: riga[T],
+    altTitle: "",
+    author: nomeAutore(riga[A]),
+    authorKeys: [],
+    year: null,
+    pages: null,
+    cover: null,
+    coverLarge: null,
+    subjects: [],
+    languages: [],
+    editions: 0,
+    publisher: "",
+    firstSentence: "",
+    readable: true,
+    freeUrl: doveLeggere("g" + riga[L_NUMERO]),
+    blurb: presentazioneDi(riga[T])
+  });
+
+  /* ---------------------------------------------------- l'indice di ricerca */
+
+  /**
+   * Ottantamila righe non si possono normalizzare a ogni ricerca: sarebbero
+   * trecentomila espressioni regolari per ogni tasto premuto. Alla prima
+   * ricerca si prepara una volta per tutte un indice piatto, e da lì in poi
+   * cercare è confrontare stringhe.
+   *
+   * Ogni testo è racchiuso fra spazi. Così la parola intera si trova cercando
+   * « re », e l'inizio di parola cercando « re» — senza dover spezzare niente
+   * e senza che «king» si nasconda dentro «hawking».
+   */
+  let indice = null;
+
+  function preparaIndice() {
+    if (indice) return indice;
+    const titoli = [];       // « titolo »  (più « altro titolo », se c'è)
+    const righe = [];        // la riga vera e propria
+    const libera = [];       // se viene dall'elenco delle opere libere
+    const autore = [];       // indice del nome nell'elenco degli autori
+    const nomi = AUTORI.map((n) => " " + normalize(n) + " ");
+
+    for (const r of SCHEDE) {
+      titoli.push(" " + normalize(r[T]) + " " + (r[ALTRO] ? normalize(r[ALTRO]) + " " : ""));
+      righe.push(r); libera.push(false); autore.push(r[A]);
+    }
+    for (const r of LIBERI) {
+      titoli.push(" " + normalize(r[T]) + " ");
+      righe.push(r); libera.push(true); autore.push(r[A]);
+    }
+    indice = { titoli, righe, libera, autore, nomi };
+    return indice;
+  }
 
   /**
    * La ricerca nel catalogo interno.
@@ -275,74 +350,86 @@ const Books = (() => {
   function searchLocal(query, limit) {
     const parole = normalize(query).split(" ").filter(Boolean);
     if (!parole.length) return [];
-    const cercato = normalize(query);
+    const cercato = " " + normalize(query) + " ";
+    const idx = preparaIndice();
     const trovati = [];
 
-    for (const riga of CATALOGO) {
-      const titolo = normalize(riga[T]);
-      const altro = riga[ALTRO] ? normalize(riga[ALTRO]) : "";
-      const paroleTitolo = titolo.split(" ");
-      const paroleAltro = altro ? altro.split(" ") : [];
-      const paroleAutore = normalize(riga[A]).split(" ");
+    for (let i = 0; i < idx.righe.length; i++) {
+      const testoTitolo = idx.titoli[i];
+      const testoAutore = idx.nomi[idx.autore[i]];
 
-      const nelTitolo = (w) => combaciaParola(paroleTitolo, w);
-      const nellAltro = (w) => paroleAltro.length > 0 && combaciaParola(paroleAltro, w);
-      const nellAutore = (w) => combaciaParola(paroleAutore, w);
+      let tuttoNelTitolo = true;
+      let tuttoNellAutore = true;
+      let tuttoDaQualcheParte = true;
+      for (const w of parole) {
+        const nelTitolo = testoTitolo.includes(" " + w);
+        const nellAutore = testoAutore.includes(" " + w);
+        if (!nelTitolo) tuttoNelTitolo = false;
+        if (!nellAutore) tuttoNellAutore = false;
+        if (!nelTitolo && !nellAutore) { tuttoDaQualcheParte = false; break; }
+      }
+      if (!tuttoDaQualcheParte) continue;
 
-      const tuttoNelTitolo = parole.every(nelTitolo) || parole.every(nellAltro);
-      const tuttoNellAutore = parole.every(nellAutore);
-      if (!parole.every((w) => nelTitolo(w) || nellAltro(w) || nellAutore(w))) continue;
+      const riga = idx.righe[i];
+      const libera = idx.libera[i];
+      const edizioni = libera ? 0 : (riga[EDIZIONI] || 0);
 
       let punti = 0;
       // Chi scrive il nome di un autore vuole i suoi libri, e fra quelli
       // decide soltanto quante volte sono stati ristampati. Premiare anche il
       // titolo qui fa danni: manda in cima «Omaggio a Italo Calvino», «The
       // Letters of J.R.R. Tolkien» e un volumetto intitolato «Andrea
-      // Camilleri», davanti al «Barone rampante», allo «Hobbit» e al
-      // commissario Montalbano.
+      // Camilleri», davanti al «Barone rampante» e allo «Hobbit».
       if (tuttoNellAutore) {
         punti += 12;
       } else {
-        if (titolo === cercato || altro === cercato) punti += 40;
+        if (testoTitolo === cercato || testoTitolo.startsWith(cercato)) punti += 40;
         if (tuttoNelTitolo) punti += 14;
-        if (paroleTitolo[0] === parole[0]) punti += 4;
+        if (testoTitolo.startsWith(" " + parole[0] + " ")) punti += 4;
       }
       // Quante volte è stata ristampata, compressa: fra 5 edizioni e 50 la
       // differenza conta, fra 500 e 1000 molto meno.
-      punti += Math.min(12, Math.round(Math.log10((riga[EDIZIONI] || 0) + 1) * 5));
-      if (riga[COPERTINA]) punti += 2;
-      if (riga[ANNO]) punti += 1;
-      trovati.push({ riga, punti });
+      punti += Math.min(12, Math.round(Math.log10(edizioni + 1) * 5));
+      // Un libro che si può aprire subito vale un pizzico più di uno di cui
+      // resta solo la scheda.
+      if (libera || riga[LETTURA]) punti += 2;
+      if (!libera && riga[COPERTINA]) punti += 2;
+      if (!libera && riga[ANNO]) punti += 1;
+      trovati.push({ i, punti, edizioni });
     }
 
-    trovati.sort((a, b) => b.punti - a.punti ||
-      (b.riga[EDIZIONI] || 0) - (a.riga[EDIZIONI] || 0) ||
-      String(a.riga[T]).localeCompare(String(b.riga[T]), "it"));
+    trovati.sort((a, b) => b.punti - a.punti || b.edizioni - a.edizioni ||
+      String(idx.righe[a.i][T]).localeCompare(String(idx.righe[b.i][T]), "it"));
 
-    // Lo stesso libro può avere due schede su Open Library. In classifica
-    // resta quella arrivata prima, cioè la più ristampata.
+    // Lo stesso libro può avere due schede. In classifica resta quella
+    // arrivata prima, cioè la più ristampata.
     const visti = new Set();
     const esito = [];
-    for (const { riga } of trovati) {
-      const chiave = normalize(riga[T]) + "|" + normalize(riga[A]).split(" ").pop();
+    for (const { i } of trovati) {
+      const riga = idx.righe[i];
+      const chiave = normalize(riga[T]) + "|" + idx.autore[i];
       if (visti.has(chiave)) continue;
       visti.add(chiave);
-      esito.push(daCatalogo(riga));
+      esito.push(idx.libera[i] ? daLibero(riga) : daScheda(riga));
       if (esito.length >= limit) break;
     }
     return esito;
   }
 
   /** Quante opere l'app si porta dietro, da dire all'utente quando serve. */
-  const operePresenti = () => CATALOGO.length;
+  const operePresenti = () => SCHEDE.length + LIBERI.length;
 
-  /** E di quanti autori. Si conta una volta sola: il catalogo non cambia. */
-  let quantiAutori = 0;
-  const autoriPresenti = () => {
-    if (!quantiAutori) quantiAutori = new Set(CATALOGO.map((r) => r[A])).size;
-    return quantiAutori;
+  /** Quante si possono leggere gratis subito. */
+  let quanteLibere = 0;
+  const opereLibere = () => {
+    if (!quanteLibere) {
+      quanteLibere = LIBERI.length + SCHEDE.reduce((n, r) => n + (r[LETTURA] ? 1 : 0), 0);
+    }
+    return quanteLibere;
   };
 
+  /** E di quanti autori. Si conta una volta sola: il catalogo non cambia. */
+  const autoriPresenti = () => AUTORI.length;
 
   /* ============================================================ ricerca == */
 
@@ -595,33 +682,65 @@ const Books = (() => {
   const cognomeDi = (nome) => normalize(nome).split(" ").pop();
 
   function shelfLocal(key, limit) {
-    const voluti = new Set((AUTORI_PER_SCAFFALE[key] || []).map(cognomeDi));
-    if (!voluti.size) return [];
+    const posizione = SHELVES.findIndex((s) => s.key === key);
+    const codice = posizione + 1;   // nel catalogo lo scaffale è salvato +1
 
     // Un autore per volta, a giro: così lo scaffale non diventa la
     // bibliografia di chi ha più ristampe.
     const perAutore = new Map();
-    for (const riga of CATALOGO) {
-      const cognome = cognomeDi(riga[A]);
-      if (!voluti.has(cognome)) continue;
-      if (!perAutore.has(cognome)) perAutore.set(cognome, []);
-      perAutore.get(cognome).push(riga);
-    }
-    for (const righe of perAutore.values()) {
-      righe.sort((a, b) => (b[EDIZIONI] || 0) - (a[EDIZIONI] || 0));
+    const metti = (chiave, libro) => {
+      if (!perAutore.has(chiave)) perAutore.set(chiave, []);
+      perAutore.get(chiave).push(libro);
+    };
+
+    // Prima le schede, che hanno copertina e anno, poi le opere di dominio
+    // pubblico: uno scaffale con le copertine si guarda meglio.
+    if (codice > 0) {
+      for (const riga of SCHEDE) {
+        if (riga[SCAFFALE] === codice) metti("s" + riga[A], { riga, libera: false });
+      }
+      for (const riga of LIBERI) {
+        if (riga[L_SCAFFALE] === codice) metti("l" + riga[A], { riga, libera: true });
+      }
     }
 
+    // Gli argomenti che il catalogo non sa assegnare restano affidati agli
+    // autori: di «Classici» o «Poesia» Gutenberg non porta l'etichetta, ma
+    // sappiamo chi ci va.
+    const voluti = new Set((AUTORI_PER_SCAFFALE[key] || []).map(cognomeDi));
+    if (voluti.size) {
+      for (const riga of SCHEDE) {
+        if (!voluti.has(cognomeDi(nomeAutore(riga[A])))) continue;
+        metti("s" + riga[A], { riga, libera: false });
+      }
+    }
+    if (!perAutore.size) return [];
+
+    for (const gruppo of perAutore.values()) {
+      gruppo.sort((a, b) => (b.libera ? 0 : b.riga[EDIZIONI] || 0) - (a.libera ? 0 : a.riga[EDIZIONI] || 0));
+    }
+
+    // Gli autori con più ristampe per primi: in vetrina ci va quello che si
+    // riconosce.
+    const code = [...perAutore.values()].sort((a, b) =>
+      ((b[0].libera ? 0 : b[0].riga[EDIZIONI] || 0) - (a[0].libera ? 0 : a[0].riga[EDIZIONI] || 0)));
+
     const scaffale = [];
-    const code = [...perAutore.values()];
+    const visti = new Set();
     for (let giro = 0; scaffale.length < limit && giro < 6; giro++) {
-      for (const righe of code) {
-        if (!righe[giro]) continue;
-        scaffale.push(daCatalogo(righe[giro]));
+      for (const gruppo of code) {
+        const scelto = gruppo[giro];
+        if (!scelto) continue;
+        const chiave = normalize(scelto.riga[T]) + "|" + scelto.riga[A];
+        if (visti.has(chiave)) continue;
+        visti.add(chiave);
+        scaffale.push(scelto.libera ? daLibero(scelto.riga) : daScheda(scelto.riga));
         if (scaffale.length >= limit) break;
       }
     }
     return scaffale;
   }
+
 
   async function shelf(key, { limit = 14 } = {}) {
     const result = await getJSON(`${OPEN_LIBRARY}/subjects/${encodeURIComponent(key)}.json?limit=${limit}`);
@@ -929,6 +1048,6 @@ const Books = (() => {
     MODES, LANGUAGES, SORTS, SHELVES, PAGE_SIZE,
     search, searchLocal, shelf, findAuthors, authorProfile,
     research, dossierText, wikipedia,
-    isReachable, normalize, languageName, temiItaliani, operePresenti, autoriPresenti
+    isReachable, normalize, languageName, temiItaliani, operePresenti, autoriPresenti, opereLibere
   };
 })();

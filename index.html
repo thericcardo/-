@@ -211,6 +211,18 @@
           <option value="">Tutti i libri</option>
         </select>
       </div>
+      <!-- Quello che l'app ha registrato da sola, mentre si leggeva nel
+           lettore: tenuto separato da quello che la persona ha scritto. -->
+      <section id="registrate" class="registrate" hidden aria-labelledby="registrate-titolo">
+        <div class="registrate-head">
+          <h3 id="registrate-titolo">Registrate dal lettore</h3>
+          <span class="pill" id="registrate-count"></span>
+        </div>
+        <p class="hint">Queste righe le scrive l'app mentre leggi, ogni dieci secondi e quando
+          chiudi la pagina. Non devi annotare niente a mano.</p>
+        <div id="registrate-list" class="registrate-list"></div>
+      </section>
+
       <div id="diario-list" class="entries"></div>
     </section>
 
@@ -288,6 +300,7 @@
   <dl class="sheet-facts" id="sheet-facts"></dl>
 
   <div class="sheet-actions">
+    <button type="button" class="btn primary" id="btn-apri-lettore" hidden>Leggi il libro</button>
     <button type="button" class="btn primary" id="btn-leggi">Comincia a leggerlo</button>
     <button type="button" class="btn accent" id="btn-nina">Raccontalo a Nina</button>
     <button type="button" class="btn" id="btn-dubbio">Non ho capito una cosa</button>
@@ -335,6 +348,42 @@
   </div>
 </div>
 
+<!-- ============ IL LETTORE ============ -->
+<div id="lettore" class="lettore" hidden>
+  <header class="lettore-head">
+    <div class="lettore-id">
+      <strong id="lettore-titolo"></strong>
+      <span class="sub" id="lettore-autore"></span>
+    </div>
+    <div class="lettore-comandi">
+      <button type="button" class="btn ghost small icon" id="lettore-meno" aria-label="Testo più piccolo" title="Testo più piccolo">A−</button>
+      <button type="button" class="btn ghost small icon" id="lettore-piu" aria-label="Testo più grande" title="Testo più grande">A+</button>
+      <button type="button" class="btn ghost small" id="lettore-close">Chiudi</button>
+    </div>
+  </header>
+
+  <div class="lettore-stato" id="lettore-stato" role="status" aria-live="polite"></div>
+
+  <div class="lettore-pagina" id="lettore-pagina" tabindex="0"></div>
+
+  <footer class="lettore-foot" hidden id="lettore-foot">
+    <button type="button" class="btn" id="lettore-prec">‹ Indietro</button>
+    <div class="lettore-dove">
+      <label class="lettore-slider">
+        <span class="sr-only">Vai a pagina</span>
+        <input type="range" id="lettore-range" min="1" max="1" value="1">
+      </label>
+      <span class="lettore-conta" id="lettore-conta"></span>
+    </div>
+    <button type="button" class="btn" id="lettore-succ">Avanti ›</button>
+  </footer>
+
+  <p class="lettore-fonte" id="lettore-fonte"></p>
+  <div class="lettore-cambio" hidden id="lettore-cambio-box">
+    <button type="button" class="btn ghost small" id="lettore-cambio">Questa copia si legge male: provane un'altra</button>
+  </div>
+</div>
+
 <dialog id="ai-dialog" class="ai-dialog" aria-labelledby="ai-title">
   <div class="ai-head">
     <h3 id="ai-title">Claude</h3>
@@ -351,6 +400,7 @@
 <script src="js/catalogo.js"></script>
 <script src="js/books.js"></script>
 <script src="js/ai.js"></script>
+<script src="js/lettore.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

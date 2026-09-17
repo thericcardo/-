@@ -30,7 +30,10 @@ Object.defineProperty(globalThis, "navigator", { value: { onLine: false }, confi
 globalThis.fetch = () => Promise.reject(new Error("nessuna rete, come nell'artifact"));
 
 const leggi = (f) => readFileSync(resolve(root, f), "utf8");
-globalThis.CATALOGO = (0, eval)(leggi("js/catalogo.js") + "; CATALOGO");
+const catalogo = leggi("js/catalogo.js");
+globalThis.CATALOGO_AUTORI = (0, eval)(catalogo + "; CATALOGO_AUTORI");
+globalThis.CATALOGO = (0, eval)(catalogo + "; CATALOGO");
+globalThis.CATALOGO_LIBERI = (0, eval)(catalogo + "; CATALOGO_LIBERI");
 const Books = (0, eval)(leggi("js/books.js").replace(/^const Books =/m, "globalThis.Books =") + "; globalThis.Books");
 
 let passate = 0;
@@ -53,10 +56,52 @@ const titoli = (q) => cerca(q).map((b) => b.title);
 /* ------------------------------------------------------ il catalogo c'è */
 
 prova("il catalogo non è un pugno di titoli", () =>
-  Books.operePresenti() >= 3000 || `solo ${Books.operePresenti()} opere`);
+  Books.operePresenti() >= 40000 || `solo ${Books.operePresenti()} opere`);
 
 prova("il catalogo copre molti autori", () =>
-  Books.autoriPresenti() >= 120 || `solo ${Books.autoriPresenti()} autori`);
+  Books.autoriPresenti() >= 10000 || `solo ${Books.autoriPresenti()} autori`);
+
+prova("tanti libri si possono leggere gratis", () =>
+  Books.opereLibere() >= 20000 || `solo ${Books.opereLibere()} da leggere`);
+
+/* ------------------------------------------- non solo i nomi più grossi */
+
+prova("il catalogo pesca anche fuori dai soliti nomi", () => {
+  // Un catalogo costruito su un elenco di autori famosi dà poche centinaia di
+  // nomi, ognuno con molte opere. La coda lunga si riconosce dal contrario:
+  // moltissimi autori presenti con un'opera sola.
+  const conta = new Map();
+  for (const r of globalThis.CATALOGO) conta.set(r[1], (conta.get(r[1]) || 0) + 1);
+  for (const r of globalThis.CATALOGO_LIBERI) conta.set(r[1], (conta.get(r[1]) || 0) + 1);
+  const unaSola = [...conta.values()].filter((n) => n === 1).length;
+  return unaSola >= 5000 || `solo ${unaSola} autori con una sola opera`;
+});
+
+const mangaka = ["Osamu Tezuka", "Eiichiro Oda", "Rumiko Takahashi", "Akira Toriyama"];
+for (const nome of mangaka) {
+  prova(`«${nome}» trova i suoi manga`, () => {
+    const n = cerca(nome, 9999).length;
+    return n >= 5 || `ne trova ${n}`;
+  });
+}
+
+const liberi = [
+  ["Frankenstein", "shelley"],
+  ["Moby", "melville"],
+  ["Dracula", "stoker"]
+];
+for (const [titolo, cognome] of liberi) {
+  prova(`«${titolo}» si può leggere gratis`, () => {
+    const suoi = cerca(titolo, 40).filter((b) =>
+      new RegExp(cognome, "i").test(Books.normalize(b.author)));
+    if (!suoi.length) return "non lo trova";
+    // Basta che una delle schede porti il link: sono lo stesso libro, e
+    // l'app propone di leggere da quella che ce l'ha.
+    const conLettura = suoi.filter((b) => b.freeUrl);
+    return conLettura.length > 0
+      || `ne trova ${suoi.length}, nessuna con dove leggerlo`;
+  });
+}
 
 /* ---------------------------------------- ogni autore ha la sua libreria */
 
