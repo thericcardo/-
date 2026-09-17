@@ -254,6 +254,17 @@
       <div class="card">
         <h3>Claude</h3>
         <p class="hint">Con una chiave API di Anthropic, Claude ti propone domande su misura, commenta quello che scrivi e ti ricorda dove eri rimasto. Senza chiave l'app prepara comunque la domanda da copiare e incollare in Claude.</p>
+
+        <!-- La chiave non può crearla nessuno al posto tuo: è legata al tuo
+             account e al tuo metodo di pagamento. Qui c'è la strada più corta. -->
+        <ol class="chiave-passi">
+          <li>Apri <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">console.anthropic.com/settings/keys</a> e accedi (o crea un account).</li>
+          <li>Premi <strong>Create Key</strong>, dalle un nome, copiala: comincia per <code>sk-ant-</code> e la vedi una volta sola.</li>
+          <li>Serve un metodo di pagamento con qualche euro di credito. Le domande di questa app costano frazioni di centesimo l'una.</li>
+          <li>Incollala qui sotto e premi <strong>Salva chiave</strong>.</li>
+        </ol>
+        <p class="hint">La chiave resta su questo dispositivo, in una voce di <code>localStorage</code> separata dai diari, e non entra mai nell'export. Chi usa questo browser può leggerla: su un computer condiviso, rimuovila quando hai finito.</p>
+
         <label class="field" for="ai-key"><span>Chiave API</span></label>
         <div class="row wrap">
           <input id="ai-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…">
@@ -348,6 +359,24 @@
   </div>
 </div>
 
+<!-- ============ GUIDA A ONE PIECE ============ -->
+<div id="guida-op" class="guida" hidden>
+  <header class="guida-head">
+    <div class="guida-id">
+      <strong>One Piece</strong>
+      <span class="sub">Eiichirō Oda · <span id="guida-conta"></span></span>
+    </div>
+    <div class="guida-comandi">
+      <label class="guida-lingua">
+        <span class="sr-only">Lingua</span>
+        <select id="guida-lingua"></select>
+      </label>
+      <button type="button" class="btn ghost small" id="guida-close">Chiudi</button>
+    </div>
+  </header>
+  <div class="guida-corpo" id="guida-corpo" tabindex="-1"></div>
+</div>
+
 <!-- ============ IL LETTORE ============ -->
 <div id="lettore" class="lettore" hidden>
   <header class="lettore-head">
@@ -398,6 +427,7 @@
 
 <script src="js/storage.js"></script>
 <script src="js/catalogo.js"></script>
+<script src="js/onepiece.js"></script>
 <script src="js/books.js"></script>
 <script src="js/ai.js"></script>
 <script src="js/lettore.js"></script>

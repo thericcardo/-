@@ -176,6 +176,42 @@ Il tempo si conta per pagina e si fermano i conti a cinque minuti per pagina:
 una pagina aperta per un'ora vuol dire che qualcuno è andato a cena, non che ha
 letto per un'ora.
 
+## One Piece, dal volume 1 al 115
+
+One Piece è di Eiichirō Oda e della Shūeisha. Il suo testo non esiste in
+nessuna fonte libera, e l'app non lo contiene: il lettore interno apre solo le
+opere di dominio pubblico, e per un manga in commercio non ci sarà mai niente
+da aprire. Quello che si può fare — e che l'app fa — è raccontarlo.
+
+C'è una **guida** con i dati veri di tutti i **115 volumi**: numero, titolo
+dell'edizione italiana Star Comics, titolo giapponese in kanji, romaji, e i
+capitoli contenuti (dal 1 al 1179, senza un buco). I dati vengono dall'elenco
+di it.wikipedia, che cita i volumi Shūeisha e l'edizione italiana.
+
+La **trama** è scritta qui, arco per arco, nelle sei lingue chieste: italiano,
+inglese, giapponese, francese, spagnolo, tedesco. Sono i **venti archi** della
+suddivisione ufficiale della serie, dal Mare Orientale a Erbaf, ognuno con il
+suo intervallo di volumi e capitoli. Il selettore in cima alla guida cambia la
+lingua di tutto, comprese le schede dei singoli volumi.
+
+Perché arco e non volume: un volume è una fetta di carta, decisa da quante
+pagine entrano in un tankōbon. Un arco è una storia con un inizio e una fine.
+Chi chiede «di che cosa parla il volume 37» vuole sapere che cosa succede a
+Water Seven, non i tre capitoli che avanzano — e la scheda del volume dice
+comunque quali capitoli contiene.
+
+Cercando «One Piece» in libreria escono tutti i 115 volumi; cercando «One
+Piece 37» quel volume viene per primo. La trama compare **senza rete e senza
+chiave API**: è dentro il file.
+
+In fondo alla guida ci sono i posti dove leggerlo per davvero, e sono soltanto
+canali ufficiali — [MANGA Plus](https://mangaplus.shueisha.co.jp/titles/100020)
+del suo editore, dove i primi tre e gli ultimi tre capitoli sono gratis;
+[Viz](https://www.viz.com/shonenjump/chapters/one-piece);
+[Star Comics](https://www.starcomics.com/serie/one-piece) per l'edizione
+italiana su carta. I siti che caricano scansioni non autorizzate non ci sono, e
+una prova in `tools/controlla-catalogo.mjs` fallisce se qualcuno ce li mette.
+
 ## Raccontalo a Nina
 
 Nina ha sei anni e ti ascolta raccontare il libro che stai leggendo.
@@ -217,6 +253,10 @@ Tre punti dell'app chiedono aiuto a Claude:
 
 A Claude viene chiesto di non anticipare mai nulla oltre le pagine indicate: il
 diario non deve diventare una fonte di spoiler.
+
+La chiave API **non può crearla l'app né nessun altro**: è legata al tuo
+account Anthropic e al tuo metodo di pagamento. In *Profilo → Claude* ci sono i
+quattro passi per farla, con il link diretto alla pagina giusta.
 
 **Con una chiave API** (da `console.anthropic.com`, incollata in *Profilo →
 Claude*) le risposte arrivano dentro l'app. La chiave resta in questo browser,
@@ -358,6 +398,7 @@ index.html              markup di tutte le schermate
 css/styles.css          stile (verde #202B22 + giallo #FFD85F, chiaro e scuro)
 js/storage.js           profili e letture su localStorage
 js/catalogo.js          il catalogo che viaggia dentro l'app (generato)
+js/onepiece.js          i 115 volumi di One Piece e la trama in sei lingue
 js/lettore.js           il lettore: trova il testo, lo impagina, tiene il segno
 js/books.js             catalogo, trame e dossier dalle fonti pubbliche
 js/ai.js                chiamate a Claude e costruzione dei prompt

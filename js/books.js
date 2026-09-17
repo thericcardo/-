@@ -34,6 +34,18 @@ const Books = (() => {
   /** null finché non si sa; poi true/false, per spiegare all'utente che succede. */
   let reachable = null;
 
+  /**
+   * La lingua in cui mostrare le trame scritte dentro l'app (per ora quelle di
+   * One Piece). Il resto del catalogo arriva da fonti che hanno una lingua
+   * loro e non si traduce.
+   */
+  let linguaTrame = "it";
+  const setLinguaTrame = (l) => {
+    linguaTrame = (typeof OnePiece !== "undefined") ? OnePiece.conLingua(l) : "it";
+    return linguaTrame;
+  };
+  const getLinguaTrame = () => linguaTrame;
+
   /* =========================================================== la rete === */
 
   const memory = new Map();
@@ -350,6 +362,12 @@ const Books = (() => {
   function searchLocal(query, limit) {
     const parole = normalize(query).split(" ").filter(Boolean);
     if (!parole.length) return [];
+
+    // One Piece non sta nel catalogo scaricato: i suoi 115 volumi sono scritti
+    // dentro l'app, con la trama, perché di un manga sotto copyright non
+    // esiste una scheda libera da nessuna parte.
+    const manga = volumiOnePiece(query, limit);
+    if (manga.length) return manga;
     const cercato = " " + normalize(query) + " ";
     const idx = preparaIndice();
     const trovati = [];
@@ -414,6 +432,24 @@ const Books = (() => {
       if (esito.length >= limit) break;
     }
     return esito;
+  }
+
+  /**
+   * I volumi di One Piece che rispondono a una ricerca.
+   *
+   * Chi scrive «One Piece» vuole la serie dal primo volume; chi scrive «One
+   * Piece 37» vuole quel volume e basta.
+   */
+  function volumiOnePiece(query, limit) {
+    if (typeof OnePiece === "undefined" || !OnePiece.riguardaOnePiece(query)) return [];
+    const tutti = OnePiece.comeLibri(linguaTrame);
+    const numero = /(\d{1,3})/.exec(normalize(query));
+    if (numero) {
+      const n = Number(numero[1]);
+      const uno = tutti.filter((v) => v.volume === n);
+      if (uno.length) return uno.concat(tutti.filter((v) => v.volume !== n)).slice(0, limit);
+    }
+    return tutti.slice(0, limit);
   }
 
   /** Quante opere l'app si porta dietro, da dire all'utente quando serve. */
@@ -573,7 +609,10 @@ const Books = (() => {
       // chiave di Open Library («classic literature»): lì non c'è niente da
       // cercare fra i titoli, c'è uno scaffale da riempire.
       const argomento = mode === "argomento" ? shelfLocal(clean.replace(/\s+/g, "_"), 40) : [];
-      const local = page !== 1 ? [] : (argomento.length ? argomento : searchLocal(clean, 40));
+      // Chi cerca una serie la vuole intera: dei 115 volumi di One Piece non
+      // ha senso mostrarne quaranta e fermarsi.
+      const quanti = volumiOnePiece(clean, 1).length ? 200 : 40;
+      const local = page !== 1 ? [] : (argomento.length ? argomento : searchLocal(clean, quanti));
       return {
         ok: local.length > 0,
         books: local,
@@ -594,6 +633,12 @@ const Books = (() => {
     }
 
     let books = dedupe(ordered);
+    if (page === 1) {
+      // I volumi scritti dentro l'app vanno davanti: di One Piece Open Library
+      // ha schede sparse e in giapponese, e nessuna con la trama.
+      const manga = volumiOnePiece(clean, 200);
+      if (manga.length) books = manga.concat(books.filter((b) => b.source !== "onepiece"));
+    }
     if (page === 1) {
       const local = searchLocal(clean, 8).filter(
         (l) => !books.some((b) => normalize(b.title) === normalize(l.title))
@@ -1048,6 +1093,7 @@ const Books = (() => {
     MODES, LANGUAGES, SORTS, SHELVES, PAGE_SIZE,
     search, searchLocal, shelf, findAuthors, authorProfile,
     research, dossierText, wikipedia,
-    isReachable, normalize, languageName, temiItaliani, operePresenti, autoriPresenti, opereLibere
+    isReachable, normalize, languageName, temiItaliani, operePresenti, autoriPresenti, opereLibere,
+    setLinguaTrame, getLinguaTrame
   };
 })();

@@ -1464,3 +1464,142 @@ body.is-locked { overflow: hidden; }
 
 .lettore-cambio { padding: 0 1rem .9rem; text-align: center; background: var(--surface); }
 .lettore-cambio .btn { font-size: .8rem; }
+
+/* ------------------------------------------------ guida a One Piece --- */
+
+.guida {
+  position: fixed;
+  inset: 0;
+  z-index: 65;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.guida-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .7rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.guida-id { min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+.guida-id strong { font-family: var(--serif); font-size: 1.15rem; }
+.guida-comandi { display: flex; gap: .45rem; align-items: center; flex: 0 0 auto; }
+.guida-lingua select { width: auto; min-width: 7.5rem; padding: .35rem .5rem; font-size: .85rem; }
+
+.guida-corpo {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 1.2rem 1rem 3rem;
+  max-width: 44rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.op-storia { font-size: 1.02rem; line-height: 1.66; white-space: pre-line; }
+.op-storia + .op-storia { margin-top: .9rem; }
+
+.op-avviso {
+  margin: 1.2rem 0;
+  padding: .8rem .95rem;
+  font-size: .9rem;
+  line-height: 1.55;
+  background: var(--surface-alt);
+  border-left: 3px solid var(--yellow);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.op-avviso strong { font-weight: 600; }
+.op-avviso a { color: inherit; }
+
+/* Un arco: titolo, intervallo, trama, e i volumi che lo compongono. */
+.op-arco {
+  margin-top: 1.4rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--line);
+}
+.op-arco:first-of-type { border-top: 0; }
+.op-arco-head { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
+.op-arco-head h4 { font-size: 1.12rem; }
+.op-arco-num {
+  font-family: var(--sans);
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--accent-ink);
+  background: var(--yellow);
+  border-radius: 999px;
+  padding: .12rem .5rem;
+}
+.op-arco-dove { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.op-arco-ja { font-size: .82rem; color: var(--muted); }
+.op-arco-trama { margin-top: .55rem; line-height: 1.62; }
+
+.op-volumi { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .7rem; }
+.op-volume {
+  font: inherit;
+  font-size: .8rem;
+  text-align: left;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: .3rem .55rem;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+.op-volume:hover { border-color: var(--chip-hover-border); background: var(--chip-hover-bg); }
+.op-volume b { font-variant-numeric: tabular-nums; }
+
+.op-dove { margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1px solid var(--line); }
+.op-dove h4 { font-size: 1.05rem; margin-bottom: .3rem; }
+.op-canale { padding: .6rem 0; border-top: 1px solid var(--line); }
+.op-canale:first-of-type { border-top: 0; }
+.op-canale-nome { font-weight: 600; }
+.op-canale p { font-size: .88rem; color: var(--muted); margin-top: .1rem; line-height: 1.5; }
+
+.op-lingua-mini { width: auto; min-width: 7rem; padding: .3rem .5rem; font-size: .84rem; }
+
+/* La porta d'ingresso alla guida, in cima alla libreria. */
+.op-invito {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: .85rem .95rem;
+  margin-bottom: 1.2rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--yellow);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+}
+.op-invito-text { flex: 1 1 auto; min-width: 0; }
+.op-invito-text strong { font-family: var(--serif); font-size: 1.05rem; }
+.op-invito-text p { font-size: .85rem; color: var(--muted); margin-top: .1rem; }
+.op-invito .btn { flex: 0 0 auto; }
+
+@media (max-width: 430px) {
+  .op-invito { flex-wrap: wrap; }
+  .op-invito .btn { width: 100%; }
+}
+
+/* I passi per creare la chiave API: una strada, non un paragrafo. */
+.chiave-passi {
+  margin: .9rem 0;
+  padding-left: 1.3rem;
+  display: grid;
+  gap: .45rem;
+  font-size: .9rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.chiave-passi strong { color: var(--ink); font-weight: 600; }
+.chiave-passi a { color: var(--ink); }
+.chiave-passi code {
+  font-size: .85em;
+  padding: .05rem .3rem;
+  background: var(--surface-alt);
+  border-radius: 4px;
+}

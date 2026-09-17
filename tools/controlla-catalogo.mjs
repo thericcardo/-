@@ -34,6 +34,8 @@ const catalogo = leggi("js/catalogo.js");
 globalThis.CATALOGO_AUTORI = (0, eval)(catalogo + "; CATALOGO_AUTORI");
 globalThis.CATALOGO = (0, eval)(catalogo + "; CATALOGO");
 globalThis.CATALOGO_LIBERI = (0, eval)(catalogo + "; CATALOGO_LIBERI");
+globalThis.OnePiece = (0, eval)(
+  leggi("js/onepiece.js").replace(/^const OnePiece =/m, "globalThis.OnePiece =") + "; globalThis.OnePiece");
 const Books = (0, eval)(leggi("js/books.js").replace(/^const Books =/m, "globalThis.Books =") + "; globalThis.Books");
 
 let passate = 0;
@@ -102,6 +104,68 @@ for (const [titolo, cognome] of liberi) {
       || `ne trova ${suoi.length}, nessuna con dove leggerlo`;
   });
 }
+
+/* ------------------------------------------------------------- One Piece */
+
+prova("i 115 volumi di One Piece ci sono tutti", () => {
+  const n = OnePiece.quantiVolumi();
+  const numeri = OnePiece.VOLUMI.map((v) => v[0]);
+  const mancanti = [];
+  for (let i = 1; i <= n; i++) if (!numeri.includes(i)) mancanti.push(i);
+  return (n >= 115 && !mancanti.length) || `${n} volumi, mancano ${mancanti.slice(0, 5)}`;
+});
+
+prova("i capitoli dei volumi non lasciano buchi", () => {
+  const v = OnePiece.VOLUMI;
+  for (let i = 0; i < v.length - 1; i++) {
+    if (v[i + 1][4] !== v[i][5] + 1) {
+      return `fra il volume ${v[i][0]} (finisce a ${v[i][5]}) e il ${v[i + 1][0]} (comincia a ${v[i + 1][4]})`;
+    }
+  }
+  return true;
+});
+
+prova("ogni volume appartiene a un arco", () => {
+  const orfani = OnePiece.VOLUMI.filter((v) => !OnePiece.arcoDelVolume(v)).map((v) => v[0]);
+  return !orfani.length || `senza arco: ${orfani.join(", ")}`;
+});
+
+for (const lingua of OnePiece.LINGUE) {
+  prova(`la trama di One Piece è scritta in ${lingua.label}`, () => {
+    if (!OnePiece.STORIA[lingua.code]) return "manca la storia generale";
+    const vuoti = OnePiece.ARCHI.filter(
+      (a) => !a.trama[lingua.code] || !a.nome[lingua.code]).map((a) => a.key);
+    return !vuoti.length || `archi senza trama: ${vuoti.join(", ")}`;
+  });
+}
+
+prova("ogni volume porta la sua trama, senza rete né chiave", () => {
+  const libri = OnePiece.comeLibri("fr");
+  const senza = libri.filter((b) => !b.blurb || b.blurb.length < 80).map((b) => b.volume);
+  return !senza.length || `volumi senza trama: ${senza.slice(0, 6).join(", ")}`;
+});
+
+prova("«One Piece» in libreria dà tutti i volumi", () => {
+  const trovati = cerca("One Piece", 500).filter((b) => b.source === "onepiece");
+  return trovati.length === OnePiece.quantiVolumi() || `ne dà ${trovati.length}`;
+});
+
+prova("«One Piece 37» mette quel volume per primo", () => {
+  const primo = cerca("One Piece 37", 5)[0];
+  return (primo && primo.volume === 37) || `primo: ${primo && primo.title}`;
+});
+
+prova("dove leggerlo sono solo canali ufficiali", () => {
+  const permessi = /^https:\/\/(mangaplus\.shueisha\.co\.jp|www\.viz\.com|www\.starcomics\.com)\//;
+  const estranei = OnePiece.DOVE.filter((d) => !permessi.test(d.url)).map((d) => d.url);
+  return !estranei.length || `non ufficiali: ${estranei.join(", ")}`;
+});
+
+prova("il manga non finisce fra le opere da leggere nel lettore", () => {
+  const leggibili = cerca("One Piece", 200).filter((b) => b.source === "onepiece" && (b.readable || b.freeUrl));
+  return !leggibili.length
+    || `${leggibili.length} volumi promettono una lettura che non può esistere`;
+});
 
 /* ---------------------------------------- ogni autore ha la sua libreria */
 

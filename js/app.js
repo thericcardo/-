@@ -1484,6 +1484,7 @@
    * spreco: ogni scaffale si carica quando sta per entrare nello schermo.
    */
   function renderBrowseShelves() {
+    renderInvitoOnePiece();
     const box = $("#lib-scaffali");
     clear(box);
     box.append(h("h3", { class: "browse-title", text: "Sfoglia gli scaffali" }));
@@ -1673,10 +1674,76 @@
     }
     sheet.scrollTop = 0;
 
+    // Di un volume di One Piece la trama è scritta dentro l'app: non c'è
+    // niente da cercare in rete, e cercarlo darebbe la voce sbagliata.
+    if (book.source === "onepiece") {
+      renderSchedaOnePiece(book);
+      return;
+    }
+
     const dossier = await Books.research(book);
     if (currentBook !== book) return; // l'utente ha già aperto un altro libro
     currentDossier = dossier;
     renderSheetBody(dossier);
+  }
+
+  /**
+   * La scheda di un volume di One Piece.
+   *
+   * Tre cose che le altre schede non hanno: la trama già scritta, nella lingua
+   * scelta; i capitoli contenuti, perché un volume è una fetta di una storia
+   * più lunga; e dove leggerlo per davvero, che per un manga sotto copyright
+   * non è il lettore interno ma il suo editore.
+   */
+  function renderSchedaOnePiece(book) {
+    const lingua = Books.getLinguaTrame();
+    const arco = OnePiece.ARCHI.find((a) => a.key === book.arco);
+    const body = $("#sheet-body");
+    clear(body);
+
+    if (arco) {
+      body.append(
+        h("p", { class: "sheet-h", text: `Arco: ${arco.nome[lingua]}` }),
+        h("p", { class: "sheet-text", text: arco.trama[lingua] })
+      );
+    }
+
+    body.append(h("div", { class: "row wrap" },
+      h("button", {
+        type: "button", class: "btn small", text: "Tutta la guida a One Piece",
+        onClick: () => apriGuidaOnePiece(book.arco)
+      }),
+      h("select", {
+        class: "op-lingua-mini", "aria-label": "Lingua della trama",
+        onChange: (e) => { Books.setLinguaTrame(e.target.value); renderSchedaOnePiece(book); }
+      }, ...OnePiece.LINGUE.map((l) => h("option", {
+        value: l.code, text: l.label, selected: l.code === lingua ? "selected" : null
+      })))
+    ));
+
+    const fatti = $("#sheet-facts");
+    clear(fatti);
+    const righe = [
+      ["Volume", `${book.volume} di ${OnePiece.quantiVolumi()}`],
+      ["Capitoli", `dal ${book.capitoli[0]} al ${book.capitoli[1]}`],
+      ["Titolo originale", book.altTitle || "—"],
+      ["Editore italiano", "Star Comics"]
+    ];
+    for (const [etichetta, valore] of righe) {
+      fatti.append(h("dt", { text: etichetta }), h("dd", { text: valore }));
+    }
+
+    const fonti = $("#sheet-sources");
+    clear(fonti);
+    fonti.append(document.createTextNode("Dove leggerlo: "));
+    OnePiece.DOVE.forEach((d, i) => {
+      if (i) fonti.append(document.createTextNode(" · "));
+      fonti.append(h("a", { href: d.url, target: "_blank", rel: "noopener noreferrer", text: d.nome }));
+    });
+
+    // Il lettore interno apre solo le opere di dominio pubblico: dirlo qui
+    // evita di far cercare a vuoto un testo che non può esistere.
+    $("#btn-apri-lettore").hidden = true;
   }
 
   function renderShelfPicker(book) {
@@ -1856,6 +1923,171 @@
     );
   }
 
+
+  /* ==================================================== guida a One Piece */
+
+  /**
+   * La guida a One Piece.
+   *
+   * Esiste perché del manga non si può mettere il testo: è di Eiichirō Oda e
+   * della Shūeisha, e nessuna fonte libera lo contiene. Quello che si può
+   * fare è raccontarlo — la storia, i venti archi, tutti i 115 volumi — e
+   * dire dove leggerlo per davvero, cioè dal suo editore.
+   *
+   * La lingua si cambia in cima e vale per tutto, comprese le trame nelle
+   * schede dei volumi: italiano, inglese, giapponese, francese, spagnolo,
+   * tedesco.
+   */
+  function apriGuidaOnePiece(arcoDaMostrare) {
+    if (typeof OnePiece === "undefined") return;
+
+    const select = $("#guida-lingua");
+    if (!select.options.length) {
+      for (const l of OnePiece.LINGUE) {
+        select.append(h("option", { value: l.code, text: l.label }));
+      }
+      select.addEventListener("change", () => {
+        Books.setLinguaTrame(select.value);
+        renderGuidaOnePiece();
+      });
+    }
+    select.value = Books.getLinguaTrame();
+
+    // Come per Nina: se la scheda è aperta il livello va rinominato prima di
+    // chiuderla, altrimenti il «close» del dialogo torna indietro nella
+    // cronologia e si porta via la guida appena aperta.
+    const sheet = $("#book-sheet");
+    if (sheet.open) {
+      replaceLayer("guida-op", nascondiGuidaOnePiece);
+      sheet.close();
+    } else {
+      openLayer("guida-op", nascondiGuidaOnePiece);
+    }
+    $("#guida-op").hidden = false;
+    document.body.classList.add("is-locked");
+    renderGuidaOnePiece();
+
+    if (arcoDaMostrare) {
+      const bersaglio = $(`[data-arco="${arcoDaMostrare}"]`);
+      if (bersaglio) bersaglio.scrollIntoView({ block: "start" });
+    } else {
+      $("#guida-corpo").scrollTop = 0;
+    }
+    $("#guida-corpo").focus();
+  }
+
+  function renderGuidaOnePiece() {
+    const lingua = Books.getLinguaTrame();
+    const box = $("#guida-corpo");
+    clear(box);
+    $("#guida-conta").textContent =
+      `${OnePiece.quantiVolumi()} volumi · ${OnePiece.ultimoCapitolo()} capitoli`;
+
+    // Di che cosa parla: la risposta alla domanda, scritta, senza chiedere
+    // niente a nessuno e senza uscire da qui.
+    for (const paragrafo of OnePiece.STORIA[lingua].split("\n\n")) {
+      box.append(h("p", { class: "op-storia", text: paragrafo }));
+    }
+
+    box.append(h("div", { class: "op-avviso" },
+      h("strong", { text: SPIEGAZIONE_OP[lingua].titolo }),
+      document.createTextNode(" " + SPIEGAZIONE_OP[lingua].testo)
+    ));
+
+    for (let i = 0; i < OnePiece.ARCHI.length; i++) {
+      const arco = OnePiece.ARCHI[i];
+      const volumi = OnePiece.volumiDellArco(arco.key);
+      const fineVol = arco.vol[1] ? arco.vol[1] : OnePiece.quantiVolumi();
+      const fineCap = arco.cap[1] ? String(arco.cap[1]) : "…";
+
+      box.append(h("section", { class: "op-arco", dataset: { arco: arco.key } },
+        h("div", { class: "op-arco-head" },
+          h("span", { class: "op-arco-num", text: String(i + 1) }),
+          h("h4", { text: arco.nome[lingua] }),
+          lingua !== "ja" ? h("span", { class: "op-arco-ja", text: arco.nome.ja }) : null
+        ),
+        h("p", { class: "op-arco-dove",
+          text: `volumi ${arco.vol[0]}–${fineVol} · capitoli ${arco.cap[0]}–${fineCap}` }),
+        h("p", { class: "op-arco-trama", text: arco.trama[lingua] }),
+        h("div", { class: "op-volumi" }, ...volumi.map((v) => h("button", {
+          type: "button", class: "op-volume",
+          title: `${v[2]} — capitoli ${v[4]}-${v[5]}`,
+          onClick: () => {
+            requestCloseLayer("guida-op");
+            const libro = OnePiece.comeLibri(lingua).find((b) => b.volume === v[0]);
+            if (libro) openBookSheet(libro);
+          }
+        }, h("b", { text: String(v[0]) }), document.createTextNode(" " + v[1]))))
+      ));
+    }
+
+    const dove = h("section", { class: "op-dove" },
+      h("h4", { text: SPIEGAZIONE_OP[lingua].dove })
+    );
+    for (const canale of OnePiece.DOVE) {
+      dove.append(h("div", { class: "op-canale" },
+        h("a", { class: "op-canale-nome", href: canale.url, target: "_blank",
+                 rel: "noopener noreferrer", text: canale.nome }),
+        h("p", { text: canale.nota[lingua] })
+      ));
+    }
+    box.append(dove);
+  }
+
+  /**
+   * Il perché, nelle sei lingue: che le trame sono scritte qui e il manga no.
+   * Meglio dirlo una volta chiaramente che lasciare cercare un testo che non
+   * può esistere.
+   */
+  const SPIEGAZIONE_OP = {
+    it: { titolo: "Perché qui c'è la trama e non il manga.",
+          testo: "One Piece è di Eiichirō Oda e della Shūeisha: il suo testo non esiste in nessuna fonte libera, e questa app non lo contiene. Le trame qui sotto sono scritte per l'app, arco per arco. Per leggere i capitoli ci sono i canali ufficiali in fondo alla pagina: su MANGA Plus, del suo editore, i primi tre e gli ultimi tre sono gratis.",
+          dove: "Dove leggerlo, legalmente" },
+    en: { titolo: "Why the plot is here and the manga is not.",
+          testo: "One Piece belongs to Eiichirō Oda and Shueisha: its text exists in no free source, and this app does not contain it. The summaries below were written for this app, arc by arc. To read the chapters, the official channels are at the foot of this page: on MANGA Plus, run by its own publisher, the first three and the latest three are free.",
+          dove: "Where to read it, legally" },
+    ja: { titolo: "ここにあらすじがあり、漫画本文がない理由。",
+          testo: "『ONE PIECE』は尾田栄一郎氏と集英社の作品であり、その本文は自由に使える形では存在せず、このアプリにも含まれていません。以下のあらすじは、このアプリのために章ごとに書き起こしたものです。本編を読むには、ページ下部の公式配信をご利用ください。出版社自身が運営する MANGA Plus では、最初の三話と最新の三話が無料です。",
+          dove: "公式に読める場所" },
+    fr: { titolo: "Pourquoi l'intrigue est ici et le manga non.",
+          testo: "One Piece appartient à Eiichirō Oda et à Shueisha : son texte n'existe dans aucune source libre, et cette application ne le contient pas. Les résumés ci-dessous ont été écrits pour cette application, arc par arc. Pour lire les chapitres, les canaux officiels sont en bas de page : sur MANGA Plus, géré par son propre éditeur, les trois premiers et les trois derniers sont gratuits.",
+          dove: "Où le lire, légalement" },
+    es: { titolo: "Por qué aquí está la trama y no el manga.",
+          testo: "One Piece es de Eiichirō Oda y de Shueisha: su texto no existe en ninguna fuente libre, y esta aplicación no lo contiene. Los resúmenes de abajo se han escrito para esta aplicación, arco por arco. Para leer los capítulos están los canales oficiales al final de la página: en MANGA Plus, de su propia editorial, los tres primeros y los tres últimos son gratis.",
+          dove: "Dónde leerlo, legalmente" },
+    de: { titolo: "Warum hier die Handlung steht und nicht der Manga.",
+          testo: "One Piece gehört Eiichirō Oda und Shueisha: sein Text existiert in keiner freien Quelle, und diese App enthält ihn nicht. Die Zusammenfassungen unten wurden für diese App geschrieben, Bogen für Bogen. Um die Kapitel zu lesen, stehen die offiziellen Kanäle am Seitenende: auf MANGA Plus, betrieben vom eigenen Verlag, sind die ersten drei und die neuesten drei kostenlos.",
+          dove: "Wo man es legal liest" }
+  };
+
+  function nascondiGuidaOnePiece() {
+    $("#guida-op").hidden = true;
+    document.body.classList.remove("is-locked");
+  }
+
+  function chiudiGuidaOnePiece() {
+    if (requestCloseLayer("guida-op")) return;
+    nascondiGuidaOnePiece();
+  }
+
+  /** L'invito in cima alla libreria, che è come si scopre che la guida c'è. */
+  function renderInvitoOnePiece() {
+    // Dentro #lib-sfoglia e non in #lib-miei o #lib-scaffali: quei due
+    // vengono svuotati a ogni render e si porterebbero via l'invito.
+    const box = $("#lib-sfoglia");
+    if (!box || typeof OnePiece === "undefined") return;
+    if ($(".op-invito")) return;
+    box.prepend(h("div", { class: "op-invito" },
+      h("div", { class: "op-invito-text" },
+        h("strong", { text: "One Piece, dal volume 1 al 115" }),
+        h("p", { text: "La storia arco per arco, in sei lingue, scritta qui dentro." })
+      ),
+      h("button", {
+        type: "button", class: "btn accent", text: "Apri la guida",
+        onClick: () => apriGuidaOnePiece(null)
+      })
+    ));
+  }
 
   /* ============================================================ lettore == */
 
@@ -2484,6 +2716,7 @@
 
     /* ---- il lettore ---- */
 
+    $("#guida-close").addEventListener("click", chiudiGuidaOnePiece);
     $("#lettore-close").addEventListener("click", closeReader);
     $("#lettore-prec").addEventListener("click", () => vaiA(lettore.pagina - 1));
     $("#lettore-succ").addEventListener("click", () => vaiA(lettore.pagina + 1));
@@ -2545,6 +2778,7 @@
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
       if (!$("#lettore").hidden) closeReader();
+      else if (!$("#guida-op").hidden) chiudiGuidaOnePiece();
       else if (!$("#nina").hidden) closeNina();
     });
 
