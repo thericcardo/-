@@ -254,6 +254,31 @@
    * chiamarla e poi richiamarla — farebbero altrimenti due passi indietro,
    * e il secondo butterebbe fuori dall'app.
    */
+  /**
+   * Apre un pannello prendendo il posto di quello che c'è.
+   *
+   * Aprire un pannello e chiuderne un altro sono due mosse sulla cronologia, e
+   * fatte insieme si pestano: la chiusura arriva un istante dopo e si porta via
+   * il pannello appena aperto. Rinominare il livello esistente invece di
+   * chiuderlo e riaprirne uno lascia la cronologia con un passo solo, che è poi
+   * quello che si aspetta chi preme Indietro.
+   */
+  function subentraA(nome, onClose) {
+    const sheet = $("#book-sheet");
+    const guida = $("#guida-op");
+    if (sheet.open) {
+      replaceLayer(nome, onClose);
+      sheet.close();
+      return;
+    }
+    if (guida && !guida.hidden) {
+      replaceLayer(nome, onClose);
+      nascondiGuidaOnePiece();
+      return;
+    }
+    openLayer(nome, onClose);
+  }
+
   function requestCloseLayer(name) {
     const layer = layers.find((l) => l.name === name && !l.closing);
     if (!layer) return false;
@@ -1701,14 +1726,27 @@
     const body = $("#sheet-body");
     clear(body);
 
+    // Prima che cosa succede in questo volume, poi in che storia si inserisce:
+    // è l'ordine in cui serve, aprendo la scheda di un volume preciso.
+    const sua = OnePiece.tramaVolume(book.volume, lingua);
+    if (sua) {
+      body.append(
+        h("p", { class: "sheet-h", text: `In questo volume` }),
+        h("p", { class: "sheet-text", text: sua })
+      );
+    }
     if (arco) {
       body.append(
-        h("p", { class: "sheet-h", text: `Arco: ${arco.nome[lingua]}` }),
+        h("p", { class: "sheet-h", text: `${sua ? "L'arco: " : "Arco: "}${arco.nome[lingua]}` }),
         h("p", { class: "sheet-text", text: arco.trama[lingua] })
       );
     }
 
     body.append(h("div", { class: "row wrap" },
+      h("button", {
+        type: "button", class: "btn small", text: "Leggilo come un libro",
+        onClick: leggiOnePieceComeLibro
+      }),
       h("button", {
         type: "button", class: "btn small", text: "Tutta la guida a One Piece",
         onClick: () => apriGuidaOnePiece(book.arco)
@@ -1953,16 +1991,7 @@
     }
     select.value = Books.getLinguaTrame();
 
-    // Come per Nina: se la scheda è aperta il livello va rinominato prima di
-    // chiuderla, altrimenti il «close» del dialogo torna indietro nella
-    // cronologia e si porta via la guida appena aperta.
-    const sheet = $("#book-sheet");
-    if (sheet.open) {
-      replaceLayer("guida-op", nascondiGuidaOnePiece);
-      sheet.close();
-    } else {
-      openLayer("guida-op", nascondiGuidaOnePiece);
-    }
+    subentraA("guida-op", nascondiGuidaOnePiece);
     $("#guida-op").hidden = false;
     document.body.classList.add("is-locked");
     renderGuidaOnePiece();
@@ -1992,6 +2021,14 @@
     box.append(h("div", { class: "op-avviso" },
       h("strong", { text: SPIEGAZIONE_OP[lingua].titolo }),
       document.createTextNode(" " + SPIEGAZIONE_OP[lingua].testo)
+    ));
+
+    box.append(h("div", { class: "op-apri" },
+      h("button", {
+        type: "button", class: "btn primary", text: SPIEGAZIONE_OP[lingua].leggi,
+        onClick: leggiOnePieceComeLibro
+      }),
+      h("span", { class: "hint", text: SPIEGAZIONE_OP[lingua].leggiNota })
     ));
 
     for (let i = 0; i < OnePiece.ARCHI.length; i++) {
@@ -2042,22 +2079,28 @@
   const SPIEGAZIONE_OP = {
     it: { titolo: "Perché qui c'è la trama e non il manga.",
           testo: "One Piece è di Eiichirō Oda e della Shūeisha: il suo testo non esiste in nessuna fonte libera, e questa app non lo contiene. Le trame qui sotto sono scritte per l'app, arco per arco. Per leggere i capitoli ci sono i canali ufficiali in fondo alla pagina: su MANGA Plus, del suo editore, i primi tre e gli ultimi tre sono gratis.",
-          dove: "Dove leggerlo, legalmente" },
+          dove: "Dove leggerlo, legalmente",
+          leggi: "Leggilo come un libro", leggiNota: "137 pagine che si sfogliano, col segno che si salva da solo." },
     en: { titolo: "Why the plot is here and the manga is not.",
           testo: "One Piece belongs to Eiichirō Oda and Shueisha: its text exists in no free source, and this app does not contain it. The summaries below were written for this app, arc by arc. To read the chapters, the official channels are at the foot of this page: on MANGA Plus, run by its own publisher, the first three and the latest three are free.",
-          dove: "Where to read it, legally" },
+          dove: "Where to read it, legally",
+          leggi: "Read it as a book", leggiNota: "137 pages to turn, with a bookmark that saves itself." },
     ja: { titolo: "ここにあらすじがあり、漫画本文がない理由。",
           testo: "『ONE PIECE』は尾田栄一郎氏と集英社の作品であり、その本文は自由に使える形では存在せず、このアプリにも含まれていません。以下のあらすじは、このアプリのために章ごとに書き起こしたものです。本編を読むには、ページ下部の公式配信をご利用ください。出版社自身が運営する MANGA Plus では、最初の三話と最新の三話が無料です。",
-          dove: "公式に読める場所" },
+          dove: "公式に読める場所",
+          leggi: "本のように読む", leggiNota: "137ページをめくって読める。しおりは自動で保存される。" },
     fr: { titolo: "Pourquoi l'intrigue est ici et le manga non.",
           testo: "One Piece appartient à Eiichirō Oda et à Shueisha : son texte n'existe dans aucune source libre, et cette application ne le contient pas. Les résumés ci-dessous ont été écrits pour cette application, arc par arc. Pour lire les chapitres, les canaux officiels sont en bas de page : sur MANGA Plus, géré par son propre éditeur, les trois premiers et les trois derniers sont gratuits.",
-          dove: "Où le lire, légalement" },
+          dove: "Où le lire, légalement",
+          leggi: "Le lire comme un livre", leggiNota: "137 pages à tourner, avec un marque-page qui se sauvegarde seul." },
     es: { titolo: "Por qué aquí está la trama y no el manga.",
           testo: "One Piece es de Eiichirō Oda y de Shueisha: su texto no existe en ninguna fuente libre, y esta aplicación no lo contiene. Los resúmenes de abajo se han escrito para esta aplicación, arco por arco. Para leer los capítulos están los canales oficiales al final de la página: en MANGA Plus, de su propia editorial, los tres primeros y los tres últimos son gratis.",
-          dove: "Dónde leerlo, legalmente" },
+          dove: "Dónde leerlo, legalmente",
+          leggi: "Léelo como un libro", leggiNota: "137 páginas para pasar, con un marcador que se guarda solo." },
     de: { titolo: "Warum hier die Handlung steht und nicht der Manga.",
           testo: "One Piece gehört Eiichirō Oda und Shueisha: sein Text existiert in keiner freien Quelle, und diese App enthält ihn nicht. Die Zusammenfassungen unten wurden für diese App geschrieben, Bogen für Bogen. Um die Kapitel zu lesen, stehen die offiziellen Kanäle am Seitenende: auf MANGA Plus, betrieben vom eigenen Verlag, sind die ersten drei und die neuesten drei kostenlos.",
-          dove: "Wo man es legal liest" }
+          dove: "Wo man es legal liest",
+          leggi: "Wie ein Buch lesen", leggiNota: "137 Seiten zum Blättern, mit einem Lesezeichen, das sich selbst speichert." }
   };
 
   function nascondiGuidaOnePiece() {
@@ -2135,22 +2178,19 @@
     clear($("#lettore-pagina"));
     $("#lettore-stato").textContent = "Cerco il testo…";
 
-    // Come per Nina: il rinomino viene prima della chiusura, così il gestore
-    // di «close» del dialogo non trova più un pannello da chiudere a sua volta.
-    const sheet = $("#book-sheet");
-    if (sheet.open) {
-      replaceLayer("lettore", hideReader);
-      sheet.close();
-    } else {
-      openLayer("lettore", hideReader);
-    }
+    subentraA("lettore", hideReader);
     $("#lettore").hidden = false;
     document.body.classList.add("is-locked");
     applicaCorpo();
 
-    const esito = await Lettore.apri(book, (messaggio) => {
-      if (token === lettore.token) $("#lettore-stato").textContent = messaggio;
-    }, scansione);
+    // Un libro può portarsi già dietro le proprie pagine: è il caso di One
+    // Piece, che non si scarica da nessuna parte perché è scritto qui dentro.
+    const esito = Array.isArray(book.pagine) && book.pagine.length
+      ? { ok: true, pagine: book.pagine, caratteri: misuraPagine(book.pagine),
+          fonte: book.fonte || "", url: "", lingua: "", quante: 0, provata: 0 }
+      : await Lettore.apri(book, (messaggio) => {
+          if (token === lettore.token) $("#lettore-stato").textContent = messaggio;
+        }, scansione);
     if (token !== lettore.token) return;
 
     if (!esito.ok) {
@@ -2182,13 +2222,17 @@
     $("#lettore-foot").hidden = false;
     $("#lettore-range").max = String(esito.pagine.length);
 
-    const lingua = esito.lingua ? ` · ${Books.languageName(abbreviaLingua(esito.lingua))}` : "";
     clear($("#lettore-fonte"));
-    $("#lettore-fonte").append(
-      document.createTextNode("Scansione da "),
-      h("a", { href: esito.url, target: "_blank", rel: "noopener noreferrer", text: esito.fonte }),
-      document.createTextNode(`${lingua} · il testo è letto da una macchina, qualche parola può essere storta`)
-    );
+    if (esito.url) {
+      const lingua = esito.lingua ? ` · ${Books.languageName(abbreviaLingua(esito.lingua))}` : "";
+      $("#lettore-fonte").append(
+        document.createTextNode("Scansione da "),
+        h("a", { href: esito.url, target: "_blank", rel: "noopener noreferrer", text: esito.fonte }),
+        document.createTextNode(`${lingua} · il testo è letto da una macchina, qualche parola può essere storta`)
+      );
+    } else if (esito.fonte) {
+      $("#lettore-fonte").textContent = esito.fonte;
+    }
 
     // Il cambio si offre solo se c'è davvero un'altra copia da provare.
     const altre = (esito.quante || 0) - (esito.provata || 0) - 1;
@@ -2223,6 +2267,36 @@
     return Boolean(book.year) && book.year < 1930;
   }
 
+  /**
+   * Apre One Piece nel lettore, come un libro.
+   *
+   * È la cosa più vicina a un ebook che di questo manga si possa fare
+   * onestamente: non il fumetto, che è di Oda e della Shūeisha, ma la storia
+   * raccontata — centotrentasette pagine che si sfogliano, con il segno che si
+   * salva da solo e la lettura che finisce fra quelle registrate, esattamente
+   * come per gli altri libri.
+   */
+  function leggiOnePieceComeLibro() {
+    const lingua = Books.getLinguaTrame();
+    const ebook = OnePiece.comeEbook(lingua);
+    const nomeLingua = (OnePiece.LINGUE.find((l) => l.code === lingua) || {}).label || "";
+    openReader({
+      id: "onepiece:ebook:" + lingua,
+      title: ebook.titolo,
+      author: ebook.autore,
+      cover: null,
+      pagine: ebook.pagine,
+      fonte: `Scritto per questa app · ${nomeLingua} · non è il manga`,
+      freeUrl: "",
+      blurb: ""
+    });
+  }
+
+  /** Quanto testo c'è, sia che le pagine siano stringhe sia che siano composte. */
+  const misuraPagine = (pagine) => pagine.reduce((n, p) =>
+    n + (typeof p === "string" ? p.length
+      : String(p.titolo || "").length + String(p.testo || "").length), 0);
+
   /** Internet Archive scrive «Italian», Open Library «ita»: qui serve «ita». */
   function abbreviaLingua(nome) {
     const n = String(nome || "").toLowerCase();
@@ -2238,7 +2312,26 @@
   function mostraPagina() {
     const box = $("#lettore-pagina");
     clear(box);
-    box.textContent = lettore.pagine[lettore.pagina - 1] || "";
+    const pagina = lettore.pagine[lettore.pagina - 1];
+
+    if (pagina && typeof pagina === "object") {
+      // Una pagina scritta per l'app ha una struttura: titolo, righe di
+      // servizio, corpo. Darle un peso tipografico è la differenza fra un
+      // libro e un blocco di testo.
+      box.classList.add("is-composta");
+      if (pagina.titolo) box.append(h("h3", { class: "pagina-titolo", text: pagina.titolo }));
+      for (const riga of pagina.righe || []) {
+        box.append(h("p", { class: "pagina-riga", text: riga }));
+      }
+      for (const paragrafo of String(pagina.testo || "").split("\n\n")) {
+        box.append(h("p", { class: "pagina-corpo", text: paragrafo }));
+      }
+      if (pagina.nota) box.append(h("p", { class: "pagina-nota", text: pagina.nota }));
+    } else {
+      // Un testo scaricato arriva come stringa: si mostra come arriva.
+      box.classList.remove("is-composta");
+      box.textContent = pagina || "";
+    }
     box.scrollTop = 0;
     $("#lettore-conta").textContent =
       `pagina ${formatNumber(lettore.pagina)} di ${formatNumber(lettore.pagine.length)}`;

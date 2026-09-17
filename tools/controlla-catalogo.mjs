@@ -139,6 +139,42 @@ for (const lingua of OnePiece.LINGUE) {
   });
 }
 
+prova("tutti i 115 volumi hanno una trama propria in italiano", () => {
+  const senza = OnePiece.VOLUMI
+    .filter((v) => (OnePiece.tramaVolume(v[0], "it") || "").length < 100)
+    .map((v) => v[0]);
+  return !senza.length || `senza trama propria: ${senza.slice(0, 8).join(", ")}`;
+});
+
+/** Una pagina dell'ebook è composta (titolo, righe, corpo): qui si appiattisce. */
+const testoDiPagina = (p) => typeof p === "string" ? p
+  : [p.titolo, ...(p.righe || []), p.testo, p.nota].filter(Boolean).join("\n");
+
+prova("l'ebook si impagina come un libro", () => {
+  for (const lingua of OnePiece.LINGUE) {
+    const e = OnePiece.comeEbook(lingua.code);
+    // una pagina di apertura, una per arco, una per volume, una di chiusura
+    const attese = 1 + OnePiece.ARCHI.length + OnePiece.VOLUMI.length + 1;
+    if (e.pagine.length !== attese) return `in ${lingua.label}: ${e.pagine.length} pagine invece di ${attese}`;
+    const vuote = e.pagine.filter((p) => testoDiPagina(p).trim().length < 40).length;
+    if (vuote) return `in ${lingua.label}: ${vuote} pagine quasi vuote`;
+  }
+  return true;
+});
+
+prova("l'ebook dice sempre che non è il manga, e di chi è", () => {
+  // Non si misura la lunghezza — il giapponese dice in quattrocento caratteri
+  // quello che l'italiano dice in settecento — ma si controlla che ci sia il
+  // nome di chi detiene i diritti: è quello il punto dell'avvertenza.
+  for (const lingua of OnePiece.LINGUE) {
+    const apertura = testoDiPagina(OnePiece.comeEbook(lingua.code).pagine[0]);
+    if (!/One Piece|ONE PIECE/.test(apertura)) return `manca il titolo in ${lingua.label}`;
+    if (!/Sh[ūu]eisha|集英社/.test(apertura)) return `l'apertura in ${lingua.label} non nomina l'editore`;
+    if (!/Oda|尾田/.test(apertura)) return `l'apertura in ${lingua.label} non nomina l'autore`;
+  }
+  return true;
+});
+
 prova("ogni volume porta la sua trama, senza rete né chiave", () => {
   const libri = OnePiece.comeLibri("fr");
   const senza = libri.filter((b) => !b.blurb || b.blurb.length < 80).map((b) => b.volume);

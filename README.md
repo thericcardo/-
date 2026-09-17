@@ -204,6 +204,25 @@ Cercando «One Piece» in libreria escono tutti i 115 volumi; cercando «One
 Piece 37» quel volume viene per primo. La trama compare **senza rete e senza
 chiave API**: è dentro il file.
 
+### Si apre come un ebook
+
+**Leggilo come un libro** apre One Piece nello stesso lettore che apre
+Frankenstein: **137 pagine** impaginate — una di apertura, una per ciascuno dei
+venti archi, una per ciascuno dei 115 volumi, una di chiusura con i canali
+ufficiali. Si sfoglia con i bottoni o con le frecce, il corpo del testo si
+ingrandisce, e il segno si salva da solo ogni dieci secondi come per gli altri
+libri; la lettura finisce fra quelle **registrate dal lettore**, nel diario.
+
+Ogni volume ha la **sua** pagina e la **sua** trama: quaranta righe di
+differenza fra il volume 2 e il volume 104, non la stessa riga ripetuta. Le
+trame per singolo volume sono scritte in italiano; nelle altre cinque lingue la
+pagina di un volume porta la trama del suo arco — meno fine, ma completa, e con
+titolo, titolo originale e capitoli sempre esatti.
+
+Non è il manga, e la prima pagina lo dice chiaramente in tutte e sei le lingue,
+col nome di chi ne detiene i diritti. È la cosa più vicina a un ebook che di
+questa serie si possa fare onestamente.
+
 In fondo alla guida ci sono i posti dove leggerlo per davvero, e sono soltanto
 canali ufficiali — [MANGA Plus](https://mangaplus.shueisha.co.jp/titles/100020)
 del suo editore, dove i primi tre e gli ultimi tre capitoli sono gratis;

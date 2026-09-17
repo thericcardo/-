@@ -1603,3 +1603,43 @@ body.is-locked { overflow: hidden; }
   background: var(--surface-alt);
   border-radius: 4px;
 }
+
+/* Il bottone che apre One Piece nel lettore, in cima alla guida. */
+.op-apri {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  flex-wrap: wrap;
+  margin: 1.1rem 0 .3rem;
+}
+.op-apri .hint { margin-top: 0; flex: 1 1 12rem; }
+
+/* Una pagina composta dall'app: il titolo pesa, le righe di servizio no. */
+.lettore-pagina.is-composta { white-space: normal; }
+.pagina-titolo {
+  font-family: var(--serif);
+  font-size: 1.22em;
+  line-height: 1.28;
+  margin-bottom: .35rem;
+  text-wrap: balance;
+}
+.pagina-riga {
+  font-family: var(--sans);
+  font-size: .8em;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.pagina-riga:last-of-type { margin-bottom: 1.1rem; }
+.pagina-corpo { margin-bottom: .9rem; white-space: pre-line; }
+.pagina-nota {
+  margin-top: 1.4rem;
+  padding: .75rem .9rem;
+  font-family: var(--sans);
+  font-size: .82em;
+  line-height: 1.55;
+  color: var(--muted);
+  background: var(--surface-alt);
+  border-left: 3px solid var(--yellow);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  white-space: normal;
+}

@@ -512,6 +512,22 @@ const OnePiece = (() => {
   const lingueValide = new Set(LINGUE.map((l) => l.code));
   const conLingua = (lingua) => (lingueValide.has(lingua) ? lingua : "it");
 
+  /**
+   * La trama di un singolo volume, se è scritta in quella lingua.
+   *
+   * Per ora esistono in italiano. Nelle altre lingue la scheda di un volume
+   * mostra la trama del suo arco: meno precisa, ma completa — e dice comunque
+   * quali capitoli contiene.
+   */
+  const tramaVolume = (numero, lingua) => {
+    const tavola = TRAME_VOLUMI[conLingua(lingua)];
+    return (tavola && tavola[numero]) || "";
+  };
+
+  /** In quali lingue la trama esiste volume per volume, e non solo per arco. */
+  const lingueConTrameVolumi = () => Object.keys(TRAME_VOLUMI)
+    .filter((l) => Object.keys(TRAME_VOLUMI[l]).length >= VOLUMI.length);
+
   /** L'arco a cui appartiene un volume. */
   const arcoDelVolume = (volume) => ARCHI[volume[6]] || null;
 
@@ -551,14 +567,237 @@ const OnePiece = (() => {
         volume: v[0],
         capitoli: [v[4], v[5]],
         arco: arco && arco.key,
-        blurb: arco ? arco.trama[l] : ""
+        blurb: tramaVolume(v[0], l) || (arco ? arco.trama[l] : "")
       };
     });
   }
 
+  /**
+   * La trama di ogni singolo volume.
+   *
+   * L'arco dice di che cosa parla la storia; queste righe dicono che cosa
+   * succede in quelle duecento pagine. Sono scritte per l'app, volume per
+   * volume, sui fatti verificati sull'elenco dei capitoli di it.wikipedia.
+   *
+   * Dove manca la riga di un volume, l'ebook mette la trama del suo arco: un
+   * testo più largo è meglio di una pagina vuota.
+   */
+  const TRAME_VOLUMI = {
+    it: {
+      1: "Rufy, sette anni, mangia il frutto Gom Gom e diventa di gomma — e da quel giorno non può più nuotare. Shanks lo tira fuori dal mare perdendoci un braccio e gli lascia il cappello di paglia: dieci anni dopo il ragazzo parte per restituirglielo da Re dei pirati. Primo a salire a bordo è Zoro, slegato da un palo della Marina.",
+      2: "Nami porta Rufy a Orange Town, assediata dal clown Bagy. La ladra prova a infiltrarsi fra i pirati per derubarli, ma si rifiuta di sparare al ragazzo e viene scoperta; Zoro arriva in tempo e taglia Bagy in due, che però si ricompone come niente fosse.",
+      3: "Bagy riconosce il cappello di paglia e racconta di quando era mozzo con Shanks sulla stessa nave. Sconfitto lui, Nami accetta di viaggiare con i due. Sull'isola degli animali strani trovano Gaimon, chiuso in uno scrigno da vent'anni, poi arrivano al villaggio di Shirop.",
+      4: "Usop avvisa il villaggio che stanno per arrivare i pirati, ma ha mentito troppe volte perché qualcuno gli creda. Organizza la difesa con la ciurma sulla costa sbagliata: i Kuroneko sbarcano dalla parte opposta dell'isola.",
+      5: "Jango insegue Kaya nel bosco per farle firmare il testamento; Zoro e Usop lo fermano, Rufy abbatte il capitano Kuro. La ciurma riparte con un membro in più e una nave vera, la Going Merry, regalo di Kaya.",
+      6: "Al ristorante galleggiante Baratie arriva Creek, il pirata più temuto del Mare Orientale, stremato dalla fame. Sanji lo sfama senza esitare e viene ripagato con un pugno. Nami sparisce con la Going Merry, e all'orizzonte compare Drakul Mihawk.",
+      7: "Gin prende in ostaggio Zef sperando di salvare Sanji, che però non si piega. Si scopre il loro passato: naufraghi su uno scoglio, Zef diede al bambino tutto il cibo e sopravvisse mangiandosi la propria gamba.",
+      8: "Gin cede la maschera antigas a Sanji e resta a morire. Rufy affronta Creek, la sua armatura e le sue armi nascoste, e lo abbatte. Sanji lascia il Baratie e sale a bordo, deciso a trovare l'All Blue.",
+      9: "Usop scopre che Nami è un membro della ciurma dell'uomo-pesce Arlong, ma lei si comporta in modo strano: lo lascia fuggire e libera Zoro. Rufy, Sanji e Yosaku vengono intanto attaccati dal mostro marino Momu.",
+      10: "Rufy restituisce il cappello a Nami come promesso e va ad Arlong Park. L'uomo-pesce conosce il punto debole dei frutti del diavolo e lo getta in mare incastrato in un blocco di pietra, mentre Zoro sfida Hacchan.",
+      11: "Rufy abbatte Arlong e il suo parco, libera l'arcipelago Konomi e costringe il corrotto Nezumi a restituire il tesoro di Nami. Con lei ufficialmente a bordo, la ciurma punta su Rogue Town, dove Gold Roger è nato ed è stato giustiziato.",
+      12: "Sfuggiti a Rogue Town e al capitano Smoker, entrano nella Rotta Maggiore dalla Reverse Mountain e finiscono dentro una balena. Là sotto trovano Crocus, che dell'animale si prende cura, e due agenti della Baroque Works.",
+      13: "Zoro mette fuori gioco Mr. 8, Miss Wednesday e Mr. 9, ma arrivano Mr. 5 e Miss Valentine per farli tacere: Miss Wednesday è in realtà Nefertari Bibi, la principessa di Alabasta infiltrata nell'organizzazione.",
+      14: "A Little Garden, Mr. 3 punta alle taglie di due giganti, Dori e Brogi, che si sfidano a duello da cent'anni per una questione d'onore. Barando nel loro scontro, li separa e imprigiona Brogi nella cera.",
+      15: "Sanji finge di essere Mr. 3 al lumacofono e convince Mr. 0 che la ciurma è morta. I due giganti liberano i pirati e tornano al loro duello. In mare aperto Nami si ammala, e la febbre sale in fretta.",
+      16: "Rufy porta Nami e Sanji su per la montagna innevata di Drum, respingendo Wapol con l'aiuto dei conigli giganti. In cima li accolgono la dottoressa Kureha e una renna dal naso blu che parla: TonyTony Chopper.",
+      17: "Al castello Rufy, Sanji e Chopper affrontano Wapol. La renna ingoia la sua Rumble Ball per moltiplicare le trasformazioni. Emerge la storia del dottor Hiluluk, il ciarlatano che a Chopper aveva insegnato che nessuno è inguaribile.",
+      18: "La ciurma incontra Mr. 2, che sa prendere il volto di chiunque abbia toccato, e sbarca ad Alabasta cercando Kosa, capo dei rivoltosi e amico d'infanzia di Bibi. Il paese è a un passo dalla guerra civile.",
+      19: "A Rainbase, Crocodile li chiude in una gabbia di agalmatolite — la pietra che spegne i poteri dei frutti del diavolo — e cattura Bibi. Sotto la gabbia, intanto, l'acqua comincia a salire.",
+      20: "Crocodile, intangibile grazie al frutto Sand Sand, trafigge Rufy con l'uncino e lo lascia in un vortice di sabbia; a salvarlo è Miss All Sunday. La ciurma corre verso Alubarna per fermare i due eserciti.",
+      21: "Sanji non riesce a colpire Mr. 2 quando prende il volto di Nami, e vince solo cogliendo l'istante in cui torna sé stesso. Nami affronta Miss Doublefinger, che fa spuntare aculei da ogni punto del corpo.",
+      22: "Crocodile rivela la vera trappola: una bomba nascosta nella capitale, che ucciderebbe ribelli ed esercito nello stesso momento. Rufy torna a batterlo, questa volta con un barile d'acqua legato sulla schiena.",
+      23: "Bibi raggiunge il campanile ma non ha il tempo di disinnescare la bomba: Pell la porta in cielo e si sacrifica. Rufy abbatte Crocodile, e su Alabasta ricomincia a piovere dopo anni di siccità.",
+      24: "Partiti da Alabasta, trovano Miss All Sunday a bordo: si chiama Nico Robin e vuole unirsi alla ciurma. Rufy accetta. Poi dal cielo precipita una nave, e dai suoi resti si capisce che viene da un'isola sopra le nuvole.",
+      25: "A Jaya incontrano Montblanc Cricket, discendente dell'esploratore che tutti presero per bugiardo e che passa la vita a cercare le prove che diceva il vero. Per salire serve cavalcare una corrente verticale, il Knock-Up Stream.",
+      26: "Arrivati nel mare bianco, conoscono Konis e suo padre Pagaya, e la frattura fra gli Shandia e gli abitanti di Angel Island. Nami esplora da sola e raggiunge l'Upper Yard, la terra proibita del dio Ener.",
+      27: "Entrare nell'Upper Yard scatena i quattro sacerdoti di Ener. Rufy abbatte Satori; e si scopre che quella terra è un pezzo dell'isola di Jaya, scagliato in cielo dalla stessa corrente quattrocento anni prima.",
+      28: "Ener annuncia che degli ottantuno guerrieri in campo, in tre ore, ne resteranno cinque. Wiper abbatte Shura, Zoro affronta Braham, e Rufy finisce ingoiato intero dal gigantesco serpente Nola.",
+      29: "Robin trova finalmente la città d'oro e la scopre vuota: l'oro non c'è più. Zoro batte il sacerdote Ohm, mentre Nami, Aisa e Gan Forr finiscono nel ventre del serpente.",
+      30: "Rufy esce da Nola e raggiunge Ener, scoprendo che il fulmine su un corpo di gomma non fa niente. Ener gli blocca il braccio in una sfera d'oro e lo fa precipitare dall'Arca Maxim, poi punta la nave sull'isola.",
+      31: "Quattrocento anni prima, Montblanc Noland arrivò a Jaya e curò gli Shandia da una malattia che li stava uccidendo, stringendo amicizia con il guerriero Calgara. Tornato in patria a raccontarlo, fu giustiziato come bugiardo: nessuno credette alla città d'oro.",
+      32: "A un passo dalla distruzione dell'isola, Rufy raggiunge Ener e suona la campana d'oro. Il suono arriva fino al mare sotto le nuvole, e Cricket capisce che il suo antenato diceva la verità. La guerra di quattrocento anni finisce lì.",
+      33: "La ciurma di Foxy spiega le regole del Davy Back Fight: tre gare, e chi vince si prende un membro della squadra avversaria. Foxy bara subito, rallentando gli avversari con il potere del suo frutto del diavolo.",
+      34: "Rufy batte Foxy ma rinuncia a portargli via un uomo: si prende la bandiera e ci disegna sopra qualcosa di orribile. Poi sull'isola arriva l'ammiraglio Aokiji, che congela il mare attorno a sé e mette la ciurma davanti alla propria misura.",
+      35: "A Water Seven, Usop viene pestato e derubato dalla Franky Family. Rufy decide di lasciare la Going Merry, che non si può più riparare; Usop non accetta, sfida il capitano a duello e, perso, lascia la ciurma.",
+      36: "Robin è scomparsa e la città dà la caccia ai pirati per un attentato che non hanno commesso. Introdotti nella Galley-La Company, scoprono un altro gruppo mascherato che cerca i progetti dell'arma ancestrale Pluton.",
+      37: "Nelle stanze di Iceburg trovano Robin insieme al CP9. Lei dice di non volerne più sapere di loro; la ciurma attacca e viene spazzata via in pochi secondi. Gli agenti danno fuoco all'edificio mentre l'Aqua Laguna si avvicina.",
+      38: "Si scopre che Cutty Flam sopravvisse all'incidente rifacendosi il corpo da cyborg: è Franky. E si scopre perché Robin è passata dall'altra parte — per salvare la ciurma dal governo. Il treno del mare parte per Enies Lobby.",
+      39: "Sul treno Sanji affronta il cuoco Wanze e Franky l'agente Nero, mentre Zoro abbatte il capitano T-Bone sulle rotaie. Ma quando la raggiungono, Robin si rifiuta ancora di fuggire con loro.",
+      40: "Otto contro un'isola intera. Sogeking convince due giganti ad allearsi, e la guarnigione di Enies Lobby cade. Poi Rufy sfida il CP9, e solo Blueno — che sa quanto è cresciuto — lo prende sul serio.",
+      41: "Robin dice di voler morire. Rufy le risponde che allora morirà come membro della sua ciurma, e le chiede di dirlo ad alta voce che vuole vivere. Riaffiora Ohara: l'isola di archeologi cancellata dal governo per aver letto i Cento anni vuoti.",
+      42: "Comincia lo scontro vero, per la chiave delle manette di Robin. I primi accoppiamenti vanno male e la ciurma se li scambia: Franky abbatte Fukuro, Chopper Kumadori. Rufy insegue Spandam e Rob Lucci verso la Porta della Giustizia.",
+      43: "Le navi della Marina si dispongono per il Buster Call che cancellerà l'isola. Nami affronta Califa, che rende scivoloso tutto quello che tocca, e vince con il Clima Tact e un'idea.",
+      44: "Enies Lobby comincia a crollare. Incoraggiato da Usop, Rufy tira fuori il Gear Second e abbatte Lucci. Gli otto scappano dall'isola che brucia con Robin, viva.",
+      45: "A Water Seven, Franky costruisce la nave nuova. Arriva Garp, vice ammiraglio e nonno di Rufy, a dire che la ciurma è ormai accusata di tutto. La Going Merry ha il suo funerale in mare, bruciando.",
+      46: "Nel Triangolo Florian, dentro una nebbia che non si alza mai, la ciurma incontra uno scheletro che parla, suona e ride: Brook, tornato in vita col frutto Yomi Yomi, e senza ombra da cinquant'anni.",
+      47: "Moria manda i suoi zombie a prendere i pirati, sparpagliati per la nave-isola. Brook spiega il meccanismo: le ombre rubate ai vivi, infilate nei cadaveri, che diventano un esercito.",
+      48: "Nell'ombra di Rufy c'è ora Odr, uno zombie alto come una casa. La ciurma si divide sui luogotenenti: Sanji batte l'invisibile Absalom, Usop la lugubre Perona, mentre Rufy va da Moria.",
+      49: "Rufy insegue Moria per tutta Thriller Bark mentre gli altri si battono con Odr. Quando sembrano averla vinta, Moria entra nello zombie e li ribalta. Fra i prigionieri senza ombra c'è chi comincia a sperare.",
+      50: "Rufy abbatte Moria e le ombre tornano ai loro padroni. Poi arriva Bartholomew Kuma, manda tutti a terra e si prepara a uccidere il capitano. Zoro si offre al suo posto, e non lo dice a nessuno.",
+      51: "Sull'arcipelago Sabaody la ciurma scopre chi comanda davvero: i Nobili mondiali, che camminano dentro una bolla per non respirare l'aria degli altri. Serve un rivestitore per scendere sott'acqua.",
+      52: "Rufy ha colpito un Nobile mondiale, e dal quartier generale parte un ammiraglio. La casa d'aste viene circondata; con Kidd e Law, e con l'aiuto di Silvers Rayleigh, la ciurma libera Kayme e scappa.",
+      53: "Mentre Rayleigh trattiene Kizaru, Kuma spazza via la ciurma uno per uno. Rufy atterra ad Amazon Lily, isola vietata agli uomini, e lì apprende dal giornale che Ace sarà giustiziato.",
+      54: "Dispersa per il mondo, la ciurma cerca di tornare indietro. Hancock fa entrare Rufy a Impel Down col pretesto di una visita al condannato, ma il piano salta quasi subito.",
+      55: "Al quarto livello Magellan lo avvelena fin quasi alla morte. Mr. 2 lo porta da Emporio Ivankov, che tiene un rifugio dentro la prigione; scoperto di chi è figlio, Ivankov accetta di curarlo.",
+      56: "Mentre gli evasi corrono verso l'uscita, a Impel Down arriva Barbanera, appena entrato nella Flotta dei Sette. Alle porte, Rufy tiene a bada Magellan e Mr. 2 resta indietro per tenere aperto il portone.",
+      57: "La guerra comincia, e il mondo la guarda in diretta. Gli ammiragli e i comandanti di Barbabianca si mostrano per quello che sono, finché dal cielo non cade la nave degli evasi di Impel Down.",
+      58: "Barbabianca scende in campo ferito e affronta gli ammiragli. Rufy attraversa Aokiji, Akainu e Kizaru uno dopo l'altro e arriva al patibolo: le manette di Ace si aprono.",
+      59: "Akainu colpisce, e Ace muore fra le braccia del fratello. Barbabianca muore in piedi, dicendo al mondo che lo One Piece esiste davvero; Barbanera gli prende il potere. Rufy resta senza niente.",
+      60: "Indietro di dodici anni: Ace, Rufy e Sabo si scambiano le coppe e diventano fratelli. Poi i nobili di Goa danno fuoco al Grey Terminal con la gente dentro, e la nave di Sabo viene cannoneggiata da un Drago Celeste.",
+      61: "Il messaggio in codice sul giornale dice una cosa sola: non fra tre giorni, fra due anni. Ognuno si allena dove il caso l'ha buttato, Rufy con Rayleigh per imparare l'Ambizione. Due anni dopo tornano a Sabaody.",
+      62: "Diecimila metri sotto il mare, dentro una bolla: kraken, un vulcano sottomarino, i pirati Volanti e i fratelli Caribou. La ciurma arriva all'isola degli uomini-pesce e viene subito accolta male.",
+      63: "Vander Decken IX e Hody Jones si alleano per prendersi il regno e attaccano il palazzo, catturando il re e tre della ciurma. Rufy intanto fa amicizia con la principessa Shirahoshi e la porta alla Foresta marina.",
+      64: "Nami dice a Jinbe di non portare rancore agli uomini-pesce per quello che le fece Arlong. Hody trasmette a tutta l'isola che prenderà il potere, e racconta la storia che nessuno voleva sentire: quella della regina Otohime.",
+      65: "Hody tradisce Decken e poi ammette di essere lui l'assassino di Otohime. La nave Noah sta per schiacciare l'isola, e Shirahoshi sceglie di sacrificarsi per fermarla; Rufy la porta via di peso.",
+      66: "L'isola è salva, Hody è in cella e le accuse contro la ciurma cadono. Mentre tutti festeggiano, Robin e Nettuno parlano a bassa voce di che cosa sia davvero Shirahoshi.",
+      67: "Un'isola metà in fiamme e metà ghiacciata. Fra i laboratori trovano la testa parlante di un samurai, Kin'emon, che cerca il figlio Momonosuke, e una stanza piena di bambini giganti tenuti a forza.",
+      68: "Rufy accetta l'alleanza di Law: rapire Caesar per togliere a un Imperatore i suoi rifornimenti. Lo scienziato intanto risveglia Smiley, il gas vivente che tiene come animale domestico.",
+      69: "Vergo si toglie la maschera e attacca i marine del G-5; Sanji lo ferma. Law cerca di distruggere la stanza del S.A.D., la sostanza con cui Caesar fabbrica i frutti del diavolo artificiali.",
+      70: "Rufy spedisce Caesar fuori dal laboratorio con un pugno. Mone prova ad attivare l'arma con cui l'isola fu distrutta anni prima, e Caesar la pugnala credendo di colpire un altro cuore.",
+      71: "A Dressrosa tutti sembrano felici, e in mezzo agli umani camminano giocattoli vivi. Do Flamingo ha indetto un torneo nell'arena, e il premio è il frutto del diavolo che fu di Ace.",
+      72: "Violet rivela a Sanji che Do Flamingo non ha mai lasciato davvero la Flotta dei Sette. Robin e Usop si guadagnano la fiducia dei nani, che aspettano da dieci anni un uomo che non è mai tornato.",
+      73: "Do Flamingo racconta a Law di essere nato Drago Celeste. I gladiatori eliminati non escono dall'arena: vengono portati sotto e trasformati in giocattoli, e il mondo intero se ne dimentica.",
+      74: "Nei sotterranei verso la fabbrica di Smile, Franky tiene testa a quattro luogotenenti. Nell'arena vince Rebecca, unica rimasta in piedi dopo che la seconda personalità di Cavendish ha falciato tutti gli altri.",
+      75: "Sugar sviene, e in un istante tutti i giocattoli tornano persone e tutti ricordano chi avevano dimenticato. Nel caos, il gladiatore che portava la maschera di Rufy si scopre: è Sabo, vivo.",
+      76: "Rufy e Law salgono verso il palazzo mentre i gladiatori tengono a bada gli uomini di Do Flamingo. Zoro affronta Pica, che è dentro la pietra dell'isola, e Franky entra nella fabbrica.",
+      77: "L'infanzia di Law: malato e condannato, raccolto da Rosinante, che era un infiltrato della Marina e fratello di Do Flamingo. Per salvarlo rubò il frutto Ope Ope e pagò con la vita, ridendo per non farsi sentire.",
+      78: "Kyros abbatte Diamante e vendica sua moglie; Zoro fa cadere Pica. I nani distruggono la fabbrica, e sopra l'isola la gabbia per uccelli comincia a stringersi per uccidere tutti.",
+      79: "Il Gear Fourth si esaurisce e Rufy resta senza forze; i gladiatori si mettono in mezzo per dargli il tempo di riprendersi. Poi si rialza, e Do Flamingo cade per davvero.",
+      80: "Rufy resta indietro per far riabbracciare Rebecca e suo padre, e la città lo copre nella fuga. Fuori, sette capitani si inginocchiano e chiedono di diventare la sua flotta: lui dice di no, e loro lo fanno lo stesso.",
+      81: "Diciassette giorni prima, Jack aveva attaccato Zo cercando un ninja di nome Raizo. I capi dei Mink, Cane-tempesta e Gatto-vipera, avevano retto cinque giorni prima di cadere sotto il gas di Caesar.",
+      82: "Momonosuke non è il figlio di Kin'emon: è l'erede dei Kozuki, la famiglia che incise i Poignee Griffe. Per questo Kaido ha invaso il Paese di Wa e ucciso suo padre. E sull'isola ce n'è uno.",
+      83: "Charlotte Pudding, la promessa sposa di Sanji, si offre di aiutarli. Jinbe chiede a Big Mom di lasciare la sua flotta, e lei accetta a un prezzo: una parte del suo corpo, o dei suoi uomini.",
+      84: "Il padre di Sanji lo ricatta minacciando Zef. Emergono i soldati artificiali dei Vinsmoke, e il motivo per cui Sanji se ne andò da quella casa. Rufy intanto abbatte Cracker dopo undici ore.",
+      85: "Nel mondo degli specchi Chopper e Carrot catturano Brulee. Origliando Pudding e Reiju, Sanji scopre a che cosa serve davvero il matrimonio: a far entrare i Vinsmoke nella sala e ucciderli tutti.",
+      86: "Bege spiega il piano per uccidere Big Mom: colpirla mentre è scossa dalla foto rotta di Madre Carmel. La cerimonia comincia, ma al momento dello sparo qualcosa non va come doveva.",
+      87: "Rufy, Sanji e i Vinsmoke provano a guadagnare tempo e vengono travolti. Poi lo scrigno esplosivo regalato da Nettuno salta alle fondamenta del castello, e tutto viene giù.",
+      88: "Katakuri sembra irraggiungibile e Rufy è costretto a fuggire negli specchi. A Cacao, Sanji, Pudding e Chiffon finiscono la torta, e Pound paga il loro passaggio con la vita.",
+      89: "La ciurma butta Big Mom fuori dalla Sunny, e l'Imperatrice insegue la torta. Sull'isola di Cacao, Rufy batte Katakuri con la nuova forma del Gear Fourth, dopo aver imparato a schivare guardando avanti.",
+      90: "I pirati del Sole coprono la fuga e Jinbe resta indietro, promettendo di raggiungerli a Wa. Poi i re del mondo si riuniscono al Reverie, e qualcuno chiede di parlare dei Draghi Celesti.",
+      91: "Rufy salva una bambina, O-Tama, dagli uomini di Kaido, e lei gli offre da mangiare. Poi sta male: ha bevuto dal fiume, e i fiumi di Wa sono avvelenati dalle fabbriche dell'Imperatore. È così che si capisce in che paese sono arrivati.",
+      92: "Kaido rade al suolo quel che resta del castello dei Kozuki e abbatte Rufy con un colpo solo, spedendolo alla miniera di Udon. Allo shogun Orochi serve Vegapunk, e intanto organizza un banchetto.",
+      93: "Al banchetto Orochi ammette di temere il ritorno dei Kozuki. Una bambina ride di lui, e la cortigiana Komurasaki la difende con uno schiaffo: da lì la serata precipita.",
+      94: "Gli abitanti di Ebisu ridono sempre perché hanno mangiato Smile difettosi e non sanno più piangere. Orochi prova a uccidere Toko davanti a tutti, e Zoro e Sanji si mettono in mezzo.",
+      95: "Gli alleati si ritrovano ad Amigasa con un nuovo punto di partenza, lasciato in eredità da Yasuie. Kaido e Big Mom si alleano rifondando i Rocks, e il Governo scioglie la Flotta dei Sette.",
+      96: "La vita di Kozuki Oden: il matrimonio con Toki, il viaggio con Barbabianca e poi con Roger fino all'isola finale, il ritorno a Wa, i cinque anni a ballare nudo in città per salvare il suo popolo, e la pentola d'olio bollente.",
+      97: "L'alleanza si riunisce al porto di Tokage dopo aver ingannato Orochi. Jinbe raggiunge Rufy ed entra ufficialmente in ciurma. Poi le navi puntano su Onigashima, e l'invasione comincia.",
+      98: "Kaido decapita Orochi e annuncia che si prenderà Wa e poi il mondo. Davanti all'esecuzione Momonosuke trova la voce per dire chi è: il figlio di Oden. La guerra si apre lì.",
+      99: "O-Tama salva Nami e Usop, Franky affronta Sasaki, Zoro strappa a Apoo gli anticorpi per il virus. Poi Kaido solleva l'intera isola in aria per lasciarla cadere sulla capitale.",
+      100: "Robin e Brook liberano Sanji; Chopper completa la cura e la distribuisce a tutti. Kanjuro prova a uccidere i Foderi con un simulacro di Oden, e Ashura si mette davanti.",
+      101: "O-Tama ordina ai Gifters di cambiare bandiera. Who's Who racconta a Jinbe di essere finito in cella per non aver fermato Shanks quando rubò il frutto Gom Gom, e gli chiede se conosce la leggenda del dio Nika.",
+      102: "Cane-tempesta abbatte Jack e Gattovipera Perospero. Rufy torna da Kaido, Momonosuke prova a fermare l'isola prima della capitale, e Law e Kidd risvegliano i loro frutti contro Big Mom.",
+      103: "Zunisha, l'elefante, arriva a Wa. Kidd e Law scaraventano Big Mom giù da Onigashima insieme agli esplosivi, e il piano di Orochi di far saltare tutto muore con lei.",
+      104: "Rufy abbatte Kaido e Momonosuke posa l'isola senza schiacciare nessuno. Denjiro taglia l'ultima testa di Orochi. Wa ha uno shogun nuovo, e per la prima volta da vent'anni il fiume si può bere.",
+      105: "La ciurma lascia il paese dei samurai con i pirati Heart e quelli di Kidd. Arrivano le taglie nuove, e Rufy dice ai compagni qual è il sogno che non aveva mai raccontato a nessuno.",
+      106: "Shaka racconta a Robin come le ricerche di Ohara si siano salvate: Sauro le mise al riparo, e Vegapunk le studiò. Il Vegapunk originale chiede aiuto per fuggire da Egghead, e mostra un robot gigante del Regno Antico.",
+      107: "York tradisce e uccide Shaka: vuole diventare una Nobile mondiale. A Erbaf, Shanks abbatte i pirati di Kidd; altrove Barbanera travolge i pirati Heart ma Law si salva.",
+      108: "Un terremoto alza il livello del mare di un metro in tutto il pianeta. La Marina circonda Egghead, Kizaru sbarca e riprende il controllo dei Pacifista, e la ciurma prepara la fuga verso Erbaf.",
+      109: "La storia di Bartholomew Kuma: la figlia Bonney, la schiavitù, il corpo ceduto pezzo per pezzo al governo. Poco prima di Marineford, Vegapunk gli cancella la mente per ordine di Saturn — e lui, prima, gli chiede di fidarsi di Rufy.",
+      110: "Dori e Brogi combattono accanto a Rufy contro tre dei cinque anziani, e il robot Emet si risveglia. Vegapunk comincia la sua trasmissione al mondo dicendo che è morto e che il mare salirà, poi racconta i cento anni cancellati.",
+      111: "Warcury spegne la trasmissione colpendo Emet. Il robot si rialza un'ultima volta e libera un'Ambizione del re conquistatore che stende i marine e costringe gli anziani a tornare a Marijoa. Poi si spegne.",
+      112: "A Erbaf i giganti mostrano la Biblioteca del Gufo e la Scuola del Tricheco, e raccontano di Nika e di come Loki abbia ucciso suo padre, re Harald. Intanto due figure incappucciate entrano nel castello del Villaggio Occidentale.",
+      113: "Loki rivela di essere stato attaccato dai Cavalieri di Dio. Nel regno del sole Gunko blocca Jinbe e gli altri, Killingham travolge i maestri della Scuola del Tricheco: i Cavalieri sono su tutta l'isola insieme.",
+      114: "Il passato di Rocks D. Xebec e di due frutti leggendari, uno destinato a Harald. Le Kuja di Gloriosa ammaliavano i pirati di passaggio, compresa la ciurma di Roger, e da lì viene anche la Shakky del bar di Sabaody.",
+      115: "Quindici anni fa: Harald lavorava per la Marina, poi divenne Cavaliere di Dio e conobbe Im, che gli donò l'immortalità. Capito troppo tardi che Im voleva ridurre in schiavitù i giganti, si ribellò — e da lì viene tutto il resto."
+    }
+  };
+
+  /* ====================================================== come un libro == */
+
+  /**
+   * One Piece impaginato come un ebook.
+   *
+   * Non è il manga — quello non si può mettere, ed è scritto ovunque nell'app
+   * perché. È la storia raccontata, divisa in pagine come un libro vero: una
+   * di apertura, una per ciascuno dei venti archi, una per ciascuno dei 115
+   * volumi, una di chiusura con i posti dove leggerlo davvero.
+   *
+   * Le pagine si contano e si sfogliano, quindi il lettore dell'app può
+   * aprirlo come apre Frankenstein: stessa impaginazione, stesso corpo del
+   * testo, stesso segnalibro che si salva da solo ogni dieci secondi.
+   */
+  function comeEbook(lingua = "it") {
+    const l = conLingua(lingua);
+    const T = TESTI[l];
+    const pagine = [];
+
+    pagine.push({
+      titolo: "ONE PIECE",
+      righe: ["Eiichirō Oda", T.sottotitolo],
+      testo: STORIA[l],
+      nota: T.avvertenza
+    });
+
+    for (let i = 0; i < ARCHI.length; i++) {
+      const arco = ARCHI[i];
+      const volumi = volumiDellArco(arco.key);
+      const fineVol = arco.vol[1] || VOLUMI.length;
+      const fineCap = arco.cap[1] ? String(arco.cap[1]) : T.inCorso;
+
+      pagine.push({
+        titolo: `${T.arco} ${i + 1} — ${arco.nome[l]}`,
+        righe: [
+          l === "ja" ? "" : arco.nome.ja,
+          `${T.volumi} ${arco.vol[0]}–${fineVol} · ${T.capitoli} ${arco.cap[0]}–${fineCap}`
+        ].filter(Boolean),
+        testo: arco.trama[l]
+      });
+
+      for (const v of volumi) {
+        const suo = TRAME_VOLUMI[l] && TRAME_VOLUMI[l][v[0]];
+        pagine.push({
+          titolo: `${T.volume} ${v[0]} — ${v[1]}`,
+          righe: [`${v[2]} · ${v[3]}`, `${T.capitoli} ${v[4]}–${v[5]} · ${arco.nome[l]}`],
+          testo: suo || arco.trama[l]
+        });
+      }
+    }
+
+    pagine.push({
+      titolo: T.doveTitolo,
+      righe: [],
+      testo: DOVE.map((d) => `${d.nome}\n${d.url}\n${d.nota[l]}`).join("\n\n")
+    });
+
+    return {
+      titolo: "One Piece — " + T.sottotitolo,
+      autore: "Eiichirō Oda",
+      pagine
+    };
+  }
+
+  /** Le parole di servizio dell'ebook, nelle sei lingue. */
+  const TESTI = {
+    it: { sottotitolo: "la storia, volume per volume", arco: "Arco", volume: "Volume",
+          volumi: "volumi", capitoli: "capitoli", inCorso: "in corso",
+          doveTitolo: "Dove leggerlo per davvero",
+          avvertenza: "Questo non è il manga. One Piece è di Eiichirō Oda e della Shūeisha, e il suo testo non esiste in nessuna fonte libera: quello che leggi qui è la storia raccontata, scritta per questa app. I capitoli veri si leggono sui canali ufficiali elencati all'ultima pagina." },
+    en: { sottotitolo: "the story, volume by volume", arco: "Arc", volume: "Volume",
+          volumi: "volumes", capitoli: "chapters", inCorso: "ongoing",
+          doveTitolo: "Where to read it for real",
+          avvertenza: "This is not the manga. One Piece belongs to Eiichirō Oda and Shueisha, and its text exists in no free source: what you are reading is the story retold, written for this app. The actual chapters are on the official channels listed on the last page." },
+    ja: { sottotitolo: "物語を、巻ごとに", arco: "編", volume: "第",
+          volumi: "巻", capitoli: "話", inCorso: "連載中",
+          doveTitolo: "公式に読める場所",
+          avvertenza: "これは漫画本編ではありません。『ONE PIECE』は尾田栄一郎氏と集英社の作品であり、その本文は自由に使える形では存在しません。ここにあるのは、このアプリのために書き起こした物語のあらすじです。本編は最終ページの公式配信でお読みください。" },
+    fr: { sottotitolo: "l'histoire, volume par volume", arco: "Arc", volume: "Tome",
+          volumi: "tomes", capitoli: "chapitres", inCorso: "en cours",
+          doveTitolo: "Où le lire pour de vrai",
+          avvertenza: "Ceci n'est pas le manga. One Piece appartient à Eiichirō Oda et à Shueisha, et son texte n'existe dans aucune source libre : ce que vous lisez est l'histoire racontée, écrite pour cette application. Les vrais chapitres sont sur les canaux officiels listés à la dernière page." },
+    es: { sottotitolo: "la historia, volumen a volumen", arco: "Arco", volume: "Volumen",
+          volumi: "volúmenes", capitoli: "capítulos", inCorso: "en curso",
+          doveTitolo: "Dónde leerlo de verdad",
+          avvertenza: "Esto no es el manga. One Piece es de Eiichirō Oda y de Shueisha, y su texto no existe en ninguna fuente libre: lo que lees aquí es la historia contada, escrita para esta aplicación. Los capítulos reales están en los canales oficiales de la última página." },
+    de: { sottotitolo: "die Geschichte, Band für Band", arco: "Handlungsbogen", volume: "Band",
+          volumi: "Bände", capitoli: "Kapitel", inCorso: "laufend",
+          doveTitolo: "Wo man es wirklich liest",
+          avvertenza: "Dies ist nicht der Manga. One Piece gehört Eiichirō Oda und Shueisha, und sein Text existiert in keiner freien Quelle: Was Sie hier lesen, ist die nacherzählte Geschichte, geschrieben für diese App. Die echten Kapitel finden Sie auf den offiziellen Kanälen auf der letzten Seite." }
+  };
+
   return {
-    LINGUE, STORIA, ARCHI, VOLUMI, DOVE,
+    LINGUE, STORIA, ARCHI, VOLUMI, DOVE, comeEbook,
     riguardaOnePiece, arcoDelVolume, volumiDellArco, comeLibri, conLingua,
+    tramaVolume, lingueConTrameVolumi,
     quantiVolumi: () => VOLUMI.length,
     ultimoCapitolo: () => VOLUMI[VOLUMI.length - 1][5]
   };
