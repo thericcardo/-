@@ -98,6 +98,33 @@ prova("l'epub non è vuoto né assurdamente grosso", () => {
   return true;
 });
 
+prova("anche un testo semplice diventa un epub valido", () => {
+  // È la strada dei libri scaricati da Internet Archive: pagine come stringhe,
+  // senza titolo né struttura. Deve funzionare come quella delle pagine composte.
+  const pagine = Array.from({ length: 40 }, (_, i) =>
+    `Pagina ${i + 1}.\n\nUn paragrafo con virgolette "doppie", & una e commerciale, ` +
+    `parentesi <angolari> e un apostrofo d'esempio.`);
+  const byte = Epub.costruisci({
+    titolo: 'Un libro & "strano" <di prova>', autore: "Nessuno", lingua: "it", pagine
+  });
+  const file = resolve(cartella, "semplice.epub");
+  mkdirSync(cartella, { recursive: true });
+  writeFileSync(file, Buffer.from(byte));
+  const fuori = execFileSync("unzip", ["-t", file], { encoding: "utf8" });
+  if (!/No errors detected/.test(fuori)) return "lo ZIP non è valido";
+  // I caratteri speciali del titolo devono essere sfuggiti, non rotti. Si
+  // guarda dentro il tag, non attorno: cercare un «<» a partire da <dc:title>
+  // trova sempre quello del tag di chiusura, che è lì di diritto.
+  const opf = execFileSync("unzip", ["-p", file, "OEBPS/content.opf"], { encoding: "utf8" });
+  const dentro = (opf.match(/<dc:title>([\s\S]*?)<\/dc:title>/) || [])[1];
+  if (dentro === undefined) return "non c'è nessun titolo nel manifesto";
+  if (/[<>]/.test(dentro)) return `il titolo contiene < o > non sfuggiti: ${dentro}`;
+  if (/&(?!amp;|lt;|gt;|quot;|#39;)/.test(dentro)) return `il titolo ha una & non sfuggita: ${dentro}`;
+  if (!/&amp;/.test(dentro)) return "la e commerciale non è stata sfuggita";
+  if (!/&lt;di prova&gt;/.test(dentro)) return `le parentesi angolari non sono sfuggite: ${dentro}`;
+  return true;
+});
+
 prova("lo stesso libro rifatto dà lo stesso identificativo", () => {
   const uno = OnePiece.comeEbook("it");
   const a = Epub.costruisci({ titolo: uno.titolo, autore: uno.autore, lingua: "it", pagine: uno.pagine });

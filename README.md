@@ -234,6 +234,13 @@ lettore apre — è già successo due volte durante la scrittura.
 `tools/controlla-epub.mjs` lo verifica con `unzip`, cioè con un giudice che non
 usa il codice che l'ha scritto: 26 prove, sulle sei lingue.
 
+**E non solo One Piece.** Nel lettore, su qualunque libro, c'è un bottone che
+lo scarica in `.epub`: le 59.435 opere di dominio pubblico del catalogo
+diventano ebook veri, con i metadati giusti, da portare su qualsiasi lettore.
+Il testo di una scansione non ha capitoli riconoscibili — l'OCR non li segnala
+in modo affidabile — quindi viene raggruppato in parti da venticinque pagine:
+non è l'indice del libro, ma è un indice, e serve a ritrovare il segno.
+
 Nella versione pubblicata come artifact lo scaricamento è bloccato dal
 contenitore, non dall'app, e l'app lo dice invece di lasciare un bottone che
 non fa niente.

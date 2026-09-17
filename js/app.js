@@ -2185,6 +2185,7 @@
     $("#lettore-titolo").textContent = book.title;
     $("#lettore-autore").textContent = book.author || "autore sconosciuto";
     $("#lettore-foot").hidden = true;
+    $("#lettore-epub").hidden = true;
     $("#lettore-fonte").textContent = "";
     clear($("#lettore-pagina"));
     $("#lettore-stato").textContent = "Cerco il testo…";
@@ -2231,6 +2232,7 @@
 
     $("#lettore-stato").textContent = "";
     $("#lettore-foot").hidden = false;
+    $("#lettore-epub").hidden = false;
     $("#lettore-range").max = String(esito.pagine.length);
 
     clear($("#lettore-fonte"));
@@ -2301,6 +2303,59 @@
       freeUrl: "",
       blurb: ""
     });
+  }
+
+  /**
+   * Scarica come .epub il libro che si sta leggendo.
+   *
+   * Vale per tutti: le opere di dominio pubblico scaricate da Internet
+   * Archive e le pagine scritte dentro l'app. Un testo che arriva come
+   * scansione non ha capitoli riconoscibili — l'OCR non li segnala in modo
+   * affidabile — quindi si raggruppa in parti da venticinque pagine: non è
+   * l'indice del libro, ma è un indice, e serve a ritrovare il segno.
+   */
+  const PAGINE_PER_PARTE = 25;
+
+  function scaricaLetturaEpub() {
+    if (!lettore.book || !lettore.pagine.length) return;
+    const libro = lettore.book;
+    const composte = typeof lettore.pagine[0] === "object";
+
+    const pagine = composte ? lettore.pagine : raggruppaInParti(lettore.pagine);
+    const nome = (libro.title || "libro").replace(/[\\/:*?"<>|]+/g, " ").slice(0, 80).trim() + ".epub";
+
+    try {
+      const byte = Epub.costruisci({
+        titolo: libro.title || "Senza titolo",
+        autore: libro.author || "Autore sconosciuto",
+        lingua: composte ? Books.getLinguaTrame() : "it",
+        pagine,
+        nota: libro.fonte || "Testo di dominio pubblico da Internet Archive."
+      });
+      const indirizzo = URL.createObjectURL(new Blob([byte], { type: "application/epub+zip" }));
+      const a = h("a", { href: indirizzo, download: nome });
+      document.body.append(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(indirizzo), 60000);
+      toast(`«${nome}» — ${plural(pagine.length, "capitolo", "capitoli")}.`);
+    } catch (err) {
+      toast("Questo browser non lascia scaricare file da qui. Apri l'app in locale e riprova.");
+    }
+  }
+
+  function raggruppaInParti(pagine) {
+    const parti = [];
+    for (let i = 0; i < pagine.length; i += PAGINE_PER_PARTE) {
+      const da = i + 1;
+      const a = Math.min(pagine.length, i + PAGINE_PER_PARTE);
+      parti.push({
+        titolo: `Parte ${parti.length + 1}`,
+        righe: [`pagine ${da}–${a}`],
+        testo: pagine.slice(i, a).join("\n\n")
+      });
+    }
+    return parti;
   }
 
   /**
@@ -2860,6 +2915,7 @@
     /* ---- il lettore ---- */
 
     $("#guida-close").addEventListener("click", chiudiGuidaOnePiece);
+    $("#lettore-epub").addEventListener("click", scaricaLetturaEpub);
     $("#lettore-close").addEventListener("click", closeReader);
     $("#lettore-prec").addEventListener("click", () => vaiA(lettore.pagina - 1));
     $("#lettore-succ").addEventListener("click", () => vaiA(lettore.pagina + 1));
